@@ -5,8 +5,10 @@
     [
       # Include the results of the hardware scan.
       ./disk-config.nix
+      (modulesPath + "/profiles/qemu-guest.nix")
     ];
 
+  boot.initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
   boot.loader.grub.enable = true;
   # boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
