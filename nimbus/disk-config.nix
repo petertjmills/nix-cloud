@@ -4,8 +4,7 @@
     device = lib.mkDefault "/dev/sda";
     type = "disk";
     content = {
-      type = "table";
-      format = "msdos";
+      type = "gpt";
       partitions = {
         boot = {
           size = "1M";
