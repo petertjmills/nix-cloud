@@ -15,7 +15,7 @@
         # Import the previous configuration.nix we used,
         # so the old configuration file still takes effect
         vscode-server.nixosModules.default
-        ./configuration.nix
+        ./cumulus/configuration.nix
       ];
     };
   };
