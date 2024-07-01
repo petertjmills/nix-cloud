@@ -4,11 +4,11 @@
     device = lib.mkDefault "/dev/sda";
     type = "disk";
     content = {
-      type = "gpt";
+      type = "msdos";
       partitions = {
         boot = {
           size = "1M";
-          type = "EF02";
+          type = "primary";
         };
         root = {
           end = "-8GB";
