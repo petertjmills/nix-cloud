@@ -21,6 +21,7 @@
     wget
     git
     gnumake
+    nixpkgs-fmt
   ];
 
   # Enable the OpenSSH daemon.
