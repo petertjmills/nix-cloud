@@ -36,6 +36,11 @@
       ll = "ls -lah";
     };
 
+    ohMyZsh = {
+      enable = true;
+      plugins = [ "git" ];
+      theme = "robbyrussell";
+    };
   };
 
   users.users.root.openssh.authorizedKeys.keys=[
