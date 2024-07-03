@@ -24,6 +24,7 @@
     wget
     git
     neofetch
+    nano
   ];
 
   # Enable the OpenSSH daemon.
