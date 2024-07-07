@@ -1,5 +1,8 @@
 # when running make this run command "nixos-rebuild switch --flake ."
 
+default:
+  echo "Hello, world!"
+
 this:
 	nixos-rebuild switch --flake .
 
@@ -10,9 +13,7 @@ confirm:
 		exit 1; \
 	fi
 
-deploy: confirm
-	@read -p "Enter the host: " host; \
-	read -p "Enter the ssh key: " ssh; \
-	nix run github:nix-community/nixos-anywhere -- --flake .#$$host $$ssh
+deploy HOST SSH: confirm
+	nix run github:nix-community/nixos-anywhere -- --flake .#{{HOST}} {{SSH}}
 
 # nixos-rebuild --target-host root@192.168.86.212 switch --flake .#nimbus
