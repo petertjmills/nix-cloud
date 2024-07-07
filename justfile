@@ -15,4 +15,4 @@ deploy: confirm
 	read -p "Enter the ssh key: " ssh; \
 	nix run github:nix-community/nixos-anywhere -- --flake .#$$host $$ssh
 
-.PHONY: deploy
+# nixos-rebuild --target-host root@192.168.86.212 switch --flake .#nimbus
