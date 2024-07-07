@@ -22,6 +22,7 @@
     git
     just
     nixpkgs-fmt
+    lynx
   ];
 
   # Enable the OpenSSH daemon.
