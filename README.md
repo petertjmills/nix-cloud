@@ -2,7 +2,7 @@
 
 ## Cumulus
 
-Cumulus is a dev server desigined to build this Nix config and deploy the various services to the servers.
+Cumulus is a dev server designed to build this Nix config and deploy the various services to the servers.
 
 It runs the VSCode server from [here](https://github.com/nix-community/nixos-vscode-server)
 To get it started I had to do:
