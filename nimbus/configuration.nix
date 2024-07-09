@@ -23,12 +23,31 @@
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
     git
-    neofetch
     nano
+    jellyfin
+    jellyfin-web
+    jellyfin-ffmpeg
   ];
 
+  nixpkgs.config.packageOverrides = pkgs: {
+    vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
+  };
+  
+  hardware.graphics = { # hardware.opengl in 24.05
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-media-driver
+      intel-vaapi-driver # previously vaapiIntel
+      vaapiVdpau
+      intel-compute-runtime # OpenCL filter support (hardware tonemapping and subtitle burn-in)
+      vpl-gpu-rt # QSV on 11th gen or newer
+      intel-media-sdk # QSV up to 11th gen
+    ];
+  };
+
   # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
+  services.openssh.enable = true
+  services.jellyfin.enable = true;
 
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
