@@ -46,7 +46,7 @@
   };
 
   # Enable the OpenSSH daemon.
-  services.openssh.enable = true
+  services.openssh.enable = true;
   services.jellyfin.enable = true;
 
   users.users.root.openssh.authorizedKeys.keys = [
