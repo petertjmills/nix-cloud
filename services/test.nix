@@ -1,6 +1,6 @@
 { pkgs, ... }:
 {
-  services.testService = {
+  systemd.services.testService = {
     enable = true;
     description = "Simple Test Service";
 
