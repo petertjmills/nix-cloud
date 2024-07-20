@@ -11,28 +11,30 @@
   };
 
   outputs = { self, nixpkgs, vscode-server, disko, ... }@inputs: {
-    nixosConfigurations.cumulus = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        vscode-server.nixosModules.default
-        ./cumulus/configuration.nix
-      ];
-    };
+    nixosConfigurations = {
+      cumulus = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          vscode-server.nixosModules.default
+          ./cumulus/configuration.nix
+        ];
+      };
 
-    nixosConfigurations.nimbus = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        disko.nixosModules.disko
-        ./nimbus/configuration.nix
-      ];
-    };
+      nimbus = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          disko.nixosModules.disko
+          ./nimbus/configuration.nix
+        ];
+      };
 
-    nixosConfigurations.altostratus = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        disko.nixosModules.disko
-        ./altostratus/configuration.nix
-      ];
+      altostratus = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          disko.nixosModules.disko
+          ./altostratus/configuration.nix
+        ];
+      };
     };
 
   };
