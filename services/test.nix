@@ -1,3 +1,4 @@
+{ pkgs, ... }:
 {
   services.testService = {
     enable = true;
