@@ -9,7 +9,6 @@
     ];
 
   boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
   
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
@@ -20,16 +19,12 @@
 
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    wget
     git
-    just
-    nixpkgs-fmt
     neofetch
   ];
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-  services.vscode-server.enable = true;
 
   users.users.root.openssh.authorizedKeys.keys=[
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
