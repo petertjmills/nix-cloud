@@ -2,7 +2,7 @@
   lib, 
   buildNpmPackage, 
   fetchFromGitHub,
-  defaultHostname ? "127.0.0.1",
+  defaultHostname ? "0.0.0.0",
   defaultPort ? 3000 
 }:
 
@@ -40,9 +40,9 @@ buildNpmPackage rec {
     chmod +x $out/share/homepage/server.js
 
     # we set a default port to support "nix run ..."
-    makeWrapper $out/share/homepage/server.js $out/bin/nixtest \
-      --set-default PORT ${toString defaultPort} \
-      --set-default HOSTNAME ${defaultHostname}
+    makeWrapper $out/share/homepage/server.js $out/bin/nixtest #\
+    #  --set-default PORT "3000" \
+    #  --set-default HOSTNAME "0.0.0.0"
 
     runHook postInstall
   '';

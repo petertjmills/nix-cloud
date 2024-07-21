@@ -36,7 +36,7 @@
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 3000 ];
+    allowedTCPPorts = [ 3000 1337 ];
   };
 
   users.users.root.openssh.authorizedKeys.keys=[
