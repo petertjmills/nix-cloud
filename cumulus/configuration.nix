@@ -22,6 +22,7 @@
     git
     just
     nixpkgs-fmt
+    neofetch
   ];
 
   # Enable the OpenSSH daemon.
@@ -40,9 +41,11 @@
     ohMyZsh = {
       enable = true;
       plugins = [ "git" ];
-      theme = "robbyrussell";
+      theme = "dieter";
     };
   };
+
+  users.defaultUserShell = pkgs.zsh;
 
   users.users.root.openssh.authorizedKeys.keys=[
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"

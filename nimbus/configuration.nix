@@ -9,6 +9,7 @@
     ];
 
   boot.initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
+  boot.kernelParams = [ "i915.force_probe=46d1" ];
   boot.loader.grub.enable = true;
   # boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
@@ -27,27 +28,32 @@
     jellyfin
     jellyfin-web
     jellyfin-ffmpeg
+    unzip
   ];
 
   nixpkgs.config.packageOverrides = pkgs: {
     vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
   };
-  
-  hardware.graphics = { # hardware.opengl in 24.05
+  hardware.intel-gpu-tools.enable = true;
+  hardware.opengl = { # hardware.opengl in 24.05
     enable = true;
     extraPackages = with pkgs; [
       intel-media-driver
       intel-vaapi-driver # previously vaapiIntel
       vaapiVdpau
+      onevpl-intel-gpu
       intel-compute-runtime # OpenCL filter support (hardware tonemapping and subtitle burn-in)
-      vpl-gpu-rt # QSV on 11th gen or newer
-      intel-media-sdk # QSV up to 11th gen
+       # QSV on 11th gen or newer
+      #intel-media-sdk # QSV up to 11th gen
     ];
   };
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-  services.jellyfin.enable = true;
+  services.jellyfin = {
+    enable = true;
+    openFirewall = true;
+  };
 
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
