@@ -30,7 +30,7 @@ in {
       description = "Simple Test Service";
 
       serviceConfig = {
-        ExecStart = "${pkgs.bash}/bin/bash -c 'echo \"${testcfg.logText}\" >> /var/log/test_service.log'";
+        ExecStart = "${pkgs.nexttest}/bin/nixtest";
         Restart = "on-failure";
       };
 

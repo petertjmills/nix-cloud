@@ -1,13 +1,16 @@
 { modulesPath, config, lib, pkgs, ... }:
 
 {
-  imports =
-    [
-      # Include the results of the hardware scan.
-      ./disk-config.nix
-      (modulesPath + "/profiles/qemu-guest.nix")
-      ../services/test.nix
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./disk-config.nix
+    (modulesPath + "/profiles/qemu-guest.nix")
+    ../services/test.nix
+  ];
+
+  nixpkgs.overlays = [
+    ( import ../packages )
+  ];
 
   boot.loader.grub.enable = true;
   
@@ -31,6 +34,10 @@
     logText = "Test service is running on altostratus";
   };
 
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 3000 ];
+  };
 
   users.users.root.openssh.authorizedKeys.keys=[
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
