@@ -1,5 +1,14 @@
 { modulesPath, config, lib, pkgs, ... }:
-
+let
+  jellyfin-ffmpeg-overlay = (final: prev: {
+    jellyfin-ffmpeg = prev.jellyfin-ffmpeg.override {
+      ffmpeg_6-full = prev.ffmpeg_6-full.override {
+        withMfx = false;
+        withVpl = true;
+      };
+    };
+  });
+in
 {
   imports =
     [
@@ -8,8 +17,11 @@
       (modulesPath + "/profiles/qemu-guest.nix")
     ];
 
+  nixpkgs.overlays = [
+    jellyfin-ffmpeg-overlay
+  ];
   boot.initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
-  boot.kernelParams = [ "i915.force_probe=46d1" ];
+  boot.kernelParams = [ "i915.force_probe=46d1" "i915.enable_guc=2" ];
   boot.loader.grub.enable = true;
   # boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
@@ -41,19 +53,20 @@
       intel-media-driver
       intel-vaapi-driver # previously vaapiIntel
       vaapiVdpau
-      onevpl-intel-gpu
       intel-compute-runtime # OpenCL filter support (hardware tonemapping and subtitle burn-in)
        # QSV on 11th gen or newer
       #intel-media-sdk # QSV up to 11th gen
+      onevpl-intel-gpu
     ];
   };
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-  services.jellyfin = {
-    enable = true;
-    openFirewall = true;
-  };
+  # services.jellyfin = {
+  #   enable = true;
+  #   openFirewall = true;
+  #   # group="render";
+  # };
 
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
