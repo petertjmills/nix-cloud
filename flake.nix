@@ -35,6 +35,15 @@
           ./altostratus/configuration.nix
         ];
       };
+
+      altocumulus = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          disko.nixosModules.disko
+          ./altocumulus/configuration.nix
+        ];
+      };
+
     };
 
   };
