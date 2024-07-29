@@ -37,6 +37,7 @@ resource "proxmox_vm_qemu" "altocumulus" {
         disk {
           size = "10G"
           storage = "local-lvm"
+          iothread = true
         }
       }
     }
