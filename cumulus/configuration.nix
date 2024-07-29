@@ -24,6 +24,7 @@
     nixpkgs-fmt
     neofetch
     opentofu
+    terraform-providers.proxmox
   ];
 
   # Enable the OpenSSH daemon.
