@@ -23,6 +23,7 @@
     just
     nixpkgs-fmt
     neofetch
+    opentofu
   ];
 
   # Enable the OpenSSH daemon.
