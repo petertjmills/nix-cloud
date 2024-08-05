@@ -47,14 +47,15 @@ in
     vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
   };
   hardware.intel-gpu-tools.enable = true;
-  hardware.opengl = { # hardware.opengl in 24.05
+  hardware.opengl = {
+    # hardware.opengl in 24.05
     enable = true;
     extraPackages = with pkgs; [
       intel-media-driver
       intel-vaapi-driver # previously vaapiIntel
       vaapiVdpau
       intel-compute-runtime # OpenCL filter support (hardware tonemapping and subtitle burn-in)
-       # QSV on 11th gen or newer
+      # QSV on 11th gen or newer
       #intel-media-sdk # QSV up to 11th gen
       onevpl-intel-gpu
     ];
@@ -66,6 +67,28 @@ in
     enable = true;
     openFirewall = true;
     # group="render";
+  };
+  services.transmission = {
+    enable = true;
+    openFirewall = true;
+    settings = {
+      download-dir = "/data/transmission";
+      incomplete-dir = "/data/transmission/incomplete";
+    };
+  };
+  services.radarr = {
+    enable = true;
+    openFirewall = true;
+  };
+  services.prowlarr = {
+    enable = true;
+    openFirewall = true;
+  };
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [
+      9091
+    ];
   };
 
   users.users.root.openssh.authorizedKeys.keys = [
