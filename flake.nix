@@ -44,6 +44,14 @@
         ];
       };
 
+      cirrustratus = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          disko.nixosModules.disko
+          ./hosts/cirrustratus/configuration.nix
+        ];
+      };
+
       installationIso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [

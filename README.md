@@ -43,3 +43,13 @@ systemctl --user start auto-fix-vscode-server.service
 - [] Secrets
 - [] tf environment variables
 - [] Configure Swap on all servers with disko. Couldn't get this working for some reason
+
+# Commands
+```bash
+
+``` 
+
+# Useful docs
+
+Terrafom Proxmox provider:
+https://registry.terraform.io/providers/Telmate/proxmox/latest/docs
