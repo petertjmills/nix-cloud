@@ -16,7 +16,7 @@
         system = "x86_64-linux";
         modules = [
           vscode-server.nixosModules.default
-          ./cumulus/configuration.nix
+          ./hosts/cumulus/configuration.nix
         ];
       };
 
@@ -24,7 +24,7 @@
         system = "x86_64-linux";
         modules = [
           disko.nixosModules.disko
-          ./nimbus/configuration.nix
+          ./hosts/nimbus/configuration.nix
         ];
       };
 
@@ -32,7 +32,7 @@
         system = "x86_64-linux";
         modules = [
           disko.nixosModules.disko
-          ./altostratus/configuration.nix
+          ./hosts/altostratus/configuration.nix
         ];
       };
 
@@ -40,10 +40,16 @@
         system = "x86_64-linux";
         modules = [
           disko.nixosModules.disko
-          ./altocumulus/configuration.nix
+          ./hosts/altocumulus/configuration.nix
         ];
       };
 
+      installationIso = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./isos/x86_64-linux-minimal-cd.nix
+        ];
+      };
     };
 
   };

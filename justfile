@@ -20,3 +20,8 @@ init HOST SSH:
 
 deploy HOST SSH:
 	nixos-rebuild switch --flake .#{{HOST}} --target-host {{SSH}}
+
+# nixos-generators can cross compile and use different image formats!
+# Maybe move away from iso in the future?
+buildiso PLATFORM:
+  nix run nixpkgs#nixos-generators -- --format iso --flake .#{{PLATFORM}} -o ./isos/results/{{PLATFORM}}

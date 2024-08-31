@@ -35,7 +35,7 @@
     scrapeConfigs = [
       {
         job_name = "water temperature";
-        scrape_interval = "15s";
+        scrape_interval = "1s";
         metrics_path = "/metrics";
         static_configs = [
           {
@@ -45,11 +45,25 @@
       }
     ];
   };
+  services.grafana = {
+    enable = true;
+    settings = {
+      security = {
+        admin_user = "admin";
+        admin_password = "admin";
+      };
+      server = {
+        http_port = 3000;
+        http_addr = "0.0.0.0";
+      };
+    };
+  };
 
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [
       9090
+      3000
     ];
   };
 
