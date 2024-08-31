@@ -52,7 +52,7 @@
         ];
       };
 
-      installationIso = nixpkgs.lib.nixosSystem {
+      x86_64-linux-iso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
           ./isos/x86_64-linux-minimal-cd.nix
