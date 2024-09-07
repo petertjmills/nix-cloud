@@ -11,7 +11,7 @@
     # Include the results of the hardware scan.
     ./disk-config.nix
     (modulesPath + "/profiles/qemu-guest.nix")
-    ../services/test.nix
+    ../../services/test.nix
   ];
 
   nixpkgs.overlays = [

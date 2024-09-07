@@ -18,13 +18,6 @@
             mountpoint = "/";
           };
         };
-        # swap = {
-        #   size = "100%";
-        #   content = {
-        #     type = "swap";
-        #     resumeDevice = true;
-        #   };
-        # };
       };
     };
   };
