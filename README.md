@@ -18,7 +18,7 @@
 6. **Altocumulus** (Logging/Monitoring Server)
    - **Explanation**: Altocumulus clouds are structured and appear in patterns, mirroring the organized collection and analysis of logs and monitoring data.
 
-7. **Cirrustratus** (Backup Server)
+7. **Cirrostratus** (Backup Server)
    - **Explanation**: Cirrustratus clouds cover large portions of the sky and often precede weather changes, symbolizing preparedness and long-term reliability, which aligns with the function of a backup server. 
 
 This list provides cloud names tailored to specific server roles, each with symbolic ties to the nature of the cloud and the server's function.
@@ -53,3 +53,6 @@ systemctl --user start auto-fix-vscode-server.service
 
 Terrafom Proxmox provider:
 https://registry.terraform.io/providers/Telmate/proxmox/latest/docs
+
+# Useful information
+

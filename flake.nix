@@ -52,6 +52,14 @@
         ];
       };
 
+      cirrus = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          disko.nixosModules.disko
+          ./hosts/cirrus/configuration.nix
+        ];
+      };
+
       x86_64-linux-iso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [

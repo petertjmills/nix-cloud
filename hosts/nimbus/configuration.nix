@@ -74,6 +74,10 @@ in
     settings = {
       download-dir = "/data/transmission";
       incomplete-dir = "/data/transmission/incomplete";
+      rpc-bind-address = "0.0.0.0";
+      rpc-enabled = true;
+      rpc-whitelist-enabled = false;
+      rpc-host-whitelist = "*";
     };
   };
   services.radarr = {

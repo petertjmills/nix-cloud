@@ -13,8 +13,8 @@ _confirm:
 		exit 1; \
 	fi
 
-init HOST SSH:
-	nix run github:nix-community/nixos-anywhere -- --flake .#{{HOST}} {{SSH}}
+init HOST SSH *args:
+	nix run github:nix-community/nixos-anywhere -- --flake .#{{HOST}} {{SSH}} {{args}}
 
 # nixos-rebuild --target-host root@192.168.86.212 switch --flake .#nimbus
 
