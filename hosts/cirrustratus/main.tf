@@ -11,11 +11,13 @@ provider "proxmox" {
   pm_api_url = "https://proxmox.server:8006/api2/json"
 }
 
-resource "proxmox_vm_qemu" "altocumulus" {
+resource "proxmox_vm_qemu" "cirrustratus" {
   name        = "cirrustratus"
   target_node = "yellowsubmarine"
   memory      = "2048"
   cores       = "2"
+  scsihw      = "virtio-scsi-single"
+  
   network{
     bridge = "vmbr0"
     link_down = false
@@ -27,7 +29,7 @@ resource "proxmox_vm_qemu" "altocumulus" {
     ide {
       ide0 {
         cdrom {
-          iso = "local:iso/nixos-minimal-24.05.2150.89c49874fb15-x86_64-linux.iso"
+          iso = "local:iso/nixos-24.05.20240630.7dca152-x86_64-linux.iso"
         }
       }
     }

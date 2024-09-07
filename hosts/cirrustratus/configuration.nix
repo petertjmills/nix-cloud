@@ -11,6 +11,8 @@
     ./disk-config.nix
     (modulesPath + "/profiles/qemu-guest.nix")
   ];
+  boot.initrd.availableKernelModules = [ "virtio_scsi" ];
+  boot.kernelParams = [ "boot.shell_on_fail" ];
 
   boot.loader.grub.enable = true;
 
@@ -31,7 +33,6 @@
   services.openssh.enable = true;
   
   # services.borgbackup.repos = {
-
   # };
 
   networking.firewall = {
