@@ -82,6 +82,12 @@
           ./isos/x86_64-linux-minimal-cd.nix
         ];
       };
+
+      packages.x86_64-linux = {
+        createQrCode = nixpkgs.legacyPackages.x86_64-linux.writeScriptBin "test" ''
+          echo "Hello, world!"
+        '';
+      };
     };
 
   };
