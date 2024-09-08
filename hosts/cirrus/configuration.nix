@@ -18,8 +18,82 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  age.secrets.cirrus_wireguard_private_key.file = ../../secrets/cirrus_wireguard_private_key.age;
+
+  boot.kernel.sysctl = {
+    "net.ipv4.ip_forward" = 1;
+  };
   networking.hostName = "cirrus"; # Define your hostname.
-  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable = true;
+
+  services.unbound = {
+    enable = true;
+    settings.server = {
+      interface = [
+        "0.0.0.0"
+      ];
+
+      access-control = [ "10.0.0.0/24 allow" ];
+
+      local-zone = "\"e-clare.com.\" static";
+      local-data = [
+        "\"jellyfin.e-clare.com. IN A 192.168.86.225\""
+        "\"text.e-clare.com. IN TXT 'this is a test'\""
+      ];
+    };
+  };
+
+  # Wireguard Config
+  networking.nat.enable = true;
+  networking.nat.externalInterface = "ens18";
+  networking.nat.internalInterfaces = [ "wg0" ];
+
+  networking.wireguard.interfaces = {
+    # "wg0" is the network interface name. You can name the interface arbitrarily.
+    wg0 = {
+      # Determines the IP address and subnet of the server's end of the tunnel interface.
+      ips = [ "10.0.0.1/24" ];
+
+      # The port that WireGuard listens to. Must be accessible by the client.
+      listenPort = 51820;
+
+      # This allows the wireguard server to route your traffic to the internet and hence be like a VPN
+      # For this to work you have to set the dnsserver IP of your router (or dnsserver of choice) in your clients
+      postSetup = ''
+        ${pkgs.iptables}/bin/iptables --append FORWARD --in-interface wg0 --jump ACCEPT
+        ${pkgs.iptables}/bin/iptables -t nat --append POSTROUTING --source 10.0.0.1/24 --out-interface ens18 --jump MASQUERADE
+      '';
+
+      # This undoes the above command
+      postShutdown = ''
+        ${pkgs.iptables}/bin/iptables --delete FORWARD --in-interface wg0 --jump ACCEPT
+        ${pkgs.iptables}/bin/iptables -t nat --delete POSTROUTING --source 10.0.0.1/24 --out-interface ens18 --jump MASQUERADE
+      '';
+
+      # Path to the private key file.
+      #
+      # Note: The private key can also be included inline via the privateKey option,
+      # but this makes the private key world-readable; thus, using privateKeyFile is
+      # recommended.
+      privateKeyFile = config.age.secrets.cirrus_wireguard_private_key.path;
+
+      peers = [
+        # List of allowed peers.
+        {
+          # Feel free to give a meaning full name
+          # Public key of the peer (not a file path).
+          publicKey = "cCGzVYGwHv7l6gBiC3IQrQJhrF5U9gVciRgCuTtDjEI=";
+          # List of IPs assigned to this peer within the tunnel subnet. Used to configure routing.
+          allowedIPs = [ "10.0.0.2/32" ];
+        }
+
+        {
+          publicKey = "xtoo1P3JB2lg7e+la/gFnGXgMpqqEsCfqdfCM/AxlnQ=";
+          allowedIPs = [ "10.0.0.3/32" ];
+        }
+      ];
+    };
+  };
 
   time.timeZone = "Europe/London";
 
@@ -31,12 +105,17 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-  
-  
+
+
 
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [
+      53
+    ];
+    allowedUDPPorts = [
+      53
+      51820
     ];
   };
 
