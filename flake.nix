@@ -67,6 +67,15 @@
         ];
       };
 
+      stratus = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          disko.nixosModules.disko
+          agenix.nixosModules.default
+          ./hosts/stratus/configuration.nix
+        ];
+      };
+
       x86_64-linux-iso = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
