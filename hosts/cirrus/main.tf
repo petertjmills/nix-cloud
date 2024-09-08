@@ -45,3 +45,7 @@ resource "proxmox_vm_qemu" "cirrus" {
     }
   }
 }
+
+output "ip" {
+  value = proxmox_vm_qemu.cirrus.ssh_host
+}
