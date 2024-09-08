@@ -9,6 +9,11 @@
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
   
+  # Added these lines to enable the emulation of i686-linux and aarch64-linux
+  # To compile packages for these systems, you need to add them to the list of emulated systems.
+  boot.binfmt.emulatedSystems = ["i686-linux" "aarch64-linux"];
+  nix.settings.extra-platforms = config.boot.binfmt.emulatedSystems;
+
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
   networking.hostName = "cumulus"; # Define your hostname.

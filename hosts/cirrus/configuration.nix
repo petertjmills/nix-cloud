@@ -18,13 +18,14 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  networking.hostName = "cirrus"; # Define your hostname.
+  networking.networkmanager.enable = true;
+
   age.secrets.cirrus_wireguard_private_key.file = ../../secrets/cirrus_wireguard_private_key.age;
 
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
   };
-  networking.hostName = "cirrus"; # Define your hostname.
-  networking.networkmanager.enable = true;
 
   services.unbound = {
     enable = true;
@@ -46,7 +47,7 @@
   # Wireguard Config
   networking.nat.enable = true;
   networking.nat.externalInterface = "ens18";
-  networking.nat.internalInterfaces = [ "wg0" ];
+  networking.nat.internalInterfaces = [ "wg0" "wg1" ];
 
   networking.wireguard.interfaces = {
     # "wg0" is the network interface name. You can name the interface arbitrarily.
@@ -93,6 +94,34 @@
         }
       ];
     };
+    wg1 = {
+      # Determines the IP address and subnet of the server's end of the tunnel interface.
+      ips = [ "10.100.0.2/24" ];
+
+      # The port that WireGuard listens to. Must be accessible by the client.
+      listenPort = 9696;
+
+      privateKeyFile = config.age.secrets.cirrus_wireguard_private_key.path;
+
+      postSetup = ''
+        ${pkgs.iptables}/bin/iptables --append FORWARD --in-interface wg1 --jump ACCEPT
+        ${pkgs.iptables}/bin/iptables --append FORWARD --out-interface wg1 --jump ACCEPT
+      '';
+
+      postShutdown = ''
+        ${pkgs.iptables}/bin/iptables --delete FORWARD --in-interface wg1 --jump ACCEPT
+        ${pkgs.iptables}/bin/iptables --delete FORWARD --out-interface wg1 --jump ACCEPT
+      '';
+
+      peers = [
+        {
+          publicKey = "UgKxWdYS4MxE8uKW+7gJwHRtnwm7GhIVzY8N7SBYqnc=";
+          allowedIPs = [ "10.100.0.0/24" ];
+          endpoint = "162.55.216.236:51820";
+          persistentKeepalive = 25;
+        }
+      ];
+    };
   };
 
   time.timeZone = "Europe/London";
@@ -116,6 +145,7 @@
     allowedUDPPorts = [
       53
       51820
+      9696
     ];
   };
 

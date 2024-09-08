@@ -8,11 +8,17 @@
 {
   imports = [
     ./disk-config.nix
+    (modulesPath + "/profiles/qemu-guest.nix")
   ];
-  boot.initrd.availableKernelModules = [ "virtio_scsi" ];
-  boot.kernelParams = [ "boot.shell_on_fail" ];
+  boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelParams = [ ];
 
   boot.loader.grub.enable = true;
+  # Required for Hetzner UEFI boot.
+  boot.loader.grub.efiSupport = true;
+  boot.loader.grub.efiInstallAsRemovable = true;
+  # boot.loader.grub.device = "/dev/sda";
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
@@ -35,6 +41,7 @@
     allowedTCPPorts = [
     ];
     allowedUDPPorts = [
+      51820
     ];
   };
 
@@ -43,6 +50,52 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPEhVfbVbix9lPz1+hQAeo7qRtQwIs6+ev22HLa4IiI+ root@cumulus"
   ];
+
+  age.secrets.stratus_wireguard_private_key.file = ../../secrets/stratus_wireguard_private_key.age;
+
+  boot.kernel.sysctl = {
+    "net.ipv4.ip_forward" = 1;
+  };
+
+  # Wireguard Config
+  networking.nat.enable = true;
+  networking.nat.externalInterface = "enp1s0";
+  networking.nat.internalInterfaces = [ "wg0" ];
+
+  networking.wireguard.interfaces = {
+    # "wg0" is the network interface name. You can name the interface arbitrarily.
+    wg0 = {
+      # Determines the IP address and subnet of the server's end of the tunnel interface.
+      ips = [ "10.100.0.1/24" ];
+
+      # The port that WireGuard listens to. Must be accessible by the client.
+      listenPort = 51820;
+
+      # This allows the wireguard server to route your traffic to the internet and hence be like a VPN
+      # For this to work you have to set the dnsserver IP of your router (or dnsserver of choice) in your clients
+      postSetup = ''
+        ${pkgs.iptables}/bin/iptables --append FORWARD --in-interface wg0 --jump ACCEPT
+        ${pkgs.iptables}/bin/iptables --append FORWARD --out-interface wg0 --jump ACCEPT
+        ${pkgs.iptables}/bin/iptables -t nat --append POSTROUTING --source 10.100.0.1/24 --out-interface enp1s0 --jump MASQUERADE
+      '';
+
+      # This undoes the above command
+      postShutdown = ''
+        ${pkgs.iptables}/bin/iptables --delete FORWARD --in-interface wg0 --jump ACCEPT
+        ${pkgs.iptables}/bin/iptables --delete FORWARD --out-interface wg0 --jump ACCEPT
+        ${pkgs.iptables}/bin/iptables -t nat --delete POSTROUTING --source 10.100.0.1/24 --out-interface enp1s0 --jump MASQUERADE
+      '';
+
+      privateKeyFile = config.age.secrets.stratus_wireguard_private_key.path;
+
+      peers = [
+        {
+          publicKey = "a3l8yQluObIOydp6qpdSTv8CKSEEtCUb7A5ggsAfBFw=";
+          allowedIPs = [ "10.100.0.2/32" "192.168.86.0/24" ];
+        }
+      ];
+    };
+  };
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
