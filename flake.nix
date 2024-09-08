@@ -83,11 +83,14 @@
         ];
       };
 
-      packages.x86_64-linux = {
-        createQrCode = nixpkgs.legacyPackages.x86_64-linux.writeScriptBin "test" ''
-          echo "Hello, world!"
-        '';
-      };
+      packages.x86_64-linux.createQrCode = 
+      let
+        pkgs = import nixpkgs { system = "x86_64-linux"; };
+      in
+      pkgs.writeScriptBin "createQrCode" ''
+        echo "Hello, world!"
+      '';
+
     };
 
   };
