@@ -18,6 +18,12 @@
 
   networking.hostName = "cumulus"; # Define your hostname.
   networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [
+      5432 # PostgreSQL
+    ];
+  };
 
   time.timeZone = "Europe/London";
 
@@ -35,6 +41,26 @@
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
   services.vscode-server.enable = true;
+  services.postgresql = {
+    enable = true;
+    enableTCPIP = true;
+    settings.port = 5432;
+    authentication = pkgs.lib.mkOverride 10 ''
+      #...
+      #type database DBuser origin-address auth-method
+      # ipv4
+      local all all              trust
+      host  all      all     127.0.0.1/32   trust
+      host all       all     ::1/128        trust
+      host  all      all     192.168.86.210/32   trust
+      # ipv6
+    '';
+    initialScript = pkgs.writeText "backend-initScript" ''
+      CREATE ROLE finance WITH LOGIN PASSWORD 'finance' CREATEDB;
+      CREATE DATABASE finance;
+      GRANT ALL PRIVILEGES ON DATABASE finance TO finance;
+    '';
+  };
 
   programs.zsh = {
     enable = true;
