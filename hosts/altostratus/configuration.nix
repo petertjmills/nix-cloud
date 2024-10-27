@@ -35,9 +35,8 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-  services.testService = {
+  services.finance-tracker = {
     enable = true;
-    logText = "Test service is running on altostratus";
   };
 
   networking.firewall = {
