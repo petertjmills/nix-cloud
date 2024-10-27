@@ -93,6 +93,18 @@
           publicKey = "a3l8yQluObIOydp6qpdSTv8CKSEEtCUb7A5ggsAfBFw=";
           allowedIPs = [ "10.100.0.2/32" "192.168.86.0/24" ];
         }
+        {
+          publicKey = "/ANlH9RU1OV+Sa53pXEwgBRJd/0XE5qZLeIcqoT3qAk=";
+          allowedIPs = [ "10.100.0.3/32" ];
+        }
+        {
+          publicKey = "cCGzVYGwHv7l6gBiC3IQrQJhrF5U9gVciRgCuTtDjEI=";
+          allowedIPs = [ "10.100.0.4/32" ];
+        }
+        {
+          publicKey = "mxkPIIq1tb3XIYoOUxf2nZad8ctzEgKv6sPJ7RdPqxk=";
+          allowedIPs = [ "10.100.0.5/32" ];
+        }
       ];
     };
   };

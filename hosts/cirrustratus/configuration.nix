@@ -4,7 +4,9 @@
 , pkgs
 , ...
 }:
-
+let
+  backupPath = "/data/borgbackup";
+in
 {
   imports = [
     # Include the results of the hardware scan.
@@ -27,13 +29,53 @@
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     git
     neofetch
+    rclone
   ];
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-  
-  # services.borgbackup.repos = {
-  # };
+
+  services.borgbackup.repos = {
+    silversurfer_backups = {
+      # silversurfer
+      authorizedKeys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
+      ];
+      path = "${backupPath}/silversurfer_backups";
+      user = "silversurfer_backups";
+    };
+    macbookpro_2015 = {
+      authorizedKeys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBQ6Qz5vAJG38dmP1C9nYETNzUrlRo5LCkeSM2LMTKVi Peter@Peters-MacBook-Pro-3.local"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMUkQkIBpVCIFpJtLgjmCnm//lqMS1vNYOmXO4Ff1fqf sophie@Peters-MacBook-Pro-3.local"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAo6iE0CBeo9SQlK8UuXGzl/gMHlEJgQ1o+6vqiJN9mE katrinamills@Peters-MBP-3.lan"
+      ];
+      path = "${backupPath}/macbookpro_2015";
+      user = "macbookpro_2015";
+    };
+  };
+
+  age.secrets.b2_backup.file = ../../secrets/b2_backup.age;
+
+  systemd.services.rclone-backup = {
+    wantedBy = [ "multi-user.target" ];
+    description = "Rclone service";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.rclone}/bin/rclone sync ${backupPath} remote:petermills-backups --config ${config.age.secrets.b2_backup.path}'";
+      # Log when completed
+      ExecStartPost = "${pkgs.systemd}/bin/systemd-cat echo 'Rclone backup completed'";
+    };
+  };
+
+  systemd.timers.rclone-backup = {
+    description = "Rclone Backup Timer";
+    timerConfig = {
+      OnCalendar = "Mon *-*-* 00:00:00"; # Run every Monday at midnight
+      Persistent = true;
+    };
+    wantedBy = [ "timers.target" ];
+  };
 
   networking.firewall = {
     enable = true;

@@ -40,6 +40,7 @@ resource "proxmox_vm_qemu" "cirrustratus" {
           size = "10G"
           storage = "local-lvm"
           iothread = true
+          serial = "disk0"
         }
       }
       scsi1 {
@@ -47,6 +48,7 @@ resource "proxmox_vm_qemu" "cirrustratus" {
             size = "1T"
             storage = "zfs1"
             iothread = true
+            serial = "disk1"
         }
       }
     }

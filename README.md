@@ -38,11 +38,12 @@ systemctl --user start auto-fix-vscode-server.service
 
 ## TODOs
 
-- [] Create tf files for all hosts
-- [] Create custom image with sudo passwd
-- [] Secrets
-- [] tf environment variables
-- [] Configure Swap on all servers with disko. Couldn't get this working for some reason
+- [ ] Create tf files for all hosts
+- [ ] Create custom image with sudo passwd
+- [ ] Secrets
+- [ ] tf environment variables
+- [ ] Configure Swap on all servers with disko. Couldn't get this working for some reason
+- [ ] Prevent init from running if the server is already initialized as it may cause data loss
 
 # Commands
 ```bash
@@ -55,4 +56,37 @@ Terrafom Proxmox provider:
 https://registry.terraform.io/providers/Telmate/proxmox/latest/docs
 
 # Useful information
+
+
+# Backups
+
+Cirrustratus is the backup server. It hosts a borg backup repositories that can be accessed via ssh (Therefore requires the ssh keys to be configured).
+A very important note is that I have one borg repo per machine. [Explanation](https://borgbackup.readthedocs.io/en/stable/faq.html#can-i-backup-from-multiple-servers-into-a-single-repository)
+
+To set up a borg nixos job, you can use the following:
+```nix
+TODO: Add borg backup job
+```
+
+To initialize an uninitialized borg repository, use the following command:
+```bash
+borg init --encryption=repokey-blake2 ${BACKUP REPO}@cirrustratus.lan
+```
+
+To backup from other machines (macos) use the following command ([docs](https://borgbackup.readthedocs.io/en/stable/usage/create.html)):
+TODO: investigate the /./. looks weird and unintuitive
+TODO: exclude ".*" is not working
+```bash
+borg create --stats --progress ssh://${BACKUP REPO}@cirrustratus.lan/./.::${BACKUP NAME}_{now} ${FOLDER TO BACKUP} --exclude ~/Library --exclude ".*"
+```
+
+TODO: Test and add pruning
+
+All backups are copied to Backblaze B2 using rclone periodically (at the moment every Monday at midnight), automated with systemd timers.
+The command used is as follows:
+```bash
+rclone sync ${backupPath} remote:petermills-backups --config ${config.age.secrets.b2_backup.path}
+```
+
+[Hard-delete](https://rclone.org/b2/#b2-hard-delete) is disabled on the B2 bucket, so changes are persisted over time, however this will start to use more space over time. To clean this we can use rclone, instructions are [here](https://rclone.org/b2/#versions)
 

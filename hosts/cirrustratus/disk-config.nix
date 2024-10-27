@@ -2,7 +2,7 @@
   disko.devices = {
     disk = {
       main = {
-        device = "/dev/sda";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_disk0";
         type = "disk";
         content = {
           type = "gpt";
@@ -25,6 +25,23 @@
                 type = "filesystem";
                 format = "ext4";
                 mountpoint = "/";
+              };
+            };
+          };
+        };
+      };
+      secondary = {
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_disk1";
+        type = "disk";
+        content = {
+          type = "gpt";
+          partitions = {
+            data = {
+              size = "100%";
+              content = {
+                type = "filesystem";
+                format = "ext4";
+                mountpoint = "/data";
               };
             };
           };

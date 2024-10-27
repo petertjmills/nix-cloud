@@ -54,6 +54,7 @@
         system = "x86_64-linux";
         modules = [
           disko.nixosModules.disko
+          agenix.nixosModules.default
           ./hosts/cirrustratus/configuration.nix
         ];
       };
@@ -83,15 +84,20 @@
         ];
       };
 
-      packages.x86_64-linux.createQrCode = 
-      let
-        pkgs = import nixpkgs { system = "x86_64-linux"; };
-      in
-      pkgs.writeScriptBin "createQrCode" ''
-        echo "Hello, world!"
-      '';
-
     };
+
+    # packages.x86_64-linux = {
+    #   createiPhoneWireguardQrCode =
+    #     let
+    #       pkgs = import nixpkgs { system = "x86_64-linux"; };
+    #       age.secrets.iphone_wireguard_private_key.file = ./secrets/iphone_wireguard_private_key.age;
+    #       config = agenix.nixosModules.default;
+    #       path = config.age.secrets.iphone_wireguard_private_key.path;
+    #     in
+    #     pkgs.writeScriptBin "createiPhoneWireguardQrCode" ''
+    #       echo ${path}
+    #     '';
+    # };
 
   };
 }

@@ -29,17 +29,26 @@
 
   services.unbound = {
     enable = true;
-    settings.server = {
-      interface = [
-        "0.0.0.0"
-      ];
+    settings = {
+      server = {
+        interface = [
+          "0.0.0.0"
+        ];
 
-      access-control = [ "10.0.0.0/24 allow" ];
+        access-control = [ "10.0.0.0/24 allow" "10.100.0.0/24 allow" "192.168.86.0/24 allow" ];
 
-      local-zone = "\"e-clare.com.\" static";
-      local-data = [
-        "\"jellyfin.e-clare.com. IN A 192.168.86.225\""
-        "\"text.e-clare.com. IN TXT 'this is a test'\""
+        local-zone = "\"e-clare.com.\" static";
+        local-data = [
+          "\"jellyfin.e-clare.com. IN A 192.168.86.225\""
+          "\"text.e-clare.com. IN TXT 'this is a test'\""
+        ];
+      };
+      forward-zone = [
+        {
+          name = "lan.";
+          forward-addr = [ "192.168.86.2" ];
+          forward-first = "no";
+        }
       ];
     };
   };
