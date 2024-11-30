@@ -57,6 +57,15 @@ https://registry.terraform.io/providers/Telmate/proxmox/latest/docs
 
 # Useful information
 
+This line can break disko:
+```
+# boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
+``` 
+
+All proxmox vms require this too:
+```
+boot.initrd.availableKernelModules = [ "virtio_scsi" ];
+```
 
 # Backups
 

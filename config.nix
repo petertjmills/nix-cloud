@@ -66,4 +66,32 @@
     };
 
   };
+
+  resource.proxmox_vm_qemu.cumulus = {
+    name = "cumulus";
+    target_node = "yellowsubmarine";
+    memory = "2048";
+    cores = "2";
+    scsihw = "virtio-scsi-single";
+
+    network = {
+      id = 0;
+      bridge = "vmbr0";
+      link_down = false;
+      firewall = true;
+      model = "virtio";
+    };
+
+    disks = {
+      scsi.scsi0.disk = {
+        size = "64G";
+        storage = "local-lvm";
+        iothread = true;
+        serial = "disk0_cumulus";
+      };
+      ide.ide0.cdrom = {
+        iso = "local:iso/nixos-24.05.20240630.7dca152-x86_64-linux.iso";
+      };
+    };
+  };
 }

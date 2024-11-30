@@ -47,6 +47,7 @@
         cumulus = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
+            disko.nixosModules.disko
             vscode-server.nixosModules.default
             ./hosts/cumulus/configuration.nix
             agenix.nixosModules.default

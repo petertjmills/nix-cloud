@@ -1,14 +1,14 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, modulesPath, ... }:
 {
-  imports =
-    [
-      # Include the results of the hardware scan.
-      # ./hardware-configuration.nix
-      ./disk-config.nix
-    ];
+  imports = [
+    ./disk-config.nix
+    (modulesPath + "/profiles/qemu-guest.nix")
+  ];
+  boot.initrd.availableKernelModules = [ "virtio_scsi" ];
+  boot.kernelParams = [ "boot.shell_on_fail" ];
 
   boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
+  # boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
   # Added these lines to enable the emulation of i686-linux and aarch64-linux
   # To compile packages for these systems, you need to add them to the list of emulated systems.
