@@ -1,23 +1,23 @@
 { config, lib, pkgs, ... }:
-
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [
+      # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
 
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
-  
+
   # Added these lines to enable the emulation of i686-linux and aarch64-linux
   # To compile packages for these systems, you need to add them to the list of emulated systems.
-  boot.binfmt.emulatedSystems = ["i686-linux" "aarch64-linux"];
+  boot.binfmt.emulatedSystems = [ "i686-linux" "aarch64-linux" ];
   nix.settings.extra-platforms = config.boot.binfmt.emulatedSystems;
 
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   networking.hostName = "cumulus"; # Define your hostname.
-  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [
@@ -34,8 +34,6 @@
     just
     nixpkgs-fmt
     neofetch
-    opentofu
-    terraform-providers.proxmox
   ];
 
   # Enable the OpenSSH daemon.
@@ -53,6 +51,7 @@
       host  all      all     127.0.0.1/32   trust
       host all       all     ::1/128        trust
       host  all      all     192.168.86.210/32   trust
+      host  all      all     192.168.86.231/32   trust
       # ipv6
     '';
     initialScript = pkgs.writeText "backend-initScript" ''
@@ -80,10 +79,12 @@
 
   users.defaultUserShell = pkgs.zsh;
 
-  users.users.root.openssh.authorizedKeys.keys=[
+  users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
   ];
+  swapDevices = lib.mkForce [ ];
+
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you

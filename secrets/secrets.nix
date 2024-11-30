@@ -3,6 +3,7 @@ let
   cumulus = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPEhVfbVbix9lPz1+hQAeo7qRtQwIs6+ev22HLa4IiI+";
   stratus = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAantcVH8/va/b0q8fPNsVLxwTeebFGOtxVVWYXIpEPM";
   cirrustratus = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEXT0PruztYsf9fLnEki+a4QR1xL7B3lWspiRwlToLAX";
+  altostratus = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKEzMThI0D4H4T2Cx94fwRQIUDQcQNCEijPJ+HmotJx4";
 in {
   "cirrus_wireguard_private_key.age".publicKeys = [
     cirrus
@@ -17,6 +18,10 @@ in {
     cirrustratus
   ];
   "sophies_mbp_wireguard_private_key.age".publicKeys = [
+    cumulus
+  ];
+  "finance_tracker_env.age".publicKeys = [
+    altostratus
     cumulus
   ];
 }

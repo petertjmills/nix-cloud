@@ -1,29 +1,47 @@
-{ 
-  modulesPath, 
-  config, 
-  lib, 
-  pkgs,
-  ... 
+{ modulesPath
+, config
+, lib
+, pkgs
+, ...
 }:
+let
+  jack_delay = pkgs.stdenv.mkDerivation {
+    name = "jack_delay";
+    src = pkgs.fetchFromGitHub {
+      owner = "ericfont";
+      repo = "jack_delay";
+      rev = "master";
+      sha256 = "sha256-7U+co0hAV0YuKY0HOgi1iifa8XCnHsvVwlTtW2EsIEc=";
+    };
 
+    buildInputs = [ pkgs.jack2 ];
+
+    buildPhase = ''
+      cd source
+      make
+    '';
+
+    installPhase = ''
+      mkdir -p $out/bin
+      cp jack_delay $out/bin
+    '';
+  };
+in
 {
   imports = [
     # Include the results of the hardware scan.
     ./disk-config.nix
     (modulesPath + "/profiles/qemu-guest.nix")
-    ../../services/test.nix
   ];
-
-  nixpkgs.overlays = [
-    ( import ../../packages )
-  ];
+  boot.initrd.availableKernelModules = [ "virtio_scsi" ];
+  boot.kernelParams = [ "boot.shell_on_fail" ];
 
   boot.loader.grub.enable = true;
-  
-  nix.settings.experimental-features = ["nix-command" "flakes"];
 
-  networking.hostName = "altostratus"; # Define your hostname.
-  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  networking.hostName = "nixmusic"; # Define your hostname.
+  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
 
   time.timeZone = "Europe/London";
 
@@ -31,46 +49,41 @@
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     git
     neofetch
+    
+    jack_delay
+    jack-example-tools
   ];
-
-  # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-
-  services.postgresql = {
-    enable = true;
-    enableTCPIP = true;
-    settings.port = 5432;
-    authentication = pkgs.lib.mkOverride 10 ''
-      #...
-      #type database DBuser origin-address auth-method
-      # ipv4
-      local all all              trust
-      host  all      all     127.0.0.1/32   trust
-      host all       all     ::1/128        trust
-      host  all      all     192.168.86.210/32   trust
-      # ipv6
-    '';
-    initialScript = pkgs.writeText "backend-initScript" ''
-      CREATE ROLE finance WITH LOGIN PASSWORD 'finance' CREATEDB;
-      CREATE DATABASE finance;
-      GRANT ALL PRIVILEGES ON DATABASE finance TO finance;
-      ALTER SCHEMA public OWNER TO finance;
-    '';
-  };
-
-  # age.secrets.finance_tracker_env.file = ../../secrets/finance_tracker_env.age;
-  services.financeTracker = {
-    enable = true;
-    # env_file = ../../services/finance-tracker.env;
-    # postgresServiceName = "postgresql.service";
-  };
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 3000 5432 ];
+    allowedTCPPorts = [
+
+    ];
   };
 
-  users.users.root.openssh.authorizedKeys.keys=[
+  musnix.enable = true;
+  musnix.kernel.realtime = true;
+  services.jack = {
+    jackd.enable = true;
+    jackd.extraOptions = [ "-d" "alsa" "-d" "hw:USB" ];
+    # support ALSA only programs via ALSA JACK PCM plugin
+    alsa.enable = false;
+    # support ALSA only programs via loopback device (supports programs like Steam)
+
+    loopback = {
+      enable = true;
+      # buffering parameters for dmix device to work with ALSA only semi-professional sound programs
+      #dmixConfig = ''
+      #  period_size 2048
+      #'';
+    };
+  };
+
+
+  users.users.root.extraGroups = [ "audio" "jackaudio" ];
+
+  users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPEhVfbVbix9lPz1+hQAeo7qRtQwIs6+ev22HLa4IiI+ root@cumulus"

@@ -1,38 +1,56 @@
-{ 
-  lib, 
-  buildNpmPackage, 
-  fetchFromGitHub,
-  defaultHostname ? "0.0.0.0",
-  defaultPort ? 3000 
-}:
+# { lib
+# , defaultHostname ? "0.0.0.0"
+# , defaultPort ? 3000
+# , pnpm
+# , nodejs
+# , stdenv
+# }:
 
-buildNpmPackage rec {
-  pname = "financeTracker";
-  version = "0.0.1";
+# stdenv.mkDerivation (finalAttrs: {
+#   pname = "finance-tracker-next";
+#   version = "0.0.1";
 
-  src = fetchFromGitHub {
-    owner = "petertjmills";
-    repo = pname;
-    rev = "main";
-    hash = "sha256-b09a7a9471262b7e7c8864938d7363133ba03bc3";
-  };
+#   src = builtins.fetchGit {
+#     url = "git@github.com:petertjmills/finance-tracker-next.git";
+#     ref = "main";
+#     rev = "c41e5cc058a8af263705fcdd5a2822c44a6eb856";
+#   };
 
-  npmDepsHash = "sha256-ZsPv2vE8KtJlmb1Q3cI7LYU2jauyrG8IkXbU4TCH7TQ=";
+#   buildInputs = [
+#     nodejs
+#   ];
 
-  postBuild = ''
+#   nativeBuildInputs = [
+#     pnpm.configHook
+#   ];
+
+#   pnpmDeps = pnpm.fetchDeps {
+#     inherit (finalAttrs) pname version src;
+#     hash = "sha256-1SXGmhpKw9wi5B7B+Bwbxz0pZ9WA3v1+9ufQunCncdg=";
+#   };
+
+#   buildPhase = ''
+#     runHook preBuild
     
-  '';
+#     pnpm build
 
-  installPhase = ''
-    runHook preInstall
+#     runHook postBuild
+#   '';
 
-    mkdir -p $out/bin
-    cp -r . $out/bin
+#   postBuild = ''
+    
+#   '';
 
-    runHook postInstall
-  '';
+#   installPhase = ''
+#     runHook preInstall
 
-  meta = {
-    description = "Personal Finance tracker";
-  };
-}
+#     mkdir -p $out/bin
+#     cp -r . $out/bin
+
+#     runHook postInstall
+#   '';
+
+#   meta = {
+#     description = "Personal Finance tracker";
+#   };
+# })

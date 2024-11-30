@@ -90,3 +90,114 @@ rclone sync ${backupPath} remote:petermills-backups --config ${config.age.secret
 
 [Hard-delete](https://rclone.org/b2/#b2-hard-delete) is disabled on the B2 bucket, so changes are persisted over time, however this will start to use more space over time. To clean this we can use rclone, instructions are [here](https://rclone.org/b2/#versions)
 
+
+# Notes
+
+Personal cloud
+
+Services
+- Backup location
+    - Borg
+- Notes
+    - Nextcloud
+- Reminders
+    - Nextcloud
+- Calendar
+    - Nextcloud
+- Media server
+    - Jellyfin
+    - Radarr
+    - Sonarr
+    - Prowlarr
+    - Transmission
+- VPN
+    - Headscale
+    - Tailscale
+- Password manager
+    - Vaultwarden
+    - Bitwarden
+- CDN
+    - Strapi
+Infrastructure
+- Logging/Monitoring
+    - Grafana
+    - Loki
+    - Prometheus
+- Notifications
+    - ntfy.sh
+- Auth
+    - Authelia
+- Mail
+    - [TBC]
+- Proxy
+    - Nginx 
+- Other
+    - Endlessh
+- DNS
+    - dnsmasq
+- VPN
+    - Wireguard
+- Dev
+    - VSCode server
+    - Opentofu
+    - Nix-anywhere
+
+Devices
+- Homelab
+    - VMs
+        - Cumulus
+            - Dev
+        - Nimbus
+            - Media Server
+        - Cirrus
+            - Internal Proxy
+            - DNS
+        - Altostratus
+            - Notes
+            - Reminders
+            - Calendar
+            - Password Manager
+            - Auth
+        - Altocumulus
+            - Logging/Monitoring
+            - Notifications
+        - Cirrostratus
+            - Backups
+- VPS
+    - Stratus
+        - VPN
+        - External Proxy
+        - Endlessh
+- MacBook
+- Mac mini 
+- Fire stick?
+- iPhone
+
+
+Network
+
+- Groups
+    - Internal
+    - External
+    - Personal
+
+
+Core: (must share host) (Level 0)
+  Dev
+  Router
+  Logging/Monitoring
+
+External: (can be on the internet, must accept inbound connections from the internet, connected to core with wireguard)
+  Satellite (VPS)
+
+Stateful: ()
+  Media
+  Backup
+  DBs? (should I put databases separate)
+
+
+Networks: (10.LEVEL.0.0/24)
+  - Level 0
+    - a network on a single provider (proxmox, hetzner, aws) that is private, so neighbour servers can communicate
+  - Level 1
+    - a wireguard network that connects 
