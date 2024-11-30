@@ -3,7 +3,8 @@
   imports =
     [
       # Include the results of the hardware scan.
-      ./hardware-configuration.nix
+      # ./hardware-configuration.nix
+      ./disk-config.nix
     ];
 
   boot.loader.grub.enable = true;
@@ -83,7 +84,6 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
   ];
-  swapDevices = lib.mkForce [ ];
 
 
   # Copy the NixOS configuration file and link it from the resulting system
