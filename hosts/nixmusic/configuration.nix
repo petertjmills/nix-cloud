@@ -1,9 +1,4 @@
-{ modulesPath
-, config
-, lib
-, pkgs
-, ...
-}:
+{ modulesPath, config, lib, pkgs, ... }:
 let
   jack_delay = pkgs.stdenv.mkDerivation {
     name = "jack_delay";
@@ -49,7 +44,7 @@ in
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     git
     neofetch
-    
+
     jack_delay
     jack-example-tools
   ];
@@ -66,7 +61,7 @@ in
   musnix.kernel.realtime = true;
   services.jack = {
     jackd.enable = true;
-    jackd.extraOptions = [ "-d" "alsa" "-d" "hw:USB" ];
+    jackd.extraOptions = [ "-R" "-d" "alsa" "-d" "hw:USB"];
     # support ALSA only programs via ALSA JACK PCM plugin
     alsa.enable = false;
     # support ALSA only programs via loopback device (supports programs like Steam)

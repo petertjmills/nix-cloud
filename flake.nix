@@ -119,7 +119,11 @@
           modules = [
             disko.nixosModules.disko
             musnix.nixosModules.musnix
+            vscode-server.nixosModules.default
             ./hosts/nixmusic/configuration.nix
+            {
+              services.vscode-server.enable = true;
+            }
           ];
         };
 
