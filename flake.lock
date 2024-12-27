@@ -1,26 +1,5 @@
 {
   "nodes": {
-    "agenix": {
-      "inputs": {
-        "darwin": "darwin",
-        "home-manager": "home-manager",
-        "nixpkgs": "nixpkgs",
-        "systems": "systems"
-      },
-      "locked": {
-        "lastModified": 1723293904,
-        "narHash": "sha256-b+uqzj+Wa6xgMS9aNbX4I+sXeb5biPDi39VgvSFqFvU=",
-        "owner": "ryantm",
-        "repo": "agenix",
-        "rev": "f6291c5935fdc4e0bef208cfc0dcab7e3f7a1c41",
-        "type": "github"
-      },
-      "original": {
-        "owner": "ryantm",
-        "repo": "agenix",
-        "type": "github"
-      }
-    },
     "bats-assert": {
       "flake": false,
       "locked": {
@@ -53,6 +32,7 @@
         "type": "github"
       }
     },
+<<<<<<< HEAD
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -97,6 +77,8 @@
         "type": "github"
       }
     },
+=======
+>>>>>>> d50b7a3 (Refactor to hosts file)
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -104,11 +86,19 @@
         ]
       },
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1736591904,
         "narHash": "sha256-LFO8pSrPKrH8OPq2HaAuBG5skk8/MNJ/9YmK3KsnSks=",
         "owner": "nix-community",
         "repo": "disko",
         "rev": "33827d2bd16bfe2e21b62956526c72d313595dfd",
+=======
+        "lastModified": 1734701201,
+        "narHash": "sha256-hk0roBX10j/hospoWIJIJj3i2skd7Oml6yKQBx7mTFk=",
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "2ee76c861af3b895b3b104bae04777b61397485b",
+>>>>>>> d50b7a3 (Refactor to hosts file)
         "type": "github"
       },
       "original": {
@@ -117,6 +107,7 @@
         "type": "github"
       }
     },
+<<<<<<< HEAD
     "finance-tracker": {
       "inputs": {
         "nixpkgs": "nixpkgs_2"
@@ -165,6 +156,8 @@
         "type": "github"
       }
     },
+=======
+>>>>>>> d50b7a3 (Refactor to hosts file)
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -222,6 +215,7 @@
         "type": "indirect"
       }
     },
+<<<<<<< HEAD
     "flake-utils": {
       "inputs": {
         "systems": "systems_2"
@@ -444,18 +438,20 @@
         "type": "github"
       }
     },
+=======
+>>>>>>> d50b7a3 (Refactor to hosts file)
     "nixpkgs": {
       "locked": {
-        "lastModified": 1703013332,
-        "narHash": "sha256-+tFNwMvlXLbJZXiMHqYq77z/RfmpfpiI3yjL6o/Zo9M=",
+        "lastModified": 1734737257,
+        "narHash": "sha256-GIMyMt1pkkoXdCq9un859bX6YQZ/iYtukb9R5luazLM=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "54aac082a4d9bb5bbc5c4e899603abfb76a3f6d6",
+        "rev": "1c6e20d41d6a9c1d737945962160e8571df55daa",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-unstable",
+        "ref": "nixos-24.11",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -486,6 +482,7 @@
     },
     "nixpkgs_2": {
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1735563628,
         "narHash": "sha256-OnSAY7XDSx7CtDoqNh8jwVwh4xNL/2HaJxGjryLWzX8=",
         "owner": "NixOS",
@@ -582,6 +579,8 @@
     },
     "nixpkgs_8": {
       "locked": {
+=======
+>>>>>>> d50b7a3 (Refactor to hosts file)
         "lastModified": 1728956102,
         "narHash": "sha256-J8zo+UYNjHATsxn2/ROl8iaji2RgLm+sG7b3VcD36YM=",
         "owner": "nixos",
@@ -595,6 +594,7 @@
         "type": "github"
       }
     },
+<<<<<<< HEAD
     "nixpkgs_9": {
       "locked": {
         "lastModified": 1682134069,
@@ -700,16 +700,22 @@
         "type": "github"
       }
     },
+=======
+>>>>>>> d50b7a3 (Refactor to hosts file)
     "root": {
       "inputs": {
-        "agenix": "agenix",
         "disko": "disko",
+<<<<<<< HEAD
         "finance-tracker": "finance-tracker",
         "musnix": "musnix",
         "nixpkgs": "nixpkgs_4",
         "nixvim": "nixvim",
         "terranix": "terranix",
         "vscode-server": "vscode-server"
+=======
+        "nixpkgs": "nixpkgs",
+        "terranix": "terranix"
+>>>>>>> d50b7a3 (Refactor to hosts file)
       }
     },
     "systems": {
@@ -727,6 +733,7 @@
         "type": "github"
       }
     },
+<<<<<<< HEAD
     "systems_2": {
       "locked": {
         "lastModified": 1681028828,
@@ -772,13 +779,21 @@
         "type": "github"
       }
     },
+=======
+>>>>>>> d50b7a3 (Refactor to hosts file)
     "terranix": {
       "inputs": {
         "bats-assert": "bats-assert",
         "bats-support": "bats-support",
+<<<<<<< HEAD
         "flake-parts": "flake-parts_3",
         "nixpkgs": "nixpkgs_8",
         "systems": "systems_3",
+=======
+        "flake-parts": "flake-parts",
+        "nixpkgs": "nixpkgs_2",
+        "systems": "systems",
+>>>>>>> d50b7a3 (Refactor to hosts file)
         "terranix-examples": "terranix-examples"
       },
       "locked": {
@@ -809,6 +824,7 @@
         "repo": "terranix-examples",
         "type": "github"
       }
+<<<<<<< HEAD
     },
     "treefmt-nix": {
       "inputs": {
@@ -850,6 +866,8 @@
         "repo": "nixos-vscode-server",
         "type": "github"
       }
+=======
+>>>>>>> d50b7a3 (Refactor to hosts file)
     }
   },
   "root": "root",

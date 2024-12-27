@@ -7,7 +7,11 @@
   },
   "resource": {
     "proxmox_vm_qemu": {
+<<<<<<< HEAD
       "nimbus": {
+=======
+      "test": {
+>>>>>>> d50b7a3 (Refactor to hosts file)
         "cores": "2",
         "disks": {
           "ide": {
@@ -21,16 +25,26 @@
             "scsi0": {
               "disk": {
                 "iothread": true,
+<<<<<<< HEAD
                 "serial": "disk0nimbus-os",
                 "size": "128G",
+=======
+                "serial": "disk0_default",
+                "size": "20G",
+>>>>>>> d50b7a3 (Refactor to hosts file)
                 "storage": "local-lvm"
               }
             }
           }
         },
+<<<<<<< HEAD
         "machine": "q35",
         "memory": "4096",
         "name": "nimbus",
+=======
+        "memory": "2048",
+        "name": "test",
+>>>>>>> d50b7a3 (Refactor to hosts file)
         "network": {
           "bridge": "vmbr0",
           "firewall": true,
@@ -52,6 +66,13 @@
   },
   "terraform": {
     "required_providers": {
+<<<<<<< HEAD
+=======
+      "hcloud": {
+        "source": "registry.terraform.io/hetznercloud/hcloud",
+        "version": "1.48.1"
+      },
+>>>>>>> d50b7a3 (Refactor to hosts file)
       "proxmox": {
         "source": "registry.terraform.io/telmate/proxmox",
         "version": "3.0.1-rc6"

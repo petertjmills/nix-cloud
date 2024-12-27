@@ -162,6 +162,7 @@ Services
   - VSCode server
   - Opentofu
   - Nix-anywhere
+  - Github Action Runners
 
 Devices
 
@@ -169,24 +170,24 @@ Devices
   - VMs
     - Cumulus
       - Dev
-    - Nimbus
-      - Media Server
-    - Cirrus
+    - Stratocumulus
       - Internal Proxy
       - DNS
-    - Altostratus
+    - Cumulonimbus
+      - Backups
+    - Stratus
+      - Logging/Monitoring
+      - Notifications
+    - Nimbostratus
+      - Media Server
+    - Altocumulus
       - Notes
       - Reminders
       - Calendar
       - Password Manager
       - Auth
-    - Altocumulus
-      - Logging/Monitoring
-      - Notifications
-    - Cirrostratus
-      - Backups
 - VPS
-  - Stratus
+  - Cirrus
     - VPN
     - External Proxy
     - Endlessh
@@ -234,3 +235,27 @@ Networks: (10.LEVEL.0.0/24)
 
 5. Reboot!
 
+# Learning Nix
+
+With nix module imports, the function parameter has access to all of the attributes of the module importing it.
+
+so if you have a module like this:
+
+```nix
+{ config, pkgs, ... }:
+let
+    a = 1;
+    b = 2;
+in
+{
+  imports = [ ./myfile];
+}
+```
+
+```nix
+{ config, pkgs, a, b, ... }:
+{
+    # do stuff
+    attr = a + b;
+}
+```
