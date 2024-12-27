@@ -41,6 +41,7 @@ in
     jellyfin-web
     jellyfin-ffmpeg
     unzip
+    get_iplayer
   ];
 
   nixpkgs.config.packageOverrides = pkgs: {
