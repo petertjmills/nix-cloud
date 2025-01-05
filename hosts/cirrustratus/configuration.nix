@@ -62,7 +62,7 @@ in
     description = "Rclone service";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.rclone}/bin/rclone sync ${backupPath} remote:petermills-backups --config ${config.age.secrets.b2_backup.path}'";
+      ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.rclone}/bin/rclone copy ${backupPath} remote:petermills-backups --config ${config.age.secrets.b2_backup.path}'";
       # Log when completed
       ExecStartPost = "${pkgs.systemd}/bin/systemd-cat echo 'Rclone backup completed'";
     };
