@@ -2,12 +2,14 @@
 {
   imports = [
     ./disk-config.nix
-    (modulesPath + "/profiles/qemu-guest.nix")
+    #(modulesPath + "/profiles/qemu-guest.nix")
   ];
   boot.initrd.availableKernelModules = [ "virtio_scsi" ];
   boot.kernelParams = [ "boot.shell_on_fail" ];
 
   boot.loader.grub.enable = true;
+  boot.loader.grub.efiSupport = true;
+  boot.loader.grub.efiInstallAsRemovable = true;
   # boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
   # Added these lines to enable the emulation of i686-linux and aarch64-linux
