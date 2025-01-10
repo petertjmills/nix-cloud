@@ -16,13 +16,19 @@
     terranix.url = "github:terranix/terranix";
 
     musnix.url = "github:musnix/musnix";
+    
+    nixvim.url = "github:nix-community/nixvim";
   };
 
-  outputs = { self, nixpkgs, vscode-server, disko, agenix, finance-tracker, terranix, musnix, ... }@inputs:
+  outputs = { self, nixpkgs, vscode-server, disko, agenix, finance-tracker, terranix, musnix, nixvim, ... }@inputs:
     let
       system = "x86_64-linux";
 
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      unfreePkgs = import nixpkgs {
+      	inherit system;
+        config.allowUnfree = true;
+      };
       terraformConfiguration = terranix.lib.terranixConfiguration {
         inherit system;
         modules = [ ./config.nix ];
@@ -46,6 +52,7 @@
       nixosConfigurations = {
         cumulus = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
+          specialArgs = inputs // { pkgs = unfreePkgs; };
           modules = [
             disko.nixosModules.disko
             vscode-server.nixosModules.default
@@ -55,8 +62,21 @@
               environment.systemPackages = [
                 agenix.packages.x86_64-linux.default
                 opentofu-proxmox
+                                  
               ];
+              programs.nixvim = {
+                enable = true;
+                colorschemes.vscode.enable = true;
+                plugins.copilot-vim.enable = true;
+		plugins.neo-tree.enable = true;
+              };
+	      programs.tmux = {
+	      	enable = true;
+	     	clock24 = true;
+
+	      };
             }
+            nixvim.nixosModules.nixvim
           ];
         };
 
