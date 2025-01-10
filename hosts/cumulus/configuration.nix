@@ -10,6 +10,10 @@
   boot.loader.grub.enable = true;
   boot.loader.grub.efiSupport = true;
   boot.loader.grub.efiInstallAsRemovable = true;
+  #boot.loader.grub.zfsSupport = true;
+  boot.supportedFilesystems = [ "zfs" ];
+  boot.zfs.extraPools = [ "zfs1" ];  
+
   # boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
   # Added these lines to enable the emulation of i686-linux and aarch64-linux
@@ -18,7 +22,8 @@
   nix.settings.extra-platforms = config.boot.binfmt.emulatedSystems;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
+  
+  networking.hostId = "d0a95792";
   networking.hostName = "cumulus"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   networking.firewall = {
@@ -37,6 +42,7 @@
     just
     nixpkgs-fmt
     neofetch
+    zfs
   ];
 
   # Enable the OpenSSH daemon.

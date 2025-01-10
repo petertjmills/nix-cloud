@@ -1,6 +1,6 @@
 {
   disko.devices.disk.main = {
-    device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_disk0_cumulus";
+    device = "/dev/nvme0n1";
     type = "disk";
     content = {
       type = "gpt";
