@@ -12,10 +12,10 @@
       version = "3.0.1-rc6";
     };
 
-    hcloud = {
-      source = "registry.terraform.io/hetznercloud/hcloud";
-      version = "1.45.0";
-    };
+    # hcloud = {
+    #   source = "registry.terraform.io/hetznercloud/hcloud";
+    #   version = "1.48.1";
+    # };
   };
 
   provider.proxmox = {
@@ -34,12 +34,74 @@
   #   iso = "nixos-minimal-24.05.1503.752c634c09ce-aarch64-linux.iso";
   # };
 
-  resource.proxmox_vm_qemu.nixmusic = {
-    name = "nixmusic";
+  # resource.proxmox_vm_qemu.nixmusic = {
+  #   name = "nixmusic";
+  #   target_node = "yellowsubmarine";
+  #   memory = "2048";
+  #   cores = "2";
+  #   scsihw = "virtio-scsi-single";
+
+  #   network = {
+  #     id = 0;
+  #     bridge = "vmbr0";
+  #     link_down = false;
+  #     firewall = true;
+  #     model = "virtio";
+  #   };
+
+  #   disks = {
+  #     scsi.scsi0.disk = {
+  #       size = "20G";
+  #       storage = "local-lvm";
+  #       iothread = true;
+  #       serial = "disk0aaa";
+  #     };
+  #     ide.ide0.cdrom = {
+  #       iso = "local:iso/nixos-24.05.20240630.7dca152-x86_64-linux.iso";
+  #     };
+  #   };
+
+  #   usbs = {
+  #     usb0.mapping.mapping_id = "scarlett";
+  #   };
+
+  # };
+
+  # resource.proxmox_vm_qemu.cumulus = {
+  #   name = "cumulus";
+  #   target_node = "yellowsubmarine";
+  #   memory = "2048";
+  #   cores = "2";
+  #   scsihw = "virtio-scsi-single";
+
+  #   network = {
+  #     id = 0;
+  #     bridge = "vmbr0";
+  #     link_down = false;
+  #     firewall = true;
+  #     model = "virtio";
+  #   };
+
+  #   disks = {
+  #     scsi.scsi0.disk = {
+  #       size = "64G";
+  #       storage = "local-lvm";
+  #       iothread = true;
+  #       serial = "disk0_cumulus";
+  #     };
+  #     ide.ide0.cdrom = {
+  #       iso = "local:iso/nixos-24.05.20240630.7dca152-x86_64-linux.iso";
+  #     };
+  #   };
+  # };
+
+  resource.proxmox_vm_qemu.nimbus = {
+    name = "nimbus";
     target_node = "yellowsubmarine";
-    memory = "2048";
+    memory = "4096";
     cores = "2";
     scsihw = "virtio-scsi-single";
+    machine = "q35";
 
     network = {
       id = 0;
@@ -51,47 +113,18 @@
 
     disks = {
       scsi.scsi0.disk = {
-        size = "20G";
+        size = "128G";
         storage = "local-lvm";
         iothread = true;
-        serial = "disk0aaa";
+        serial = "disk0nimbus-os";
       };
       ide.ide0.cdrom = {
         iso = "local:iso/nixos-24.05.20240630.7dca152-x86_64-linux.iso";
       };
     };
 
-    usbs = {
-      usb0.mapping.mapping_id = "scarlett";
-    };
-
-  };
-
-  resource.proxmox_vm_qemu.cumulus = {
-    name = "cumulus";
-    target_node = "yellowsubmarine";
-    memory = "2048";
-    cores = "2";
-    scsihw = "virtio-scsi-single";
-
-    network = {
-      id = 0;
-      bridge = "vmbr0";
-      link_down = false;
-      firewall = true;
-      model = "virtio";
-    };
-
-    disks = {
-      scsi.scsi0.disk = {
-        size = "64G";
-        storage = "local-lvm";
-        iothread = true;
-        serial = "disk0_cumulus";
-      };
-      ide.ide0.cdrom = {
-        iso = "local:iso/nixos-24.05.20240630.7dca152-x86_64-linux.iso";
-      };
+    pcis = {
+      pci0.mapping.mapping_id = "intelgpu";
     };
   };
 }

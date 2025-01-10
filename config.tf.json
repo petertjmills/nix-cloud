@@ -7,7 +7,7 @@
   },
   "resource": {
     "proxmox_vm_qemu": {
-      "cumulus": {
+      "nimbus": {
         "cores": "2",
         "disks": {
           "ide": {
@@ -21,73 +21,37 @@
             "scsi0": {
               "disk": {
                 "iothread": true,
-                "serial": "disk0_cumulus",
-                "size": "64G",
+                "serial": "disk0nimbus-os",
+                "size": "128G",
                 "storage": "local-lvm"
               }
             }
           }
         },
-        "memory": "2048",
-        "name": "cumulus",
+        "machine": "q35",
+        "memory": "4096",
+        "name": "nimbus",
         "network": {
           "bridge": "vmbr0",
           "firewall": true,
           "id": 0,
           "link_down": false,
           "model": "virtio"
+        },
+        "pcis": {
+          "pci0": {
+            "mapping": {
+              "mapping_id": "intelgpu"
+            }
+          }
         },
         "scsihw": "virtio-scsi-single",
         "target_node": "yellowsubmarine"
-      },
-      "nixmusic": {
-        "cores": "2",
-        "disks": {
-          "ide": {
-            "ide0": {
-              "cdrom": {
-                "iso": "local:iso/nixos-24.05.20240630.7dca152-x86_64-linux.iso"
-              }
-            }
-          },
-          "scsi": {
-            "scsi0": {
-              "disk": {
-                "iothread": true,
-                "serial": "disk0aaa",
-                "size": "20G",
-                "storage": "local-lvm"
-              }
-            }
-          }
-        },
-        "memory": "2048",
-        "name": "nixmusic",
-        "network": {
-          "bridge": "vmbr0",
-          "firewall": true,
-          "id": 0,
-          "link_down": false,
-          "model": "virtio"
-        },
-        "scsihw": "virtio-scsi-single",
-        "target_node": "yellowsubmarine",
-        "usbs": {
-          "usb0": {
-            "mapping": {
-              "mapping_id": "scarlett"
-            }
-          }
-        }
       }
     }
   },
   "terraform": {
     "required_providers": {
-      "hcloud": {
-        "source": "registry.terraform.io/hetznercloud/hcloud",
-        "version": "1.45.0"
-      },
       "proxmox": {
         "source": "registry.terraform.io/telmate/proxmox",
         "version": "3.0.1-rc6"

@@ -2,7 +2,7 @@
 let
   jellyfin-ffmpeg-overlay = (final: prev: {
     jellyfin-ffmpeg = prev.jellyfin-ffmpeg.override {
-      ffmpeg_6-full = prev.ffmpeg_6-full.override {
+      ffmpeg_7-full = prev.ffmpeg_7-full.override {
         withMfx = false;
         withVpl = true;
       };
