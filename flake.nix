@@ -16,26 +16,38 @@
     terranix.url = "github:terranix/terranix";
 
     musnix.url = "github:musnix/musnix";
-    
-    nixvim.url = "github:nix-community/nixvim";
+
+    nixvim.url = "github:petertjmills/nixvim";
   };
 
-  outputs = { self, nixpkgs, vscode-server, disko, agenix, finance-tracker, terranix, musnix, nixvim, ... }@inputs:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      vscode-server,
+      disko,
+      agenix,
+      finance-tracker,
+      terranix,
+      musnix,
+      nixvim,
+      ...
+    }@inputs:
     let
       system = "x86_64-linux";
 
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
       unfreePkgs = import nixpkgs {
-      	inherit system;
+        inherit system;
         config.allowUnfree = true;
       };
       terraformConfiguration = terranix.lib.terranixConfiguration {
         inherit system;
         modules = [ ./config.nix ];
       };
-      opentofu-proxmox = pkgs.opentofu.withPlugins (ps: with ps; [
-        (
-          mkProvider {
+      opentofu-proxmox = pkgs.opentofu.withPlugins (
+        ps: with ps; [
+          (mkProvider {
             hash = "sha256-dQvJVAxSR0eMeJseDR80MqXX4v7ry794bIr+ilpKBoQ=";
             owner = "Telmate";
             repo = "terraform-provider-proxmox";
@@ -43,16 +55,18 @@
             vendorHash = "sha256-rD4+m0txQhzw2VmQ56/ZXjtQ9QOufseZGg8TrisgAJo=";
             spdx = "MIT";
             homepage = "https://registry.terraform.io/providers/Telmate/proxmox";
-          }
-        )
-        hcloud
-      ]);
+          })
+          hcloud
+        ]
+      );
     in
     {
       nixosConfigurations = {
         cumulus = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          specialArgs = inputs // { pkgs = unfreePkgs; };
+          specialArgs = inputs // {
+            pkgs = unfreePkgs;
+          };
           modules = [
             disko.nixosModules.disko
             vscode-server.nixosModules.default
@@ -62,31 +76,10 @@
               environment.systemPackages = [
                 agenix.packages.x86_64-linux.default
                 opentofu-proxmox
-                                  
+                nixvim.packages.x86_64-linux.default
+
               ];
-              programs.nixvim = {
-                enable = true;
-		extraConfigVim = ''
-		  set number
-		'';
-                colorschemes.vscode.enable = true;
-                plugins.copilot-vim.enable = true;
-		plugins.neo-tree = {
-		  enable = true; 
-		  enableRefreshOnWrite = true; 
-		};
-		plugins.gitgutter.enable = true;
-		plugins.lsp = {
-		  enable = true;
-		  servers = {
-		    nixd.enable = true;
-		    jsonls.enable = true;	
-		    bashls.enable = true;
-		  };
-		};
-              };
             }
-            nixvim.nixosModules.nixvim
           ];
         };
 
@@ -179,7 +172,9 @@
         {
           createiPhoneWireguardQrCode = pkgs.writeScriptBin "createiPhoneWireguardQrCode" ''
             cd ${self + /secrets}
-            ${agenix.packages.x86_64-linux.default + /bin/agenix} -d iphone_wireguard_private_key.age | ${pkgs.qrencode + /bin/qrencode} -t ansiutf8
+            ${
+              agenix.packages.x86_64-linux.default + /bin/agenix
+            } -d iphone_wireguard_private_key.age | ${pkgs.qrencode + /bin/qrencode} -t ansiutf8
           '';
         };
 
@@ -187,22 +182,26 @@
         # nix run ".#apply"
         apply = {
           type = "app";
-          program = toString (pkgs.writers.writeBash "apply" ''
-            if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
-            cp ${terraformConfiguration} config.tf.json \
-              && ${opentofu-proxmox}/bin/tofu init \
-              && ${opentofu-proxmox}/bin/tofu apply
-          '');
+          program = toString (
+            pkgs.writers.writeBash "apply" ''
+              if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
+              cp ${terraformConfiguration} config.tf.json \
+                && ${opentofu-proxmox}/bin/tofu init \
+                && ${opentofu-proxmox}/bin/tofu apply
+            ''
+          );
         };
         # nix run ".#destroy"
         destroy = {
           type = "app";
-          program = toString (pkgs.writers.writeBash "destroy" ''
-            if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
-            cp ${terraformConfiguration} config.tf.json \
-              && ${opentofu-proxmox}/bin/tofu init \
-              && ${opentofu-proxmox}/bin/tofu destroy
-          '');
+          program = toString (
+            pkgs.writers.writeBash "destroy" ''
+              if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
+              cp ${terraformConfiguration} config.tf.json \
+                && ${opentofu-proxmox}/bin/tofu init \
+                && ${opentofu-proxmox}/bin/tofu destroy
+            ''
+          );
         };
       };
     };
