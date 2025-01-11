@@ -1,4 +1,5 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   default = {
     terranix = {
       name = "default";
@@ -60,27 +61,33 @@
     };
 
     modules = [
-      ({ modulesPath, ... }: {
-        imports = [
-          (modulesPath + "/profiles/qemu-guest.nix")
-        ];
-        boot.initrd.availableKernelModules = [ "virtio_scsi" ];
-        boot.kernelParams = [ "boot.shell_on_fail" ];
+      (
+        { modulesPath, ... }:
+        {
+          imports = [
+            (modulesPath + "/profiles/qemu-guest.nix")
+          ];
+          boot.initrd.availableKernelModules = [ "virtio_scsi" ];
+          boot.kernelParams = [ "boot.shell_on_fail" ];
 
-        boot.loader.grub.enable = true;
+          boot.loader.grub.enable = true;
 
-        nix.settings.experimental-features = [ "nix-command" "flakes" ];
+          nix.settings.experimental-features = [
+            "nix-command"
+            "flakes"
+          ];
 
-        networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
-        networking.firewall.enable = true;
-        services.openssh.enable = true;
+          networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
+          networking.firewall.enable = true;
+          services.openssh.enable = true;
 
-        users.users.root.openssh.authorizedKeys.keys = [
-          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
-          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
-          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPEhVfbVbix9lPz1+hQAeo7qRtQwIs6+ev22HLa4IiI+ root@cumulus"
-        ];
-      })
+          users.users.root.openssh.authorizedKeys.keys = [
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPEhVfbVbix9lPz1+hQAeo7qRtQwIs6+ev22HLa4IiI+ root@cumulus"
+          ];
+        }
+      )
     ];
 
     system = "x86_64-linux";
@@ -100,7 +107,8 @@
 
     modules = [
       (
-        { pkgs, ... }: {
+        { pkgs, ... }:
+        {
           environment.systemPackages = with pkgs; [
             vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
             wget
