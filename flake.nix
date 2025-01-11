@@ -6,6 +6,7 @@
     terranix.url = "github:terranix/terranix";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+    nixvim.url = "github:petertjmills/nixvim";
   };
 
   outputs =
@@ -15,7 +16,7 @@
       terranix,
       disko,
       ...
-    }:
+    }@inputs:
     let
       pkgs = import nixpkgs {
         system = "x86_64-linux";
@@ -24,7 +25,10 @@
         ];
       };
 
-      hostconfig = import ./hosts.nix { inherit pkgs; };
+      hostconfig = import ./hosts.nix {
+        inherit pkgs;
+        flakeInputs = inputs;
+      };
       hosts = import ./lib/host_config.nix { inherit pkgs hostconfig; };
 
       terraformConfiguration = terranix.lib.terranixConfiguration {
@@ -97,7 +101,7 @@
           type = "app";
           program = toString (
             pkgs.writers.writeBash "destroy" ''
-              echo ${hosts.test.system}
+              echo ${hosts.test.disko}
             ''
           );
         };

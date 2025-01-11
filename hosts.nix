@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, flakeInputs, ... }:
 {
   default = {
     terranix = {
@@ -117,7 +117,7 @@
             nixpkgs-fmt
             neofetch
           ];
-          networking.hostName = "test"; # Define your hostname.
+          networking.hostName = ""; # Define your hostname.
         }
       )
     ];
