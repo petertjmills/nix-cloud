@@ -66,15 +66,25 @@
               ];
               programs.nixvim = {
                 enable = true;
+		extraConfigVim = ''
+		  set number
+		'';
                 colorschemes.vscode.enable = true;
                 plugins.copilot-vim.enable = true;
-		plugins.neo-tree.enable = true;
+		plugins.neo-tree = {
+		  enable = true; 
+		  enableRefreshOnWrite = true; 
+		};
+		plugins.gitgutter.enable = true;
+		plugins.lsp = {
+		  enable = true;
+		  servers = {
+		    nixd.enable = true;
+		    jsonls.enable = true;	
+		    bashls.enable = true;
+		  };
+		};
               };
-	      programs.tmux = {
-	      	enable = true;
-	     	clock24 = true;
-
-	      };
             }
             nixvim.nixosModules.nixvim
           ];
