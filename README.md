@@ -244,6 +244,11 @@ Networks: (10.LEVEL.0.0/24)
 
 - `nix run 'github:nix-community/disko/latest#disko-install' -- --flake <flake-url>#<flake-attr> --disk <disk-name> <disk-device>`
 - Note: For some reason I have to clone first: it doesn't let me do `flake https://github.com.....` may be worth investigating
+- sometimes works try:
+
+```sh
+nix run 'github:nix-community/disko/latest#disko-install' -- --flake github:petertjmills/nix-cloud/refactor2#sky --disk main /dev/nvme0n1
+```
 
 5. Reboot!
 
