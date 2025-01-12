@@ -18,42 +18,109 @@
       ...
     }@inputs:
     let
-      pkgs = import nixpkgs {
-        system = "x86_64-linux";
-        overlays = [
-          (import ./packages/opentofu.nix)
-        ];
-      };
-
-      hostconfig = import ./hosts.nix {
-        inherit pkgs;
-        flakeInputs = inputs;
-      };
-      hosts = import ./lib/host_config.nix { inherit pkgs hostconfig; };
-
-      terraformConfiguration = terranix.lib.terranixConfiguration {
-        inherit pkgs;
-        modules = [
+      hosts = {
+        sky =
+          let
+            system = "x86_64-linux";
+          in
           {
-            terraform.required_providers = {
-              proxmox = {
-                source = "registry.terraform.io/telmate/proxmox";
-                version = "3.0.1-rc6";
-              };
+            inherit system;
+            disko = import ./disko/nvme_uefi.nix;
 
-              hcloud = {
-                source = "registry.terraform.io/hetznercloud/hcloud";
-                version = "1.48.1";
-              };
-            };
+            modules = [
+              (
+                { pkgs, ... }:
+                {
+                  boot.loader.grub.enable = true;
+                  boot.loader.grub.efiSupport = true;
+                  boot.loader.grub.efiInstallAsRemovable = true;
+                  boot.supportedFilesystems = [ "zfs" ];
+                  boot.zfs.extraPools = [ "tank" ];
+                  nix.settings.experimental-features = [
+                    "nix-command"
+                    "flakes"
+                  ];
+                  networking.hostId = "d0a95792";
+                  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
 
-            provider.proxmox = {
-              pm_api_url = "http://proxmox.server:8006/api2/json";
-              pm_tls_insecure = true;
-            };
-            resource.proxmox_vm_qemu = builtins.mapAttrs (name: value: value.terranix) hosts;
-          }
-        ];
+                  environment.systemPackages = [
+                    inputs.nixvim.packages.${system}.default
+                    pkgs.zfs
+                    pkgs.neofetch
+                    pkgs.git
+                    pkgs.just
+                  ];
+                  services.openssh.enable = true;
+                  programs.zsh = {
+                    enable = true;
+                    enableCompletion = true;
+                    syntaxHighlighting.enable = true;
+
+                    shellAliases = {
+                      ll = "ls -lah";
+                    };
+
+                    ohMyZsh = {
+                      enable = true;
+                      plugins = [ "git" ];
+                      theme = "dieter";
+                    };
+                  };
+                  users.defaultUserShell = pkgs.zsh;
+                  users.users.root.openssh.authorizedKeys.keys = [
+                    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
+                    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
+                  ];
+                  networking.nftables.enable = true;
+                  virtualisation.incus = {
+                    enable = true;
+                    ui.enable = true;
+                    preseed = {
+                      config."core.https_address" = "[::]:8443";
+                      config."images.auto_update_interval" = "0";
+                      networks = [
+                        {
+                          config = {
+                            "ipv4.address" = "10.0.0.1/24";
+                            "ipv4.nat" = "true";
+                          };
+                          name = "br0";
+                          type = "bridge";
+                        }
+                      ];
+                      storage_pools = [
+
+                        {
+                          config.source = "tank";
+                          name = "incus_zfs_pool";
+                          driver = "zfs";
+                        }
+                      ];
+                      profiles = [
+                        {
+                          devices.eth0 = {
+                            name = "eth0";
+                            network = "br0";
+                            type = "nic";
+                          };
+                          devices.root = {
+                            path = "/";
+                            pool = "incus_zfs_pool";
+                            type = "disk";
+                          };
+                          name = "default";
+                        }
+                      ];
+                      projects = [ ];
+                      cluster = null;
+                    };
+                  };
+
+                  system.stateVersion = "24.05";
+                }
+              )
+            ];
+          };
       };
 
     in
@@ -66,45 +133,11 @@
             disko.nixosModules.disko
             {
               disko = value.disko;
+              networking.hostName = name;
             }
           ] ++ value.modules;
         }
       ) hosts;
 
-      apps.x86_64-linux = {
-        # nix run ".#apply"
-        apply = {
-          type = "app";
-          program = toString (
-            pkgs.writers.writeBash "apply" ''
-              if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
-              cp ${terraformConfiguration} config.tf.json \
-                && ${pkgs.opentofu}/bin/tofu init \
-                && ${pkgs.opentofu}/bin/tofu apply
-            ''
-          );
-        };
-        # nix run ".#destroy"
-        destroy = {
-          type = "app";
-          program = toString (
-            pkgs.writers.writeBash "destroy" ''
-              if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
-              cp ${terraformConfiguration} config.tf.json \
-                && ${pkgs.opentofu}/bin/tofu init \
-                && ${pkgs.opentofu}/bin/tofu destroy
-            ''
-          );
-        };
-
-        show = {
-          type = "app";
-          program = toString (
-            pkgs.writers.writeBash "destroy" ''
-              echo ${hosts.test.disko}
-            ''
-          );
-        };
-      };
     };
 }

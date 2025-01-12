@@ -95,12 +95,8 @@
   };
 
   test = {
-    terranix = {
-      name = "test";
-      disks.scsi.scsi0.disk.size = "20G";
-    };
-
-    disko = { };
+    terranix = pkgs.lib.mkforce { };
+    disko = pkgs.lib.mkForce { test = "new"; };
 
     system = "x86_64-linux";
     os = "nixos";
