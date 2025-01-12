@@ -72,6 +72,21 @@
                     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
                   ];
                   networking.nftables.enable = true;
+                  networking.firewall.trustedInterfaces = [ "br0" ];
+                  networking.useDHCP = false;
+                  networking.bridges = {
+                    "br0" = {
+                      interfaces = [ "enp1s0" ];
+                    };
+                  };
+                  networking.interfaces.br0.ipv4.addresses = [
+                    {
+                      address = "192.168.86.60";
+                      prefixLength = 24;
+                    }
+                  ];
+                  networking.defaultGateway = "192.168.86.1";
+                  networking.nameservers = [ "8.8.8.8" ];
                   virtualisation.incus = {
                     enable = true;
                     ui.enable = true;
@@ -79,14 +94,14 @@
                       config."core.https_address" = "[::]:8443";
                       config."images.auto_update_interval" = "0";
                       networks = [
-                        {
-                          config = {
-                            "ipv4.address" = "10.0.0.1/24";
-                            "ipv4.nat" = "true";
-                          };
-                          name = "br0";
-                          type = "bridge";
-                        }
+                        # {
+                        #   config = {
+                        #     "ipv4.address" = "192.168.86.60/24";
+                        #     "ipv4.nat" = "true";
+                        #   };
+                        #   name = "br0";
+                        #   type = "bridge";
+                        # }
                       ];
                       storage_pools = [
                         # Only run this once. if it fails use incus storage
