@@ -89,12 +89,12 @@
                         }
                       ];
                       storage_pools = [
-
-                        {
-                          config.source = "tank";
-                          name = "incus_zfs_pool";
-                          driver = "zfs";
-                        }
+                        # Only run this once. if it fails use incus storage
+                        # {
+                        #   config.source = "tank";
+                        #   name = "incus_zfs_pool";
+                        #   driver = "zfs";
+                        # }
                       ];
                       profiles = [
                         {
