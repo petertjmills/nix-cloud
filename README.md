@@ -76,6 +76,18 @@ All proxmox vms require this too:
 boot.initrd.availableKernelModules = [ "virtio_scsi" ];
 ```
 
+Change boot order in uefi with
+
+```sh
+nix-shell -p efibootmgr
+# list boot devices
+efibootmgr
+# change order
+efibootmgr -o 0001,0002
+# set next boot
+efibootmgr -n 0001
+```
+
 # Backups
 
 Cirrustratus is the backup server. It hosts a borg backup repositories that can be accessed via ssh (Therefore requires the ssh keys to be configured).
