@@ -72,8 +72,7 @@
                     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
                   ];
                   networking.nftables.enable = true;
-                  networking.firewall.trustedInterfaces = [ "br0" ];
-                  networking.useDHCP = false;
+                  # networking.firewall.trustedInterfaces = [ "incusbr0" ];
                   networking.bridges = {
                     "br0" = {
                       interfaces = [ "enp1s0" ];
@@ -85,6 +84,7 @@
                       prefixLength = 24;
                     }
                   ];
+                  networking.useDHCP = false;
                   networking.defaultGateway = "192.168.86.1";
                   networking.nameservers = [ "8.8.8.8" ];
                   virtualisation.incus = {
@@ -94,14 +94,6 @@
                       config."core.https_address" = "[::]:8443";
                       config."images.auto_update_interval" = "0";
                       networks = [
-                        # {
-                        #   config = {
-                        #     "ipv4.address" = "192.168.86.60/24";
-                        #     "ipv4.nat" = "true";
-                        #   };
-                        #   name = "br0";
-                        #   type = "bridge";
-                        # }
                       ];
                       storage_pools = [
                         # Only run this once. if it fails use incus storage
@@ -136,6 +128,31 @@
               )
             ];
           };
+        test =
+          let
+            system = "x86_64-linux";
+          in
+          {
+            disko = { };
+            inherit system;
+
+            modules = [
+              "${inputs.nixpkgs}/nixos/modules/virtualisation/lxd-virtual-machine.nix"
+              (
+                { pkgs, ... }:
+                {
+                  environment.systemPackages = [ pkgs.neofetch ];
+                  users.users.root.openssh.authorizedKeys.keys = [
+                    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
+                    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
+                  ];
+                }
+              )
+
+            ];
+
+          };
+
       };
 
     in
