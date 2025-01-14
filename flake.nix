@@ -93,8 +93,7 @@
                     preseed = {
                       config."core.https_address" = "[::]:8443";
                       config."images.auto_update_interval" = "0";
-                      networks = [
-                      ];
+                      networks = [ ];
                       storage_pools = [
                         # Only run this once. if it fails use incus storage
                         # {
@@ -107,12 +106,13 @@
                         {
                           devices.eth0 = {
                             name = "eth0";
-                            network = "br0";
+                            nictype = "bridged";
+                            parent = "br0";
                             type = "nic";
                           };
                           devices.root = {
                             path = "/";
-                            pool = "incus_zfs_pool";
+                            pool = "incus_zfs";
                             type = "disk";
                           };
                           name = "default";
