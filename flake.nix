@@ -41,6 +41,7 @@
             # TODO: host_sky might not be a very good name...
             ./modules/host_sky.nix
             ./modules/networking.nix
+            ./modules/zfs.nix
             ./modules/zsh.nix
           ];
         };
@@ -57,6 +58,7 @@
             # TODO: host_sky might not be a very good name...
             ./modules/host_sky.nix
             ./modules/zsh.nix
+            ./modules/zfs.nix
             # Incus module handles ZFS and networking configs
             ./modules/incus.nix
             ./modules/nvim.nix
