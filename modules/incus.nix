@@ -80,8 +80,8 @@ in
     after = [ "incus.service" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = builtins.concatStringsSep "\n" vmImages;
     };
+    script = builtins.concatStringsSep "\n" vmImages;
   };
 
 }
