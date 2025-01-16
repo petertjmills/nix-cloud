@@ -3,6 +3,7 @@
   inputs,
   ip,
   defaultGateway,
+  hostname,
   ...
 }:
 let
@@ -42,6 +43,7 @@ in
   ];
   networking.useDHCP = false;
   networking.defaultGateway = defaultGateway;
+  networking.hostName = hostname;
   networking.nameservers = [ "8.8.8.8" ];
   virtualisation.incus = {
     enable = true;
