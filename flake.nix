@@ -33,6 +33,7 @@
           specialArgs = {
             inherit inputs defaultGateway;
             ip = ipPool 0;
+            hostname = "sky";
           };
           modules = [
             inputs.disko.nixosModules.disko
@@ -54,6 +55,7 @@
           specialArgs = {
             inherit inputs defaultGateway;
             ip = ipPool 1;
+            hostname = "cumulus";
           };
           modules = [
             "${nixpkgs}/nixos/modules/virtualisation/lxd-virtual-machine.nix"
