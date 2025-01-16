@@ -15,7 +15,7 @@ let
       value = inputs.self.vms.${name};
     in
     ''
-      ${pkgs.incus}/bin/incus image delete ${name}
+      ${pkgs.incus}/bin/incus image delete ${name} || true # so it doesn't fail
       ${pkgs.incus}/bin/incus image import --alias ${name} ${value.config.system.build.metadata}/tarball/nixos-system-x86_64-linux.tar.xz ${value.config.system.build.qemuImage}/nixos.qcow2 --reuse --verbose
     ''
   ) (builtins.attrNames inputs.self.vms);
