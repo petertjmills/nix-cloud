@@ -56,7 +56,6 @@
             ./disko/nvme_uefi.nix
             # TODO: host_sky might not be a very good name...
             ./modules/host_sky.nix
-            ./modules/networking.nix
             ./modules/zsh.nix
             # Incus module handles ZFS and networking configs
             ./modules/incus.nix
