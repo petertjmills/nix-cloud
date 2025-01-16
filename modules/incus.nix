@@ -21,12 +21,7 @@ let
   ) (builtins.attrNames inputs.self.vms);
 in
 {
-  boot.supportedFilesystems = [ "zfs" ];
-  boot.zfs.extraPools = [ "tank" ];
-  networking.hostId = "d0a95792";
-  environment.systemPackages = [
-    pkgs.zfs
-  ];
+  
 
   networking.nftables.enable = true;
   # networking.firewall.trustedInterfaces = [ "incusbr0" ];
