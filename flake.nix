@@ -35,7 +35,7 @@
             hostname = "minimal";
           };
           modules = [
-             inputs.disko.nixosModules.disko
+            inputs.disko.nixosModules.disko
             ./modules
             ./disko/nvme_uefi.nix
             # TODO: host_sky might not be a very good name...
@@ -61,7 +61,6 @@
             ./modules/zfs.nix
             # Incus module handles ZFS and networking configs
             ./modules/incus.nix
-            ./modules/nvim.nix
           ];
         };
 

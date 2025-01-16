@@ -40,6 +40,10 @@ in
   networking.defaultGateway = defaultGateway;
   networking.hostName = hostname;
   networking.nameservers = [ "8.8.8.8" ];
+
+  services.lvm.boot.thin.enable = true;
+  services.lvm.enable = true;
+
   virtualisation.incus = {
     enable = true;
     ui.enable = true;
@@ -57,6 +61,7 @@ in
       ];
       profiles = [
         {
+	  config."agent.nic_config" = true;
           devices.enp1s0 = {
             name = "enp1s0";
             nictype = "bridged";

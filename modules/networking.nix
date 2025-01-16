@@ -3,6 +3,7 @@
   networking.useDHCP = false;
   networking.hostName = hostname;
   networking.defaultGateway = defaultGateway;
+  networking.usePredictableInterfaceNames = false;
   networking.interfaces.enp1s0.ipv4.addresses = [
     {
       address = ip.address;
