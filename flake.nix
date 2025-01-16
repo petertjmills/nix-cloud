@@ -28,7 +28,21 @@
     in
     {
       nixosConfigurations = {
-
+        minimal = nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            inherit inputs defaultGateway;
+            ip = ipPool 0;
+            hostname = "minimal";
+          };
+          modules = [
+             inputs.disko.nixosModules.disko
+            ./modules
+            ./disko/nvme_uefi.nix
+            # TODO: host_sky might not be a very good name...
+            ./modules/host_sky.nix
+            ./modules/zsh.nix
+          ];
+        };
         sky = nixpkgs.lib.nixosSystem {
           specialArgs = {
             inherit inputs defaultGateway;
