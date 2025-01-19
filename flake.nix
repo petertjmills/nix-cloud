@@ -45,6 +45,19 @@
             ./modules/zsh.nix
           ];
         };
+        x86_64-linux-minimal-cd = nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            inherit inputs defaultGateway;
+            ip = ipPool 0;
+            hostname = "minimal";
+          };
+          modules = [
+            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+            ./modules
+            ./modules/networking.nix
+          ];
+        };
+
         sky = nixpkgs.lib.nixosSystem {
           specialArgs = {
             inherit inputs defaultGateway;
@@ -61,6 +74,7 @@
             ./modules/zfs.nix
             # Incus module handles ZFS and networking configs
             ./modules/incus.nix
+            ./modules/nvim.nix
           ];
         };
 

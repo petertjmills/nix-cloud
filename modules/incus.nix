@@ -21,9 +21,14 @@ let
   ) (builtins.attrNames inputs.self.vms);
 in
 {
-  
 
   networking.nftables.enable = true;
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [
+      8443
+    ];
+  };
   # networking.firewall.trustedInterfaces = [ "incusbr0" ];
   networking.bridges = {
     "br0" = {
@@ -52,6 +57,13 @@ in
       config."images.auto_update_interval" = "0";
       networks = [ ];
       storage_pools = [
+        {
+          name = "lvm";
+          driver = "lvm";
+          config = {
+            size = "100GiB";
+          };
+        }
         # Only run this once. if it fails use incus storage
         # {
         #   config.source = "tank";
@@ -61,7 +73,7 @@ in
       ];
       profiles = [
         {
-	  config."agent.nic_config" = true;
+          config."agent.nic_config" = true;
           devices.enp1s0 = {
             name = "enp1s0";
             nictype = "bridged";
@@ -70,7 +82,7 @@ in
           };
           devices.root = {
             path = "/";
-            pool = "incus_zfs";
+            pool = "lvm";
             type = "disk";
           };
           name = "default";
