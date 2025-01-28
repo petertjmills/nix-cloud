@@ -2,6 +2,7 @@
   ip,
   defaultGateway,
   hostname,
+  inputs,
   ...
 }:
 {
@@ -11,6 +12,9 @@
   networking.useDHCP = false;
   networking.hostName = hostname;
   networking.defaultGateway = defaultGateway;
+  networking.nameservers = [
+    "${inputs.self.core-vms.stratocumulus._module.specialArgs.ip.address}"
+  ];
   # networking.usePredictableInterfaceNames = false;
   networking.interfaces.enp1s0.ipv4.addresses = [
     {

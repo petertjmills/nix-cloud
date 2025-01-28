@@ -1,0 +1,10 @@
+keys:
+  - &server_sky age1gp3thqrexazrxumqdh6jktwlcpm2rmy02hgu7q86sqt8y0kqnsmshm5djm
+  - &server_cumulus age1wm9x49eg4ex9j2x885uzwkv27ly46yktxmknz2ch0rldme2r95msgfjfjc
+
+creation_rules:
+  - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+          - *server_sky
+          - *server_cumulus

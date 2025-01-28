@@ -7,19 +7,9 @@
   ...
 }:
 let
-  # This produces a list of commands to import the images into incus
-  # The images come from flake vms
-  vmImages = builtins.map (
-    name:
-    let
-      value = inputs.self.vms.${name};
-    in
-    ''
-      ${pkgs.incus}/bin/incus image delete ${name} || true # so it doesn't fail
-      ${pkgs.incus}/bin/incus image import --alias ${name} ${value.config.system.build.metadata}/tarball/nixos-system-x86_64-linux.tar.xz ${value.config.system.build.qemuImage}/nixos.qcow2 --reuse --verbose
-    ''
-  ) (builtins.attrNames inputs.self.vms);
 in
+# This produces a list of commands to import the images into incus
+# The images come from flake vms
 {
 
   networking.nftables.enable = true;
@@ -91,14 +81,45 @@ in
     };
   };
 
-  systemd.services.incus_image_import_vms = {
-    description = "After incus service starts, build nix images";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "incus.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-    };
-    script = builtins.concatStringsSep "\n" vmImages;
-  };
+  # systemd.services.incus_image_import_vms = {
+  #   description = "After incus service starts, build nix images";
+  #   wantedBy = [ "multi-user.target" ];
+  #   after = [ "incus.service" ];
+  #   serviceConfig = {
+  #     Type = "oneshot";
+  #   };
+  #   script = builtins.concatStringsSep "\n" vmImages;
+  # };
+
+  # This creates a service for each core vm that:
+  #   - Deletes the image from incus
+  #   - Imports the image into incus
+  #   - Creates a vm from the image
+  #   - ~~and starts it~~ Doesn't start the files because order can't be controlled this way.
+  systemd.services = pkgs.lib.mapAttrs' (
+    vmName: vmValue:
+    pkgs.lib.nameValuePair (vmName + "-image-service") {
+      description = "After incus service starts, build ${vmName} image and try to reapply";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "incus.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+      };
+
+      script = ''
+        ${pkgs.incus}/bin/incus image delete ${vmName} || true
+        ${pkgs.incus}/bin/incus image import --alias ${vmName} ${vmValue.config.system.build.metadata}/tarball/nixos-system-x86_64-linux.tar.xz ${vmValue.config.system.build.qemuImage}/nixos.qcow2 --reuse --verbose
+        ${pkgs.incus}/bin/incus create ${vmName} ${vmName} < ${
+          toString (
+            pkgs.writers.writeText "${vmName}config" (
+              pkgs.lib.generators.toYAML { } inputs.self.core-vms.${vmName}._module.specialArgs.vm-config
+            )
+          )
+        } || true
+      '';
+    }
+  ) inputs.self.core-vms;
+
+  # TODO: Start core VMs
 
 }

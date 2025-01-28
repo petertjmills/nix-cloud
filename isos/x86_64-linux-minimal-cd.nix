@@ -1,4 +1,5 @@
-{ pkgs, modulesPath, ... }: {
+{ pkgs, modulesPath, ... }:
+{
   imports = [
     "${modulesPath}/installer/cd-dvd/installation-cd-minimal.nix"
   ];
@@ -11,5 +12,8 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPEhVfbVbix9lPz1+hQAeo7qRtQwIs6+ev22HLa4IiI+ root@cumulus"
   ];
 
-  nix.settings.experimental-features = ["nix-command" "flakes"]; 
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 }
