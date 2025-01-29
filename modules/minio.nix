@@ -2,7 +2,8 @@
   services.minio = {
     enable = true;
     browser = true;
-    dataDir = "/data/minio";
+    dataDir = [ "/data/minio" ];
+    configDir = "/data/minioconfig";
     region = "milton-keynes";
 
   };

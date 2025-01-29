@@ -111,6 +111,14 @@
             ./modules/zsh.nix
             ./modules/nvim.nix
             ./modules/sops.nix
+            (
+              { pkgs, ... }:
+              {
+                environment.systemPackages = [
+                  pkgs.incus
+                ];
+              }
+            )
 
           ];
         };
