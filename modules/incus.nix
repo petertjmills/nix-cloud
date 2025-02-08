@@ -52,7 +52,15 @@ in
     preseed = {
       config."core.https_address" = "[::]:8443";
       config."images.auto_update_interval" = "0";
-      networks = [ ];
+      networks = [
+        # {
+        #   name = "incusbr0";
+        #   type = "bridge";
+        #   config = {
+        #     "ipv4.address" = "192.168.86.192/32";
+        #   };
+        # }
+      ];
       storage_pools = [
         {
           name = "lvm";
