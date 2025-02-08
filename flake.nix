@@ -84,6 +84,13 @@
             # Incus module handles ZFS and networking configs
             ./modules/incus.nix
             ./modules/nvim.nix
+            (
+              { pkgs, ... }:
+              {
+                boot.kernelPackages = pkgs.linuxPackages_latest;
+
+              }
+            )
           ];
         };
 
@@ -97,10 +104,16 @@
             hostname = "cumulus";
             vm-config = {
               config."limits.cpu" = "2";
-              config."limits.memory" = "2GiB";
+              config."limits.memory" = "4GiB";
 
               config."boot.autostart" = true;
 
+              devices.root = {
+                path = "/";
+                pool = "lvm";
+                size = "50GiB";
+                type = "disk";
+              };
             };
           };
           modules = [
@@ -116,6 +129,14 @@
               {
                 environment.systemPackages = [
                   pkgs.incus
+                ];
+                swapDevices = [
+                  {
+                    device = "/swapfile";
+                    # 4gb
+                    size = 4 * 1024;
+                    randomEncryption.enable = true;
+                  }
                 ];
               }
             )

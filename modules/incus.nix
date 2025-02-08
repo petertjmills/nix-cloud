@@ -41,6 +41,7 @@ in
 
   virtualisation.incus = {
     enable = true;
+    package = pkgs.incus;
     ui.enable = true;
     preseed = {
       config."core.https_address" = "[::]:8443";
@@ -51,7 +52,7 @@ in
           name = "lvm";
           driver = "lvm";
           config = {
-            size = "100GiB";
+            size = "800GiB";
           };
         }
         # Only run this once. if it fails use incus storage
