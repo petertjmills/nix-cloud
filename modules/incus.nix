@@ -17,6 +17,12 @@ in
     enable = true;
     allowedTCPPorts = [
       8443
+      53
+      67
+    ];
+    allowedUDPPorts = [
+      53
+      67
     ];
   };
   # networking.firewall.trustedInterfaces = [ "incusbr0" ];
