@@ -27,165 +27,141 @@
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
       ipPool = import ./lib/ip-calculator.nix "192.168.86.192/26";
       defaultGateway = "192.168.86.1";
-      # See default.nix to why the path doesn't have ./
+
+      # Relative path, because secrets are mounted at /mnt/secrets
+      # in the luks usb drive on the host
       secrets-dir = "/mnt/secrets";
+
+      terranix-storage = rec {
+        # resource."incus_storage_pool"."homeserver_tank" = {
+        #   name = "zfs_tank";
+        #   driver = "zfs";
+        #   source = "tank";
+        # };
+
+        resource."incus_storage_pool"."homeserver_lvm" = {
+          name = "lvm";
+          driver = "lvm";
+          size = "800GiB";
+        };
+
+        # resource."incus_storage_volume"."homeserver_zfs_tank_1tb" = {
+        #   name = "zfs_tank_1tb";
+        #   pool = resource."incus_storage_pool"."homeserver_tank".name;
+        #   size = "1TiB";
+        # };
+      };
+
+      # terranix = import ./lib/terranix-utils.nix {
+      #   inherit nixpkgs terranix-storage self;
+      # };
+
+      mkNixosSystem = import ./lib/mk-nixos-system.nix {
+        inherit
+          nixpkgs
+          inputs
+          defaultGateway
+          self
+          ;
+      };
+
     in
     {
       nixosConfigurations = {
 
-        minimal = nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs defaultGateway;
-            ip = ipPool 0;
-            hostname = "minimal";
+        # installer = mkNixosSystem {
+        #   name = "installer";
+        #   # image = ./images/iso-installer.nix;
+        #   # Needs something else here?
+        # };
 
-          };
+        sky = mkNixosSystem {
+          name = "sky";
+
+          ip = ipPool 0;
+
           modules = [
-            inputs.disko.nixosModules.disko
-            sops-nix.nixosModules.sops
-            ./modules
-            ./disko/nvme_uefi.nix
-            # TODO: host_sky might not be a very good name...
-            ./modules/host_sky.nix
-            ./modules/networking.nix
-            ./modules/zfs.nix
             ./modules/zsh.nix
-          ];
-        };
-
-        x86_64-linux-minimal-cd = nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs defaultGateway;
-            ip = ipPool 0;
-            hostname = "minimal";
-          };
-          modules = [
-            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-            ./modules
-            ./modules/networking.nix
-          ];
-        };
-
-        sky = nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs defaultGateway;
-            ip = ipPool 0;
-            hostname = "sky";
-          };
-          modules = [
-            inputs.disko.nixosModules.disko
-            inputs.sops-nix.nixosModules.sops
-            ./modules
-            ./disko/nvme_uefi.nix
-            # TODO: host_sky might not be a very good name...
-            ./modules/host_sky.nix
-            ./modules/zsh.nix
-            ./modules/zfs.nix
-            # Incus module handles ZFS and networking configs
             ./modules/incus.nix
-            ./modules/nvim.nix
-            (
-              { pkgs, ... }:
-              {
-                boot.kernelPackages = pkgs.linuxPackages_latest;
-
-              }
-            )
           ];
         };
 
-      } // self.core-vms;
+        cumulus = mkNixosSystem {
+          name = "cumulus";
 
-      core-vms = {
-        cumulus = nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs defaultGateway;
-            ip = ipPool 1;
-            hostname = "cumulus";
-            vm-config = {
-              config."limits.cpu" = "2";
-              config."limits.memory" = "4GiB";
+          ip = ipPool 1;
 
-              config."boot.autostart" = true;
+          terranix = {
+            image = "nixos-lxc-base";
 
-              devices.root = {
-                path = "/";
-                pool = "lvm";
-                size = "50GiB";
-                type = "disk";
-              };
+            config = {
+              "limits.cpu" = "2";
+              "limits.memory" = "4GiB";
+              "boot.autostart" = true;
             };
+
+            device = [
+              {
+                name = "root";
+                type = "disk";
+                properties = {
+                  path = "/";
+                  pool = "lvm";
+                  size = "50GiB";
+                };
+              }
+            ];
           };
+
           modules = [
-            "${nixpkgs}/nixos/modules/virtualisation/lxd-virtual-machine.nix"
-            inputs.sops-nix.nixosModules.sops
-            ./modules
-            ./modules/networking.nix
+            ./machine/incus-vm.nix
             ./modules/zsh.nix
-            ./modules/nvim.nix
-            ./modules/sops.nix
-            (
-              { pkgs, ... }:
-              {
-                environment.systemPackages = [
-                  pkgs.incus
-                ];
-                swapDevices = [
-                  {
-                    device = "/swapfile";
-                    # 4gb
-                    size = 4 * 1024;
-                    randomEncryption.enable = true;
-                  }
-                ];
-              }
-            )
-
+            ./modules/opentofu.nix
           ];
         };
 
-        stratocumulus = nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs defaultGateway;
-            ip = ipPool 2;
-            hostname = "stratocumulus";
-            vm-config = {
-            };
-          };
+        stratocumulus = mkNixosSystem {
+          name = "stratocumulus";
+
+          ip = ipPool 2;
+
           modules = [
-            "${nixpkgs}/nixos/modules/virtualisation/lxd-virtual-machine.nix"
-            ./modules
-            ./modules/networking.nix
-            ./modules/dns.nix
+            # ./machine/incus-container.nix
+
+            ./modules/zsh.nix
           ];
         };
 
-        cumulonimbus = nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            inherit inputs defaultGateway;
-            ip = ipPool 3;
-            hostname = "cumulonimbus";
-            vm-config = {
-              devices.storage = {
-                pool = "tank";
-                source = "zfs_tank_1tb";
-                type = "disk";
-              };
-            };
-          };
+        cumulonimbus = mkNixosSystem {
+          name = "cumulonimbus";
+
+          ip = ipPool 3;
+          # terranix = {
+
+          #   config = { };
+          #   devices = {
+          #     storage = {
+          #       pool = "tank";
+          #       source = "zfs_tank_1tb";
+          #       type = "disk";
+          #     };
+          #   };
+          # };
+
           modules = [
-            "${nixpkgs}/nixos/modules/virtualisation/lxd-virtual-machine.nix"
-            ./modules
-            ./modules/networking.nix
+            ./machine/incus-container.nix
             {
-              fileSystems."/data" = {
-                device = "/dev/disk/by-uuid/a4e5bfd5-b2d7-4b19-b3f9-29f9ba1bc96e";
-                fsType = "ext4";
+              fileSystems = {
+                "/data" = {
+                  device = "/dev/disk/by-uuid/a4e5bfd5-b2d7-4b19-b3f9-29f9ba1bc96e";
+                  fsType = "ext4";
+                };
               };
             }
-            ./modules/minio.nix
+            ./modules/zsh.nix
           ];
         };
+
       };
 
       apps.x86_64-linux = {
@@ -228,6 +204,42 @@
             '')
           );
         };
+
+        terranix-config =
+          let
+            system = "x86_64-linux";
+            terraform = pkgs.terraform;
+            allVMsTerraformConfiguration = terranix.lib.terranixConfiguration {
+              inherit system;
+              modules = [
+                (import ./lib/terranix-utils.nix {
+                  inherit nixpkgs terranix-storage self;
+                })
+              ];
+            };
+          in
+          {
+            apply = {
+              type = "app";
+              program = toString (
+                pkgs.writers.writeBash "apply" ''
+                  if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
+                  cp ${allVMsTerraformConfiguration} config.tf.json
+                ''
+              );
+            };
+            destroy = {
+              type = "app";
+              program = toString (
+                pkgs.writers.writeBash "destroy" ''
+                  if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
+                  cp ${allVMsTerraformConfiguration} config.tf.json
+                  ${terraform}/bin/terraform init
+                  ${terraform}/bin/terraform destroy
+                ''
+              );
+            };
+          };
 
       };
 

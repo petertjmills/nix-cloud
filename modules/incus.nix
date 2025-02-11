@@ -111,29 +111,29 @@ in
   #   - Imports the image into incus
   #   - Creates a vm from the image
   #   - ~~and starts it~~ Doesn't start the files because order can't be controlled this way.
-  systemd.services = pkgs.lib.mapAttrs' (
-    vmName: vmValue:
-    pkgs.lib.nameValuePair (vmName + "-image-service") {
-      description = "After incus service starts, build ${vmName} image and try to reapply";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "incus.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-      };
+  # systemd.services = pkgs.lib.mapAttrs' (
+  #   vmName: vmValue:
+  #   pkgs.lib.nameValuePair (vmName + "-image-service") {
+  #     description = "After incus service starts, build ${vmName} image and try to reapply";
+  #     wantedBy = [ "multi-user.target" ];
+  #     after = [ "incus.service" ];
+  #     serviceConfig = {
+  #       Type = "oneshot";
+  #     };
 
-      script = ''
-        ${pkgs.incus}/bin/incus image delete ${vmName} || true
-        ${pkgs.incus}/bin/incus image import --alias ${vmName} ${vmValue.config.system.build.metadata}/tarball/nixos-system-x86_64-linux.tar.xz ${vmValue.config.system.build.qemuImage}/nixos.qcow2 --reuse --verbose
-        ${pkgs.incus}/bin/incus create ${vmName} ${vmName} < ${
-          toString (
-            pkgs.writers.writeText "${vmName}config" (
-              pkgs.lib.generators.toYAML { } inputs.self.core-vms.${vmName}._module.specialArgs.vm-config
-            )
-          )
-        } || true
-      '';
-    }
-  ) inputs.self.core-vms;
+  #     script = ''
+  #       ${pkgs.incus}/bin/incus image delete ${vmName} || true
+  #       ${pkgs.incus}/bin/incus image import --alias ${vmName} ${vmValue.config.system.build.metadata}/tarball/nixos-system-x86_64-linux.tar.xz ${vmValue.config.system.build.qemuImage}/nixos.qcow2 --reuse --verbose
+  #       ${pkgs.incus}/bin/incus create ${vmName} ${vmName} < ${
+  #         toString (
+  #           pkgs.writers.writeText "${vmName}config" (
+  #             pkgs.lib.generators.toYAML { } inputs.self.core-vms.${vmName}._module.specialArgs.vm-config
+  #           )
+  #         )
+  #       } || true
+  #     '';
+  #   }
+  # ) inputs.self.core-vms;
 
   # TODO: Start core VMs
 

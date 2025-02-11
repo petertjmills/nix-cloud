@@ -1,0 +1,34 @@
+{
+  "resource": {
+    "incus_instance": {
+      "cumulus": {
+        "config": {
+          "boot.autostart": true,
+          "cloud-init.network-config": "network:\n  version: 2\n  renderer: networkd\n  ethernets:\n    enp1s0:\n      dhcp4: no\n      addresses: [192.168.86.193/24]\n      gateway4: 192.168.86.1\n      nameservers:\n        addresses: [192.168.86.194]\n",
+          "limits.cpu": "2",
+          "limits.memory": "4GiB"
+        },
+        "device": [
+          {
+            "name": "root",
+            "properties": {
+              "path": "/",
+              "pool": "lvm",
+              "size": "50GiB"
+            },
+            "type": "disk"
+          }
+        ],
+        "image": "nixos-lxc-base",
+        "name": "cumulus"
+      }
+    },
+    "incus_storage_pool": {
+      "homeserver_lvm": {
+        "driver": "lvm",
+        "name": "lvm",
+        "size": "800GiB"
+      }
+    }
+  }
+}
