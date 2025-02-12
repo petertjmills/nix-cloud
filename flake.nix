@@ -102,7 +102,7 @@
         cumulus = mkNixosSystem {
           name = "cumulus-tst";
 
-          ip = ipPool 1;
+          ip = ipPool 10;
 
           terranix = {
             image = "nixos-lxc-base";
