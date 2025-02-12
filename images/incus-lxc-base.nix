@@ -2,6 +2,7 @@
 {
   imports = [
     "${modulesPath}/virtualisation/lxc-container.nix"
+    "${modulesPath}/virtualisation/incus-agent.nix"
   ];
 
   services.resolved.enable = false;
