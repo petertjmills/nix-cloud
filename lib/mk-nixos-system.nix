@@ -27,16 +27,15 @@ nixpkgs.lib.nixosSystem {
             image = terranix.image;
             config = terranix.config // {
               "cloud-init.network-config" = ''
-                network:
-                  version: 2
-                  renderer: networkd
-                  ethernets:
-                    enp1s0:
-                      dhcp4: no
-                      addresses: [${ip.address}/24]
-                      gateway4: ${defaultGateway}
-                      nameservers:
-                        addresses: [${self.nixosConfigurations.stratocumulus._module.specialArgs.ip.address}]
+                version: 2
+                renderer: networkd
+                ethernets:
+                  enp1s0:
+                    dhcp4: no
+                    addresses: [${ip.address}/24]
+                    gateway4: ${defaultGateway}
+                    nameservers:
+                      addresses: [${self.nixosConfigurations.stratocumulus._module.specialArgs.ip.address}]
               '';
 
             };
