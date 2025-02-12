@@ -233,15 +233,13 @@
           );
         };
 
-        import-images = {
+        import-incus-images = {
           type = "app";
           program = toString (
-            pkgs.writers.writeBash "import-images" (''
-              ${builtins.concatStringsSep "\n" (
-                builtins.map (name: ''
-                  incus image import --alias ${name} ${self.images.${name}.metadata}/tarball/nixos-system-x86_64-linux.tar.xz ${self.images.${name}.img}/nixos-lxc-image-x86_64-linux.squashfs
-                '') (builtins.attrNames self.images)
-              )}
+            pkgs.writers.writeBash "import-incus-images" (''
+              incus image import --alias nixos-lxc-base \
+              ${self.images.incus-lxc-base.metadata}/tarball/nixos-system-x86_64-linux.tar.xz \
+              ${self.images.incus-lxc-base.img}/nixos-lxc-image-x86_64-linux.squashfs
             '')
           );
         };
