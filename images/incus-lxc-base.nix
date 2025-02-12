@@ -3,6 +3,10 @@
   imports = [
     "${modulesPath}/virtualisation/lxc-container.nix"
   ];
+
+  systemd.network.enable = true;
+  services.resolved.enable = false;
+
   services.cloud-init = {
     enable = true;
     network.enable = true;
