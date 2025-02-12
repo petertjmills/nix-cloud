@@ -243,6 +243,7 @@
                 pkgs.writers.writeBash "apply" ''
                   if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
                   cp ${allVMsTerraformConfiguration} config.tf.json
+                  ${tofu}/bin/tofu init
                   ${tofu}/bin/tofu apply
                   rm -f config.tf.json
                 ''
