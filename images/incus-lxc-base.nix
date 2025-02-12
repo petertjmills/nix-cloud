@@ -4,8 +4,8 @@
     "${modulesPath}/virtualisation/lxc-container.nix"
   ];
 
-  systemd.network.enable = true;
   services.resolved.enable = false;
+  networking.useDHCP = false;
 
   services.cloud-init = {
     enable = true;
