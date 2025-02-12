@@ -239,7 +239,7 @@
             pkgs.writers.writeBash "import-images" (''
               ${builtins.concatStringsSep "\n" (
                 builtins.map (name: ''
-                  incus image import --alias ${name} ${self.images.${name}.img} ${self.images.${name}.metadata}
+                  incus image import --alias ${name} ${self.images.${name}.metadata}/tarball/nixos-system-x86_64-linux.tar.xz ${self.images.${name}.img}/nixos-lxc-image-x86_64-linux.squashfs
                 '') (builtins.attrNames self.images)
               )}
             '')
