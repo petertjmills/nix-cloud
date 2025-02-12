@@ -28,6 +28,7 @@ nixpkgs.lib.nixosSystem {
             config = terranix.config // {
               "cloud-init.network-config" = ''
                 version: 2
+                renderer: networkd
                 ethernets:
                   enp1s0:
                     dhcp4: no
