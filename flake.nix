@@ -74,6 +74,10 @@
           ;
       };
 
+      mkImage = import ./lib/mk-image.nix {
+        inherit nixpkgs;
+      };
+
     in
     {
       nixosConfigurations = {
@@ -179,7 +183,13 @@
             ./modules/zsh.nix
           ];
         };
+      };
 
+      images = {
+        incus-lxc-base = mkImage {
+          name = "incus-lxc-base";
+          module = ./images/incus-lxc-base.nix;
+        };
       };
 
       apps.x86_64-linux = {
@@ -218,6 +228,19 @@
                   incus file push ${secrets-dir}/${name}_id_ed25519 ${name}/root/.ssh/id_ed25519 -p
                   incus file push ${secrets-dir}/${name}_id_ed25519.pub ${name}/root/.ssh/id_ed25519.pub -p
                 '') (builtins.attrNames self.nixosConfigurations)
+              )}
+            '')
+          );
+        };
+
+        import-images = {
+          type = "app";
+          program = toString (
+            pkgs.writers.writeBash "import-images" (''
+              ${builtins.concatStringsSep "\n" (
+                builtins.map (name: ''
+                  incus image import --alias ${name} ${self.images.${name}.img} ${self.images.${name}.metadata}
+                '') (builtins.attrNames self.images)
               )}
             '')
           );
