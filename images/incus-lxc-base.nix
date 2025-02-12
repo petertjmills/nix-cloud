@@ -1,4 +1,4 @@
-{ modulesPath, ... }:
+{ modulesPath, pkgs, ... }:
 {
   imports = [
     "${modulesPath}/virtualisation/lxc-container.nix"
@@ -10,6 +10,7 @@
   networking.useDHCP = false;
 
   virtualisation.incus.agent.enable = true;
+  virtualisation.incus.package = pkgs.incus;
   services.cloud-init = {
     enable = true;
     network.enable = true;
