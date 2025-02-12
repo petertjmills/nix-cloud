@@ -100,7 +100,7 @@
         };
 
         cumulus = mkNixosSystem {
-          name = "cumulus";
+          name = "cumulus_tst";
 
           ip = ipPool 1;
 
