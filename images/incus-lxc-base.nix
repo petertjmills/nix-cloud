@@ -23,4 +23,8 @@
 
   nixpkgs.system = "x86_64-linux";
   system.stateVersion = "24.11";
+
+  environment.systemPackages = with pkgs; [
+    cloud-init
+  ];
 }
