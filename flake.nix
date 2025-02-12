@@ -5,6 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
 
     terranix.url = "github:terranix/terranix";
+    terranix.inputs.nixpkgs.follows = "nixpkgs";
 
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
@@ -12,6 +13,7 @@
     nixvim.url = "github:petertjmills/nixvim";
 
     sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -33,6 +35,10 @@
       secrets-dir = "/mnt/secrets";
 
       terranix-storage = rec {
+        terraform."required_providers"."incus" = {
+          source = "registry.terraform.io/lxc/incus";
+        };
+        provider."incus" = { };
         # resource."incus_storage_pool"."homeserver_tank" = {
         #   name = "zfs_tank";
         #   driver = "zfs";
@@ -42,7 +48,10 @@
         resource."incus_storage_pool"."homeserver_lvm" = {
           name = "lvm";
           driver = "lvm";
-          size = "800GiB";
+          config = {
+            size = "800GiB";
+          };
+
         };
 
         # resource."incus_storage_volume"."homeserver_zfs_tank_1tb" = {
@@ -95,9 +104,12 @@
             image = "nixos-lxc-base";
 
             config = {
-              "limits.cpu" = "2";
-              "limits.memory" = "4GiB";
               "boot.autostart" = true;
+            };
+
+            limits = {
+              cpu = 2;
+              memory = "4GiB";
             };
 
             device = [
@@ -117,6 +129,12 @@
             ./machine/incus-vm.nix
             ./modules/zsh.nix
             ./modules/opentofu.nix
+            {
+              environment.systemPackages = with pkgs; [
+                pkgs.nixd
+                pkgs.nixfmt-rfc-style
+              ];
+            }
           ];
         };
 
@@ -208,7 +226,7 @@
         terranix-config =
           let
             system = "x86_64-linux";
-            terraform = pkgs.terraform;
+            tofu = import ./packages/opentofu.nix { inherit pkgs; };
             allVMsTerraformConfiguration = terranix.lib.terranixConfiguration {
               inherit system;
               modules = [
@@ -225,6 +243,8 @@
                 pkgs.writers.writeBash "apply" ''
                   if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
                   cp ${allVMsTerraformConfiguration} config.tf.json
+                  ${tofu}/bin/tofu apply
+                  rm -f config.tf.json
                 ''
               );
             };
@@ -234,8 +254,8 @@
                 pkgs.writers.writeBash "destroy" ''
                   if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
                   cp ${allVMsTerraformConfiguration} config.tf.json
-                  ${terraform}/bin/terraform init
-                  ${terraform}/bin/terraform destroy
+                  ${tofu}/bin/terraform destroy
+                  rm -f config.tf.json
                 ''
               );
             };
