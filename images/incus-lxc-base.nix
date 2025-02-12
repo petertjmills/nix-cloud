@@ -3,8 +3,10 @@
   imports = [
     "${modulesPath}/virtualisation/lxc-container.nix"
   ];
-
-  services.cloud-init.network.enable = true;
+  services.cloud-init = {
+    enable = true;
+    network.enable = true;
+  };
   users.users.root.openssh.authorizedKeys.keyFiles = [
     ../secrets/public-keys/master_id_ed25519.pub
     ../secrets/public-keys/cumulus_id_ed25519.pub
