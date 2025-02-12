@@ -35,9 +35,9 @@ nixpkgs.lib.nixosSystem {
                       dhcp4: no
                       addresses: [${ip.address}/24]
                       gateway4: ${defaultGateway}
-                      nameservers:
-                        addresses: [${self.nixosConfigurations.stratocumulus._module.specialArgs.ip.address}]
               '';
+              # nameservers:
+              #   addresses: [${self.nixosConfigurations.stratocumulus._module.specialArgs.ip.address}]
             };
             device = terranix.device;
           };
