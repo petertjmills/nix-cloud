@@ -20,18 +20,18 @@
       67
     ];
   };
-  # networking.firewall.trustedInterfaces = [ "incusbr0" ];
-  networking.bridges = {
-    "br0" = {
-      interfaces = [ "enp1s0" ];
-    };
-  };
-  networking.interfaces.br0.ipv4.addresses = [
-    {
-      address = ip.address;
-      prefixLength = 24;
-    }
-  ];
+  networking.firewall.trustedInterfaces = [ "incusbr0" ];
+  # networking.bridges = {
+  # "br0" = {
+  # interfaces = [ "enp1s0" ];
+  # };
+  # };
+  # networking.interfaces.br0.ipv4.addresses = [
+  # {
+  # address = ip.address;
+  # prefixLength = 24;
+  # }
+  # ];
   networking.useDHCP = false;
   networking.defaultGateway = defaultGateway;
   networking.hostName = hostname;
