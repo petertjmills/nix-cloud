@@ -61,10 +61,11 @@
         # };
       };
 
-      # terranix = import ./lib/terranix-utils.nix {
-      #   inherit nixpkgs terranix-storage self;
-      # };
 
+
+    in
+    {
+      nixosConfigurations = let
       mkNixosSystem = import ./lib/mk-nixos-system.nix {
         inherit
           nixpkgs
@@ -73,49 +74,31 @@
           self
           ;
       };
-
-      mkImage = import ./lib/mk-image.nix {
-        inherit nixpkgs;
-      };
-
-    in
-    {
-      nixosConfigurations = {
-
-        # installer = mkNixosSystem {
-        #   name = "installer";
-        #   # image = ./images/iso-installer.nix;
-        #   # Needs something else here?
-        # };
-
+      in
+      {
         sky = mkNixosSystem {
           name = "sky";
-
           ip = ipPool 0;
 
           modules = [
+            ./machine/home-server.nix
             ./modules/zsh.nix
             ./modules/incus.nix
           ];
         };
 
         cumulus = mkNixosSystem {
-          name = "cumulus-tst";
-
-          ip = ipPool 10;
-
+          name = "cumulus";
+          ip = ipPool 1;
           terranix = {
             image = "nixos-lxc-base";
-
             config = {
               "boot.autostart" = true;
             };
-
             limits = {
               cpu = 2;
               memory = "4GiB";
             };
-
             device = [
               {
                 name = "root";
@@ -130,7 +113,7 @@
           };
 
           modules = [
-            ./machine/incus-vm.nix
+            ./machine/incus-container.nix
             ./modules/zsh.nix
             ./modules/opentofu.nix
             {
@@ -144,19 +127,22 @@
 
         stratocumulus = mkNixosSystem {
           name = "stratocumulus";
-
           ip = ipPool 2;
+          terranix = {
+            image = "nixos-lxc-base";
+            config = {
+              "boot.autostart" = true;
+            };
+          };
 
           modules = [
-            # ./machine/incus-container.nix
-
-            ./modules/zsh.nix
+            ./machine/incus-container.nix
+            ./modules/dns.nix
           ];
         };
 
         cumulonimbus = mkNixosSystem {
           name = "cumulonimbus";
-
           ip = ipPool 3;
           # terranix = {
 
@@ -185,12 +171,7 @@
         };
       };
 
-      images = {
-        incus-lxc-base = mkImage {
-          name = "incus-lxc-base";
-          module = ./images/incus-lxc-base.nix;
-        };
-      };
+
 
       apps.x86_64-linux = {
 
@@ -212,6 +193,12 @@
                 builtins.map (name: ''
                   ssh-keygen -t ed25519 -f ${secrets-dir}/${name}_id_ed25519 -N ""
                   cp ${secrets-dir}/${name}_id_ed25519.pub ./secrets/public-keys/${name}_id_ed25519.pub
+                  # if hostname = name then copy the key to ~/.ssh
+                    if [ "$(hostname)" = "${name}" ]; then
+                        cp ${secrets-dir}/${name}_id_ed25519 ~/.ssh/id_ed25519
+                        cp ${secrets-dir}/${name}_id_ed25519.pub ~/.ssh/id_ed25519.pub
+                    fi
+
                 '') (builtins.attrNames self.nixosConfigurations)
               )}
             '')

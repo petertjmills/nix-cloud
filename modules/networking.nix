@@ -11,15 +11,16 @@
 
   networking.useDHCP = false;
   networking.hostName = hostname;
-  networking.defaultGateway = defaultGateway;
+  # networking.defaultGateway = defaultGateway;
   networking.nameservers = [
-    "${inputs.self.core-vms.stratocumulus._module.specialArgs.ip.address}"
+    "${inputs.self.nixosConfigurations.stratocumulus._module.specialArgs.ip.address}"
+    "8.8.8.8"
   ];
   # networking.usePredictableInterfaceNames = false;
-  networking.interfaces.enp1s0.ipv4.addresses = [
-    {
-      address = ip.address;
-      prefixLength = 24;
-    }
-  ];
+  # networking.interfaces.enp1s0.ipv4.addresses = [
+  #   {
+  #     address = ip.address;
+  #     prefixLength = 32;
+  #   }
+  # ];
 }

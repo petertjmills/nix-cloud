@@ -3,6 +3,7 @@
   ip,
   defaultGateway,
   hostname,
+  inputs,
   ...
 }:
 {
@@ -20,26 +21,16 @@
       67
     ];
   };
-  networking.firewall.trustedInterfaces = [ "incusbr0" ];
+  # networking.firewall.trustedInterfaces = [ "incusbr0" ];
   # networking.bridges = {
   # "br0" = {
   # interfaces = [ "enp1s0" ];
   # };
   # };
-  # networking.interfaces.br0.ipv4.addresses = [
-  # {
-  # address = ip.address;
-  # prefixLength = 24;
-  # }
-  # ];
-  networking.useDHCP = false;
-  networking.defaultGateway = defaultGateway;
-  networking.hostName = hostname;
-  networking.nameservers = [ "8.8.8.8" ];
 
   services.lvm.boot.thin.enable = true;
   services.lvm.enable = true;
-
+ boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
   virtualisation.incus = {
     enable = true;
     package = pkgs.incus;
@@ -56,8 +47,8 @@
           config."agent.nic_config" = true;
           devices.enp1s0 = {
             name = "enp1s0";
-            nictype = "bridged";
-            parent = "br0";
+            nictype = "routed";
+            parent = "enp1s0";
             type = "nic";
           };
           devices.root = {
@@ -68,6 +59,54 @@
           name = "default";
         }
       ];
+    };
+  };
+
+  systemd.services.incus-import-images = let
+      mkImage =
+      { name, module }:
+      rec {
+        inherit name;
+        nixosConfig = inputs.nixpkgs.lib.nixosSystem {
+          modules = [
+            module
+          ];
+        };
+        build = nixosConfig.config.system.build;
+      };
+
+      images = {
+        incus-lxc-base = mkImage {
+          name = "nixos-lxc-base";
+          module = ../images/incus-lxc-base.nix;
+        };
+
+        incus-vm-base = mkImage {
+          name = "nixos-vm-base";
+          module = ../images/incus-vm-base.nix;
+        };
+      };
+
+
+  in {
+    enable = true;
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = pkgs.writers.writeBash "destroy" ''
+          echo "importing LXC image"
+          ${pkgs.incus}/bin/incus image delete ${images.incus-lxc-base.name}
+          ${pkgs.incus}/bin/incus image import --alias ${images.incus-lxc-base.name} \
+            ${images.incus-lxc-base.build.metadata}/tarball/nixos-system-x86_64-linux.tar.xz \
+            ${images.incus-lxc-base.build.squashfs}/nixos-lxc-image-x86_64-linux.squashfs
+
+            echo "importing VM image"
+          ${pkgs.incus}/bin/incus image delete ${images.incus-vm-base.name}
+          ${pkgs.incus}/bin/incus image import --alias ${images.incus-vm-base.name} \
+            ${images.incus-vm-base.build.metadata}/tarball/nixos-system-x86_64-linux.tar.xz \
+            ${images.incus-vm-base.build.qemuImage}/nixos.qcow2
+      '';
     };
   };
 

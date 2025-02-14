@@ -7,6 +7,5 @@ rec {
       module
     ];
   };
-  img = nixosConfig.config.system.build.squashfs;
-  metadata = nixosConfig.config.system.build.metadata;
+  build = nixosConfig.config.system.build;
 }

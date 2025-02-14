@@ -25,23 +25,23 @@ nixpkgs.lib.nixosSystem {
           resource."incus_instance"."${name}" = {
             name = name;
             image = terranix.image;
-            config = terranix.config // {
-              "cloud-init.network-config" = ''
-                version: 2
-                renderer: networkd
-                ethernets:
-                  enp1s0:
-                    dhcp4: no
-                    addresses:
-                      - ${ip.address}/24
-                    gateway4: ${defaultGateway}
-                    nameservers:
-                      addresses:
-                        - ${self.nixosConfigurations.stratocumulus._module.specialArgs.ip.address}
-              '';
+            config = terranix.config;
+            device = (if terranix ? device then
+              terranix.device else [])  ++ [
+               {
+                 name = "enp1s0";
+                 type = "nic";
+                 properties = {
+                   "ipv4.address" = ip.address;
+                   # "ipv4.gateway" = defaultGateway;
+                   # "ipv4.dhcp" = false;
+                   parent = "enp1s0";
+                   nictype = "routed";
+                   name = "enp1s0";
+                 };
+               }
+             ];
 
-            };
-            device = terranix.device;
           };
         };
 
@@ -50,6 +50,7 @@ nixpkgs.lib.nixosSystem {
   modules = [
     inputs.sops-nix.nixosModules.sops
     ../modules
+    ../modules/networking.nix
     {
       networking.hostName = name;
     }
