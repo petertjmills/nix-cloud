@@ -31,12 +31,12 @@ in
   #     interfaces = [ "enp1s0" ];
   #   };
   # };
-  # networking.interfaces.br0.ipv4.addresses = [
-  #   {
-  #     address = ip.address;
-  #     prefixLength = 24;
-  #   }
-  # ];
+  networking.interfaces.enp1s0.ipv4.addresses = [
+    {
+      address = ip.address;
+      prefixLength = 24;
+    }
+  ];
   networking.useDHCP = false;
   networking.defaultGateway = defaultGateway;
   networking.hostName = hostname;
@@ -81,8 +81,8 @@ in
           config."agent.nic_config" = true;
           devices.enp1s0 = {
             name = "enp1s0";
-            nictype = "bridged";
-            parent = "br0";
+            nictype = "routed";
+            parent = "enp1s0";
             type = "nic";
           };
           devices.root = {
