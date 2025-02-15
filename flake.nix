@@ -94,6 +94,9 @@
             image = "nixos-lxc-base";
             config = {
               "boot.autostart" = true;
+              # required to avoid
+              # error: this system does not support the kernel namespaces that are required for sandboxing; use '--no-sandbox' to disable sandboxing
+              "security.nesting" = true;
             };
             limits = {
               cpu = 2;
@@ -178,30 +181,9 @@
         generate-ssh-keys = {
           type = "app";
           program = toString (
-            pkgs.writers.writeBash "generate-secrets" (''
-              #check to see if dir exists
-              if [ ! -d ${secrets-dir}/masterkey ]; then
-                echo "Master key dir is missing. Drive may not be mounted"
-                exit 1
-              fi
-
-              # ssh-keygen -t ed25519 -f ${secrets-dir}/masterkey/master_id_ed25519 -N "" # Generate ssh key
-              # copy public keys to ./secrets/public-keys
-              # cp ${secrets-dir}/masterkey/master_id_ed25519.pub ./secrets/public-keys/master_id_ed25519.pub
-
-              ${builtins.concatStringsSep "\n" (
-                builtins.map (name: ''
-                  ssh-keygen -t ed25519 -f ${secrets-dir}/${name}_id_ed25519 -N ""
-                  cp ${secrets-dir}/${name}_id_ed25519.pub ./secrets/public-keys/${name}_id_ed25519.pub
-                  # if hostname = name then copy the key to ~/.ssh
-                    if [ "$(hostname)" = "${name}" ]; then
-                        cp ${secrets-dir}/${name}_id_ed25519 ~/.ssh/id_ed25519
-                        cp ${secrets-dir}/${name}_id_ed25519.pub ~/.ssh/id_ed25519.pub
-                    fi
-
-                '') (builtins.attrNames self.nixosConfigurations)
-              )}
-            '')
+              pkgs.writers.writeBash "push-secrets" (''
+                ${pkgs.python3}/bin/python3 ${./scripts/generate_ssh_keys.py} --output-dir ${secrets-dir} ${builtins.concatStringsSep " " (builtins.attrNames self.nixosConfigurations)}
+              '')
           );
         };
 
