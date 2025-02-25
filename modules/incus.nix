@@ -21,16 +21,29 @@
       67
     ];
   };
-  # networking.firewall.trustedInterfaces = [ "incusbr0" ];
-  # networking.bridges = {
-  # "br0" = {
-  # interfaces = [ "enp1s0" ];
-  # };
-  # };
+  networking.firewall.trustedInterfaces = [ "incusbr0" ];
+  networking.bridges = {
+    "br0" = {
+      interfaces = [ "enp1s0" ];
+    };
+  };
+  networking.interfaces.br0.ipv4 = {
+    addresses = [
+      {
+        address = ip.address;
+        prefixLength = 24;
+      }
+    ];
+  };
+  networking.defaultGateway = {
+    address = defaultGateway;
+    interface = "br0";
+  };
 
   services.lvm.boot.thin.enable = true;
   services.lvm.enable = true;
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+
   virtualisation.incus = {
     enable = true;
     package = pkgs.incus;
@@ -38,7 +51,18 @@
     preseed = {
       config."core.https_address" = "[::]:8443";
       config."images.auto_update_interval" = "0";
-      networks = [ ];
+      networks = [
+        {
+          config = {
+            "ipv4.address" = "10.0.0.1/24";
+            "ipv4.dhcp" = "true";
+            "ipv4.dhcp.ranges" = "10.32.241.50-10.32.241.150";
+            "ipv4.nat" = "true";
+          };
+          name = "incusbr0";
+          type = "bridge";
+        }
+      ];
       storage_pools = [
 
       ];

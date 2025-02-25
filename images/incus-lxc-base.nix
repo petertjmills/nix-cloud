@@ -5,7 +5,7 @@
   ];
 
   services.resolved.enable = false;
-  networking.useDHCP = false;
+  networking.useDHCP = true;
 
   virtualisation.incus.agent.enable = true;
   virtualisation.incus.package = pkgs.incus;

@@ -21,20 +21,20 @@
     "i915.force_probe=46d1"
     "i915.enable_guc=2"
     "intel_iommu=on"
-        "iommu=pt"
-        ''vfio-pci.ids="8086:46d1"''
+    "iommu=pt"
+    ''vfio-pci.ids="8086:46d1"''
   ];
 
-  networking.interfaces.enp1s0.ipv4.addresses = [
-    {
-      address = ip.address;
-      prefixLength = 32;
-    }
-  ];
-  networking.defaultGateway = {
-    address = defaultGateway;
-    interface = "enp1s0";
-  };
+  # networking.interfaces.enp1s0.ipv4.addresses = [
+  #   {
+  #     address = ip.address;
+  #     prefixLength = 32;
+  #   }
+  # ];
+  # networking.defaultGateway = {
+  #   address = defaultGateway;
+  #   interface = "enp1s0";
+  # };
 
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.extraPools = [ "tank" ];
