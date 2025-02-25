@@ -1,6 +1,6 @@
 final: prev:
 let
-  inherit (final);
+  inherit (final) ;
 in
 rec {
   nexttest = prev.callPackage ./test.nix { };

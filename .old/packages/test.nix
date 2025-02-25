@@ -1,9 +1,9 @@
-{ 
-  lib, 
-  buildNpmPackage, 
+{
+  lib,
+  buildNpmPackage,
   fetchFromGitHub,
   defaultHostname ? "0.0.0.0",
-  defaultPort ? 3000 
+  defaultPort ? 3000,
 }:
 
 buildNpmPackage rec {

@@ -1,7 +1,7 @@
 { pkgs, ... }:
 {
   environment.systemPackages = [
-    (pkgs.opentofu.withPlugins(
+    (pkgs.opentofu.withPlugins (
       ps: with ps; [
         incus
         hcloud

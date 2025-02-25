@@ -16,7 +16,7 @@
     pkgs.cryptsetup
   ];
   time.timeZone = "Europe/London";
-  #TODO: Move this to ssh.nix
+  #TODO: Move this to ssh.nix?
   services.openssh.enable = true;
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"

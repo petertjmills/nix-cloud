@@ -30,7 +30,7 @@
 
   services.lvm.boot.thin.enable = true;
   services.lvm.enable = true;
- boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
   virtualisation.incus = {
     enable = true;
     package = pkgs.incus;
@@ -62,18 +62,19 @@
     };
   };
 
-  systemd.services.incus-import-images = let
+  systemd.services.incus-import-images =
+    let
       mkImage =
-      { name, module }:
-      rec {
-        inherit name;
-        nixosConfig = inputs.nixpkgs.lib.nixosSystem {
-          modules = [
-            module
-          ];
+        { name, module }:
+        rec {
+          inherit name;
+          nixosConfig = inputs.nixpkgs.lib.nixosSystem {
+            modules = [
+              module
+            ];
+          };
+          build = nixosConfig.config.system.build;
         };
-        build = nixosConfig.config.system.build;
-      };
 
       images = {
         incus-lxc-base = mkImage {
@@ -87,14 +88,14 @@
         };
       };
 
-
-  in {
-    enable = true;
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = pkgs.writers.writeBash "destroy" ''
+    in
+    {
+      enable = true;
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = pkgs.writers.writeBash "destroy" ''
           echo "importing LXC image"
           ${pkgs.incus}/bin/incus image delete ${images.incus-lxc-base.name}
           ${pkgs.incus}/bin/incus image import --alias ${images.incus-lxc-base.name} \
@@ -106,8 +107,8 @@
           ${pkgs.incus}/bin/incus image import --alias ${images.incus-vm-base.name} \
             ${images.incus-vm-base.build.metadata}/tarball/nixos-system-x86_64-linux.tar.xz \
             ${images.incus-vm-base.build.qemuImage}/nixos.qcow2
-      '';
+        '';
+      };
     };
-  };
 
 }

@@ -1,8 +1,9 @@
-{ modulesPath
-, config
-, lib
-, pkgs
-, ...
+{
+  modulesPath,
+  config,
+  lib,
+  pkgs,
+  ...
 }:
 
 {
@@ -10,7 +11,14 @@
     ./disk-config.nix
     (modulesPath + "/profiles/qemu-guest.nix")
   ];
-  boot.initrd.availableKernelModules = [ "ahci" "xhci_pci" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
+  boot.initrd.availableKernelModules = [
+    "ahci"
+    "xhci_pci"
+    "virtio_pci"
+    "virtio_scsi"
+    "sd_mod"
+    "sr_mod"
+  ];
   boot.initrd.kernelModules = [ ];
   boot.kernelParams = [ ];
 
@@ -20,7 +28,10 @@
   boot.loader.grub.efiInstallAsRemovable = true;
   # boot.loader.grub.device = "/dev/sda";
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   networking.hostName = "stratus"; # Define your hostname.
   networking.networkmanager.enable = true;
@@ -91,7 +102,10 @@
       peers = [
         {
           publicKey = "a3l8yQluObIOydp6qpdSTv8CKSEEtCUb7A5ggsAfBFw=";
-          allowedIPs = [ "10.100.0.2/32" "192.168.86.0/24" ];
+          allowedIPs = [
+            "10.100.0.2/32"
+            "192.168.86.0/24"
+          ];
         }
         {
           publicKey = "/ANlH9RU1OV+Sa53pXEwgBRJd/0XE5qZLeIcqoT3qAk=";

@@ -1,10 +1,16 @@
-{ pkgs, config, lib, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 
 with lib;
 
 let
   testcfg = config.services.testService;
-in {
+in
+{
   options = {
     services.testService = {
       enable = mkOption {

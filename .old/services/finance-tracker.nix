@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 with lib;
 let
   cfg = config.services.financeTracker;
@@ -23,7 +28,7 @@ let
     pnpmDeps = pkgs.pnpm.fetchDeps {
       inherit (finalAttrs) pname version src;
       hash = "sha256-8+MOzdiujjjjL6W016kJ718rv/OSetIfThuY2qAcaUo=";
-    # hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+      # hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
     };
 
     buildPhase = ''
@@ -95,9 +100,9 @@ in
 
     systemd.services.refreshTransactions = {
       description = "Refresh Transactions Service";
-        script = ''
-          ${pkgs.curl}/bin/curl "http://0.0.0.0:3000/api/refresh"
-        ''; 
+      script = ''
+        ${pkgs.curl}/bin/curl "http://0.0.0.0:3000/api/refresh"
+      '';
       serviceConfig = {
         Type = "oneshot";
         User = "root";

@@ -1,4 +1,10 @@
-{ config, lib, pkgs, modulesPath, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  modulesPath,
+  ...
+}:
 {
   imports = [
     ./disk-config.nix
@@ -12,17 +18,23 @@
   boot.loader.grub.efiInstallAsRemovable = true;
   #boot.loader.grub.zfsSupport = true;
   boot.supportedFilesystems = [ "zfs" ];
-  boot.zfs.extraPools = [ "zfs1" ];  
+  boot.zfs.extraPools = [ "zfs1" ];
 
   # boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
   # Added these lines to enable the emulation of i686-linux and aarch64-linux
   # To compile packages for these systems, you need to add them to the list of emulated systems.
-  boot.binfmt.emulatedSystems = [ "i686-linux" "aarch64-linux" ];
+  boot.binfmt.emulatedSystems = [
+    "i686-linux"
+    "aarch64-linux"
+  ];
   nix.settings.extra-platforms = config.boot.binfmt.emulatedSystems;
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+
   networking.hostId = "d0a95792";
   networking.hostName = "cumulus"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
@@ -92,7 +104,6 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
   ];
-
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you

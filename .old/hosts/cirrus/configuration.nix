@@ -1,8 +1,9 @@
-{ modulesPath
-, config
-, lib
-, pkgs
-, ...
+{
+  modulesPath,
+  config,
+  lib,
+  pkgs,
+  ...
 }:
 
 {
@@ -16,7 +17,10 @@
 
   boot.loader.grub.enable = true;
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   networking.hostName = "cirrus"; # Define your hostname.
   networking.networkmanager.enable = true;
@@ -35,7 +39,11 @@
           "0.0.0.0"
         ];
 
-        access-control = [ "10.0.0.0/24 allow" "10.100.0.0/24 allow" "192.168.86.0/24 allow" ];
+        access-control = [
+          "10.0.0.0/24 allow"
+          "10.100.0.0/24 allow"
+          "192.168.86.0/24 allow"
+        ];
 
         local-zone = "\"e-clare.com.\" static";
         local-data = [
@@ -56,7 +64,10 @@
   # Wireguard Config
   networking.nat.enable = true;
   networking.nat.externalInterface = "ens18";
-  networking.nat.internalInterfaces = [ "wg0" "wg1" ];
+  networking.nat.internalInterfaces = [
+    "wg0"
+    "wg1"
+  ];
 
   networking.wireguard.interfaces = {
     # "wg0" is the network interface name. You can name the interface arbitrarily.
@@ -143,8 +154,6 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
-
-
 
   networking.firewall = {
     enable = true;

@@ -1,8 +1,9 @@
-{ modulesPath
-, config
-, lib
-, pkgs
-, ...
+{
+  modulesPath,
+  config,
+  lib,
+  pkgs,
+  ...
 }:
 let
   backupPath = "/data/borgbackup";
@@ -18,7 +19,10 @@ in
 
   boot.loader.grub.enable = true;
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   networking.hostName = "cirrustratus"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.

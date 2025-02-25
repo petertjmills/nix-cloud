@@ -1,9 +1,9 @@
-{ 
-  modulesPath, 
-  config, 
-  lib, 
+{
+  modulesPath,
+  config,
+  lib,
   pkgs,
-  ... 
+  ...
 }:
 
 {
@@ -15,15 +15,18 @@
   ];
 
   nixpkgs.overlays = [
-    ( import ../../packages )
+    (import ../../packages)
   ];
 
   boot.loader.grub.enable = true;
-  
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   networking.hostName = "altostratus"; # Define your hostname.
-  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
 
   time.timeZone = "Europe/London";
 
@@ -67,10 +70,13 @@
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 3000 5432 ];
+    allowedTCPPorts = [
+      3000
+      5432
+    ];
   };
 
-  users.users.root.openssh.authorizedKeys.keys=[
+  users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPEhVfbVbix9lPz1+hQAeo7qRtQwIs6+ev22HLa4IiI+ root@cumulus"

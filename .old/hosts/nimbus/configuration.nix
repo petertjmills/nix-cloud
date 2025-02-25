@@ -1,31 +1,51 @@
-{ modulesPath, config, lib, pkgs, ... }:
+{
+  modulesPath,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
-  jellyfin-ffmpeg-overlay = (final: prev: {
-    jellyfin-ffmpeg = prev.jellyfin-ffmpeg.override {
-      ffmpeg_7-full = prev.ffmpeg_7-full.override {
-        withMfx = false;
-        withVpl = true;
+  jellyfin-ffmpeg-overlay = (
+    final: prev: {
+      jellyfin-ffmpeg = prev.jellyfin-ffmpeg.override {
+        ffmpeg_7-full = prev.ffmpeg_7-full.override {
+          withMfx = false;
+          withVpl = true;
+        };
       };
-    };
-  });
+    }
+  );
 in
 {
-  imports =
-    [
-      # Include the results of the hardware scan.
-      ./disk-config.nix
-      (modulesPath + "/profiles/qemu-guest.nix")
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./disk-config.nix
+    (modulesPath + "/profiles/qemu-guest.nix")
+  ];
 
   nixpkgs.overlays = [
     jellyfin-ffmpeg-overlay
   ];
-  boot.initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
-  boot.kernelParams = [ "i915.force_probe=46d1" "i915.enable_guc=2" ];
+  boot.initrd.availableKernelModules = [
+    "ata_piix"
+    "uhci_hcd"
+    "virtio_pci"
+    "virtio_scsi"
+    "sd_mod"
+    "sr_mod"
+  ];
+  boot.kernelParams = [
+    "i915.force_probe=46d1"
+    "i915.enable_guc=2"
+  ];
   boot.loader.grub.enable = true;
   # boot.loader.grub.device = "/dev/sda"; # or "nodev" for efi only
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   networking.hostName = "nimbus"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.

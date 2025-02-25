@@ -1,5 +1,5 @@
-{ 
-  lib, 
+{
+  lib,
   stdenv,
   fetchurl,
   nodejs,
@@ -13,12 +13,14 @@ stdenv.mkDerivation (finalAttrs: {
   pname = "workerd";
   version = "1.20240718.0";
 
-  src = {
-    x86_64-linux = fetchurl {
-      url = "https://github.com/cloudflare/workerd/releases/download/v${finalAttrs.version}/workerd-linux-64.gz";
-      hash = "sha256-qnIQsNKEDTZDnZKFc2LW3phDmJTrHgfbdWWCtqd2k+g=";
-    };
-  }.${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
+  src =
+    {
+      x86_64-linux = fetchurl {
+        url = "https://github.com/cloudflare/workerd/releases/download/v${finalAttrs.version}/workerd-linux-64.gz";
+        hash = "sha256-qnIQsNKEDTZDnZKFc2LW3phDmJTrHgfbdWWCtqd2k+g=";
+      };
+    }
+    .${stdenv.hostPlatform.system} or (throw "Unsupported system: ${stdenv.hostPlatform.system}");
 
   dontUnpack = true;
   dontConfigure = true;

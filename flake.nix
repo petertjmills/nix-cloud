@@ -39,11 +39,6 @@
           source = "registry.terraform.io/lxc/incus";
         };
         provider."incus" = { };
-        # resource."incus_storage_pool"."homeserver_tank" = {
-        #   name = "zfs_tank";
-        #   driver = "zfs";
-        #   source = "tank";
-        # };
 
         resource."incus_storage_pool"."homeserver_lvm" = {
           name = "lvm";
@@ -54,136 +49,186 @@
 
         };
 
-        # resource."incus_storage_volume"."homeserver_zfs_tank_1tb" = {
-        #   name = "zfs_tank_1tb";
-        #   pool = resource."incus_storage_pool"."homeserver_tank".name;
-        #   size = "1TiB";
-        # };
+        resource."incus_storage_volume"."homeserver_zfs_tank_1tb" = {
+          name = "zfs_tank_1tb";
+          pool = "tank";
+          config = {
+            size = "1TiB";
+          };
+        };
+
+        resource."incus_storage_volume"."homeserver_lvm_500gb" = {
+          name = "lvm_500gb";
+          pool = "lvm";
+          config = {
+            size = "500GiB";
+          };
+        };
       };
-
-
 
     in
     {
-      nixosConfigurations = let
-      mkNixosSystem = import ./lib/mk-nixos-system.nix {
-        inherit
-          nixpkgs
-          inputs
-          defaultGateway
-          self
-          ;
-      };
-      in
-      {
-        sky = mkNixosSystem {
-          name = "sky";
-          ip = ipPool 0;
+      nixosConfigurations =
+        let
+          mkNixosSystem = import ./lib/mk-nixos-system.nix {
+            inherit
+              nixpkgs
+              inputs
+              defaultGateway
+              self
+              ;
+          };
+        in
+        {
+          sky = mkNixosSystem {
+            name = "sky";
+            ip = ipPool 0;
 
-          modules = [
-            ./machine/home-server.nix
-            ./modules/zsh.nix
-            ./modules/incus.nix
-          ];
-        };
+            modules = [
+              ./machine/home-server.nix
+              ./modules/zsh.nix
+              ./modules/incus.nix
+            ];
+          };
 
-        cumulus = mkNixosSystem {
-          name = "cumulus";
-          ip = ipPool 1;
-          terranix = {
-            image = "nixos-lxc-base";
-            config = {
-              "boot.autostart" = true;
-              # required to avoid
-              # error: this system does not support the kernel namespaces that are required for sandboxing; use '--no-sandbox' to disable sandboxing
-              "security.nesting" = true;
+          cumulus = mkNixosSystem {
+            name = "cumulus";
+            ip = ipPool 1;
+            terranix = {
+              image = "nixos-lxc-base";
+              config = {
+                "boot.autostart" = true;
+                # required to avoid
+                # error: this system does not support the kernel namespaces that are required for sandboxing; use '--no-sandbox' to disable sandboxing
+                "security.nesting" = true;
+              };
+              limits = {
+                cpu = 2;
+                memory = "4GiB";
+              };
+              device = [
+                {
+                  name = "root";
+                  type = "disk";
+                  properties = {
+                    path = "/";
+                    pool = "lvm";
+                    size = "50GiB";
+                  };
+                }
+              ];
             };
-            limits = {
-              cpu = 2;
-              memory = "4GiB";
-            };
-            device = [
+
+            modules = [
+              ./machine/incus-container.nix
+              ./modules/zsh.nix
+              ./modules/opentofu.nix
               {
-                name = "root";
-                type = "disk";
-                properties = {
-                  path = "/";
-                  pool = "lvm";
-                  size = "50GiB";
-                };
+                environment.systemPackages = [
+                  pkgs.nixd
+                  pkgs.nixfmt-rfc-style
+                  pkgs.incus
+                ];
               }
             ];
           };
 
-          modules = [
-            ./machine/incus-container.nix
-            ./modules/zsh.nix
-            ./modules/opentofu.nix
-            {
-              environment.systemPackages = with pkgs; [
-                pkgs.nixd
-                pkgs.nixfmt-rfc-style
-              ];
-            }
-          ];
-        };
-
-        stratocumulus = mkNixosSystem {
-          name = "stratocumulus";
-          ip = ipPool 2;
-          terranix = {
-            image = "nixos-lxc-base";
-            config = {
-              "boot.autostart" = true;
+          stratocumulus = mkNixosSystem {
+            name = "stratocumulus";
+            ip = ipPool 2;
+            terranix = {
+              image = "nixos-lxc-base";
+              config = {
+                "boot.autostart" = true;
+              };
             };
+
+            modules = [
+              ./machine/incus-container.nix
+              ./modules/dns.nix
+            ];
           };
 
-          modules = [
-            ./machine/incus-container.nix
-            ./modules/dns.nix
-          ];
-        };
+          cumulonimbus = mkNixosSystem {
+            name = "cumulonimbus";
+            ip = ipPool 3;
+            terranix = {
+              image = "nixos-lxc-base";
+              config = { };
+              # {
+              #   storage = {
+              #     pool = "tank";
+              #     source = "zfs_tank_1tb";
+              #     type = "disk";
+              #   };
+              # };
+              device = [
+                {
+                  name = "zfs_storage";
+                  type = "disk";
+                  properties = {
+                    pool = "tank";
+                    source = "zfs_tank_1tb";
+                    path = "/zfs_data";
+                  };
+                }
+                {
+                  name = "lvm_storage";
+                  type = "disk";
+                  properties = {
+                    pool = "lvm";
+                    source = "lvm_500gb";
+                    path = "/lvm_data";
+                  };
+                }
+              ];
+            };
 
-        cumulonimbus = mkNixosSystem {
-          name = "cumulonimbus";
-          ip = ipPool 3;
-          # terranix = {
+            modules = [
+              ./machine/incus-container.nix
+              ./modules/seaweedfs.nix
 
-          #   config = { };
-          #   devices = {
-          #     storage = {
-          #       pool = "tank";
-          #       source = "zfs_tank_1tb";
-          #       type = "disk";
-          #     };
-          #   };
-          # };
+            ];
+          };
 
-          modules = [
-            ./machine/incus-container.nix
-            {
-              fileSystems = {
-                "/data" = {
-                  device = "/dev/disk/by-uuid/a4e5bfd5-b2d7-4b19-b3f9-29f9ba1bc96e";
-                  fsType = "ext4";
-                };
+          nimbostratus = mkNixosSystem {
+            name = "nimbostratus";
+            ip = ipPool 4;
+            terranix = {
+              image = "nixos-vm-base";
+              config = { };
+              limits = {
+                cpu = 2;
+                memory = "4GiB";
               };
-            }
-            ./modules/zsh.nix
-          ];
+              device = [
+                {
+                  name = "gpu";
+                  type = "pci";
+                  properties = {
+                    address = "0000:00:02.0";
+                  };
+                }
+              ];
+            };
+
+            modules = [
+              ./machine/incus-vm.nix
+              # ./modules/zsh.nix
+              ./modules/jellyfin.nix
+            ];
+          };
+
         };
-      };
-
-
 
       apps.x86_64-linux = {
 
         generate-ssh-keys = {
           type = "app";
           program = toString (
-              pkgs.writers.writeBash "push-secrets" (''
-                ${pkgs.python3}/bin/python3 ${./scripts/generate_ssh_keys.py} --output-dir ${secrets-dir} ${builtins.concatStringsSep " " (builtins.attrNames self.nixosConfigurations)}
-              '')
+            pkgs.writers.writeBash "push-secrets" ''
+              ${pkgs.python3}/bin/python3 ${./scripts/generate_ssh_keys.py} --output-dir ${secrets-dir} ${builtins.concatStringsSep " " (builtins.attrNames self.nixosConfigurations)}
+            ''
           );
         };
 
@@ -225,6 +270,10 @@
                 })
               ];
             };
+
+            terranixVms = nixpkgs.lib.filterAttrs (
+              name: config: config._module.specialArgs.terranix != null
+            ) self.nixosConfigurations;
           in
           {
             apply = {
@@ -234,11 +283,49 @@
                   if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
                   cp ${allVMsTerraformConfiguration} config.tf.json
                   ${tofu}/bin/tofu init
+                  ${
+                    # Import all nixos configurations in case they already exist
+                    builtins.concatStringsSep "\n" (
+                      builtins.map (name: ''
+                        ${tofu}/bin/tofu import incus_instance.${name} ${name},image=${
+                          terranixVms.${name}._module.specialArgs.terranix.resource.incus_instance.${name}.image
+                        }
+                      '') (builtins.attrNames terranixVms)
+                    )
+                  }
+
                   ${tofu}/bin/tofu apply
-                  rm -f config.tf.json
+                  # rm -f config.tf.json
                 ''
               );
             };
+
+            plan = {
+              type = "app";
+              program = toString (
+                pkgs.writers.writeBash "plan" ''
+                  if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
+                  cp ${allVMsTerraformConfiguration} config.tf.json
+                  ${tofu}/bin/tofu init
+                  ${tofu}/bin/tofu plan
+                  # rm -f config.tf.json
+                ''
+              );
+            };
+
+            import = {
+              type = "app";
+              program = toString (
+                pkgs.writers.writeBash "import" ''
+                  if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
+                  cp ${allVMsTerraformConfiguration} config.tf.json
+                  ${tofu}/bin/tofu init
+                  ${tofu}/bin/tofu import
+                  # rm -f config.tf.json
+                ''
+              );
+            };
+
             destroy = {
               type = "app";
               program = toString (

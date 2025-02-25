@@ -1,4 +1,10 @@
-{ modulesPath, config, lib, pkgs, ... }:
+{
+  modulesPath,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   jack_delay = pkgs.stdenv.mkDerivation {
     name = "jack_delay";
@@ -33,7 +39,10 @@ in
 
   boot.loader.grub.enable = true;
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   networking.hostName = "nixmusic"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
@@ -61,7 +70,13 @@ in
   musnix.kernel.realtime = true;
   services.jack = {
     jackd.enable = true;
-    jackd.extraOptions = [ "-R" "-d" "alsa" "-d" "hw:USB"];
+    jackd.extraOptions = [
+      "-R"
+      "-d"
+      "alsa"
+      "-d"
+      "hw:USB"
+    ];
     # support ALSA only programs via ALSA JACK PCM plugin
     alsa.enable = false;
     # support ALSA only programs via loopback device (supports programs like Steam)
@@ -75,8 +90,10 @@ in
     };
   };
 
-
-  users.users.root.extraGroups = [ "audio" "jackaudio" ];
+  users.users.root.extraGroups = [
+    "audio"
+    "jackaudio"
+  ];
 
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
