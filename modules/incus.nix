@@ -2,7 +2,6 @@
   pkgs,
   ip,
   defaultGateway,
-  hostname,
   inputs,
   ...
 }:
@@ -54,9 +53,9 @@
       networks = [
         {
           config = {
-            "ipv4.address" = "10.0.0.1/24";
+            "ipv4.address" = "${ip.internalSubnet}";
             "ipv4.dhcp" = "true";
-            "ipv4.dhcp.ranges" = "10.32.241.50-10.32.241.150";
+            # "ipv4.dhcp.ranges" = "10.0.0.5-10.0.0.150";
             "ipv4.nat" = "true";
           };
           name = "incusbr0";
@@ -69,12 +68,7 @@
       profiles = [
         {
           config."agent.nic_config" = true;
-          devices.enp1s0 = {
-            name = "enp1s0";
-            nictype = "routed";
-            parent = "enp1s0";
-            type = "nic";
-          };
+
           devices.root = {
             path = "/";
             pool = "lvm";

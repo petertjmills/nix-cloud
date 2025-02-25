@@ -27,58 +27,27 @@ nixpkgs.lib.nixosSystem {
             image = terranix.image;
             type = if terranix.image == "nixos-lxc-base" then "container" else "virtual-machine";
             config = terranix.config;
-            # For vm's we use cloud-init to configure the network.
-            # if terranix.image == "nixos-vm-base" then
-            #   terranix.config
-            #   // {
-            #     "cloud-init.network-config" = ''
-            #       network:
-            #             version: 2
-            #             ethernets:
-            #               enp1s0:
-            #                 addresses:
-            #                 - ${ip.address}/32
-            #                 nameservers:
-            #                   addresses:
-            #                   - 8.8.8.8
-            #                   - ${inputs.self.nixosConfigurations.stratocumulus._module.specialArgs.ip.address}
-            #     '';
-            #     # on-link above doesn't work because cloud-init can't see netplan, so doesn't use it
-            #     # "cloud-init.user-data" = ''
-            #     #   #cloud-config
-            #     #       runcmd:
-            #     #         - [ip, r, a, default, via, 169.254.0.1, dev, enp1s0, onlink]
-            #     # '';
-            #   }
-            # else
-            #   terranix.config;
             device = (if terranix ? device then terranix.device else [ ]) ++ [
               {
                 name = "enp1s0";
                 type = "nic";
                 properties = {
-                  "ipv4.address" = ip.address;
-                  # "ipv4.gateway" = defaultGateway;
-                  # "ipv4.dhcp" = false;
-                  parent = "enp1s0";
-                  nictype = "routed";
+                  "ipv4.address" = ip.internalIp;
+                  "ipv6.address" = null;
+                  network = "incusbr0";
                   name = "enp1s0";
                 };
               }
             ];
-            # provisioner =
-            #   if terranix.image == "nixos-vm-base" then
-            #     {
-            #       "local-exec" = {
-            #         command = ''
-            #           incus exec ${name} ip addr add ${ip.address}/32 dev enp1s0 && \
-            #           incus exec ${name} ip route add default via 169.254.0.1 dev enp1s0 onlink"
-            #         '';
-            #       };
-            #     }
-            #   else
-            #     null;
+          };
 
+          resource."incus_network_forward"."${name}_forward" = {
+            network = "incusbr0";
+            listen_address = ip.address;
+            config.target_address = ip.internalIp;
+            provisioner."local-exec" = {
+              command = ''ssh root@192.168.86.192 "ip addr add ${ip.address}/24 dev br0"'';
+            };
           };
 
           import = [

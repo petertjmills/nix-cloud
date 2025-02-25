@@ -4,22 +4,7 @@
     "${modulesPath}/virtualisation/incus-virtual-machine.nix"
   ];
 
-  services.resolved.enable = false;
   networking.useDHCP = true;
-  networking.interfaces.enp1s0.ipv4.routes = [
-    {
-      address = "0.0.0.0";
-      prefixLength = 0;
-      via = "169.254.0.1";
-      options.onlink = "";
-    }
-  ];
-
-  # services.cloud-init.enable = true;
-  # services.cloud-init.network.enable = true;
-  # services.cloud-init.extraPackages = with pkgs; [
-  # netplan
-  # ];
 
   virtualisation.incus.agent.enable = true;
   virtualisation.incus.package = pkgs.incus;

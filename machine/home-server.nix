@@ -24,6 +24,8 @@
     "iommu=pt"
     ''vfio-pci.ids="8086:46d1"''
   ];
+  # Or incus will crash the Network interface when vm/container is stopped
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # networking.interfaces.enp1s0.ipv4.addresses = [
   #   {

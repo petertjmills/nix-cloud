@@ -4,7 +4,6 @@
     "${modulesPath}/virtualisation/lxc-container.nix"
   ];
 
-  services.resolved.enable = false;
   networking.useDHCP = true;
 
   virtualisation.incus.agent.enable = true;

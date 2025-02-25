@@ -1,41 +1,53 @@
 # Function that takes a subnet and returns a new function
-subnet:
+subnet: internalSubnet:
 let
-  # Split the subnet into address and prefix parts
-  parts = builtins.split "/" subnet;
-  address = builtins.elemAt parts 0;
-  prefix = builtins.fromJSON (builtins.elemAt parts 2);
-
-  # Split IP address into octets
-  octets = builtins.split "[.]" address;
-
-  # Convert IP to integer
-  ipToInt =
+  calculateNetwork =
+    subnet:
     let
-      oct0 = builtins.fromJSON (builtins.elemAt octets 0);
-      oct1 = builtins.fromJSON (builtins.elemAt octets 2);
-      oct2 = builtins.fromJSON (builtins.elemAt octets 4);
-      oct3 = builtins.fromJSON (builtins.elemAt octets 6);
-    in
-    (oct0 * 16777216) + (oct1 * 65536) + (oct2 * 256) + oct3;
+      # Split the subnet into address and prefix parts
+      parts = builtins.split "/" subnet;
+      address = builtins.elemAt parts 0;
+      prefix = builtins.fromJSON (builtins.elemAt parts 2);
 
-  # Calculate subnet size (total addresses)
-  subnetSize =
-    let
-      exp = 32 - prefix;
-      # Manually calculate 2^exp
-      power = builtins.foldl' (x: y: x * 2) 1 (builtins.genList (x: x) exp);
-    in
-    power;
+      # Split IP address into octets
+      octets = builtins.split "[.]" address;
 
-  # Calculate network address (floor to subnet boundary)
-  network =
-    let
-      # Integer division by subnet size then multiply back
-      factor = ipToInt / subnetSize;
-    in
-    factor * subnetSize;
+      # Convert IP to integer
+      ipToInt =
+        let
+          oct0 = builtins.fromJSON (builtins.elemAt octets 0);
+          oct1 = builtins.fromJSON (builtins.elemAt octets 2);
+          oct2 = builtins.fromJSON (builtins.elemAt octets 4);
+          oct3 = builtins.fromJSON (builtins.elemAt octets 6);
+        in
+        (oct0 * 16777216) + (oct1 * 65536) + (oct2 * 256) + oct3;
 
+      # Calculate subnet size (total addresses)
+      subnetSize =
+        let
+          exp = 32 - prefix;
+          # Manually calculate 2^exp
+          power = builtins.foldl' (x: y: x * 2) 1 (builtins.genList (x: x) exp);
+        in
+        power;
+
+      # Calculate network address (floor to subnet boundary)
+      network =
+        let
+          # Integer division by subnet size then multiply back
+          factor = ipToInt / subnetSize;
+        in
+        factor * subnetSize;
+    in
+    {
+      inherit network subnetSize;
+    };
+
+  calc = calculateNetwork subnet;
+  network = calc.network;
+  subnetSize = calc.subnetSize;
+
+  internalNetwork = calculateNetwork internalSubnet;
   # Calculate broadcast address
   # broadcast = network + subnetSize - 1;
 
@@ -89,4 +101,8 @@ index:
 
   # Return total available addresses in subnet
   totalAddresses = subnetSize;
+
+  # Return an internal IP based on the internalSubnet
+  internalIp = intToIp (internalNetwork.network + index + 1);
+  internalSubnet = internalSubnet;
 }

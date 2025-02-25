@@ -29,10 +29,9 @@
           {
             "name": "enp1s0",
             "properties": {
-              "ipv4.address": "192.168.86.195",
+              "ipv4.address": "10.0.0.4",
               "name": "enp1s0",
-              "nictype": "routed",
-              "parent": "enp1s0"
+              "network": "incusbr0"
             },
             "type": "nic"
           }
@@ -59,10 +58,9 @@
           {
             "name": "enp1s0",
             "properties": {
-              "ipv4.address": "192.168.86.193",
+              "ipv4.address": "10.0.0.2",
               "name": "enp1s0",
-              "nictype": "routed",
-              "parent": "enp1s0"
+              "network": "incusbr0"
             },
             "type": "nic"
           }
@@ -84,10 +82,9 @@
           {
             "name": "enp1s0",
             "properties": {
-              "ipv4.address": "192.168.86.196",
+              "ipv4.address": "10.0.0.5",
               "name": "enp1s0",
-              "nictype": "routed",
-              "parent": "enp1s0"
+              "network": "incusbr0"
             },
             "type": "nic"
           }
@@ -104,10 +101,9 @@
           {
             "name": "enp1s0",
             "properties": {
-              "ipv4.address": "192.168.86.194",
+              "ipv4.address": "10.0.0.3",
               "name": "enp1s0",
-              "nictype": "routed",
-              "parent": "enp1s0"
+              "network": "incusbr0"
             },
             "type": "nic"
           }
@@ -115,6 +111,56 @@
         "image": "nixos-lxc-base",
         "name": "stratocumulus",
         "type": "container"
+      }
+    },
+    "incus_network_forward": {
+      "cumulonimbus_forward": {
+        "config": {
+          "target_address": "10.0.0.4"
+        },
+        "listen_address": "192.168.86.195",
+        "network": "incusbr0",
+        "provisioner": {
+          "local-exec": {
+            "command": "ssh root@192.168.86.192 \"ip addr add 192.168.86.195/24 dev br0\""
+          }
+        }
+      },
+      "cumulus_forward": {
+        "config": {
+          "target_address": "10.0.0.2"
+        },
+        "listen_address": "192.168.86.193",
+        "network": "incusbr0",
+        "provisioner": {
+          "local-exec": {
+            "command": "ssh root@192.168.86.192 \"ip addr add 192.168.86.193/24 dev br0\""
+          }
+        }
+      },
+      "nimbostratus_forward": {
+        "config": {
+          "target_address": "10.0.0.5"
+        },
+        "listen_address": "192.168.86.196",
+        "network": "incusbr0",
+        "provisioner": {
+          "local-exec": {
+            "command": "ssh root@192.168.86.192 \"ip addr add 192.168.86.196/24 dev br0\""
+          }
+        }
+      },
+      "stratocumulus_forward": {
+        "config": {
+          "target_address": "10.0.0.3"
+        },
+        "listen_address": "192.168.86.194",
+        "network": "incusbr0",
+        "provisioner": {
+          "local-exec": {
+            "command": "ssh root@192.168.86.192 \"ip addr add 192.168.86.194/24 dev br0\""
+          }
+        }
       }
     },
     "incus_storage_pool": {

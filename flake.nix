@@ -27,8 +27,10 @@
     }@inputs:
     let
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
-      ipPool = import ./lib/ip-calculator.nix "192.168.86.192/26";
+
       defaultGateway = "192.168.86.1";
+      internalSubnet = "10.0.0.1/24";
+      ipPool = import ./lib/ip-calculator.nix "192.168.86.192/26" internalSubnet;
 
       # Relative path, because secrets are mounted at /mnt/secrets
       # in the luks usb drive on the host
@@ -76,6 +78,7 @@
               inputs
               defaultGateway
               self
+              internalSubnet
               ;
           };
         in
@@ -216,6 +219,24 @@
               ./machine/incus-vm.nix
               # ./modules/zsh.nix
               ./modules/jellyfin.nix
+              {
+                fileSystems."zfs-media" = {
+                  device = "zfsdata";
+                  mountPoint = "/zfsdata";
+                  fsType = "fuse./run/current-system/sw/bin/s3fs";
+                  noCheck = true;
+                  # TODO: change address
+                  options = [
+                    "allow_other"
+                    "use_path_request_style"
+                    "url=http://10.0.0.4:8333"
+                  ];
+                };
+
+                environment.systemPackages = [
+                  pkgs.s3fs
+                ];
+              }
             ];
           };
 
