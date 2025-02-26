@@ -9,7 +9,7 @@
   # Disable wireless networking, as this breaks the use of networkmanager when building the ISO
   networking.wireless.enable = false;
 
-  networking.useDHCP = false;
+  # networking.useDHCP = false;
   networking.hostName = hostname;
   # networking.defaultGateway = defaultGateway;
   networking.nameservers = [

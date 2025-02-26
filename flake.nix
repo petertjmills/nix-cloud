@@ -201,7 +201,7 @@
               image = "nixos-vm-base";
               config = { };
               limits = {
-                cpu = 2;
+                cpu = 4;
                 memory = "4GiB";
               };
               device = [
@@ -212,6 +212,15 @@
                     address = "0000:00:02.0";
                   };
                 }
+                {
+                  name = "root";
+                  type = "disk";
+                  properties = {
+                    path = "/";
+                    pool = "lvm";
+                    size = "50GiB";
+                  };
+                }
               ];
             };
 
@@ -219,24 +228,41 @@
               ./machine/incus-vm.nix
               # ./modules/zsh.nix
               ./modules/jellyfin.nix
-              {
-                fileSystems."zfs-media" = {
-                  device = "zfsdata";
-                  mountPoint = "/zfsdata";
-                  fsType = "fuse./run/current-system/sw/bin/s3fs";
-                  noCheck = true;
-                  # TODO: change address
-                  options = [
-                    "allow_other"
-                    "use_path_request_style"
-                    "url=http://10.0.0.4:8333"
+              ./modules/seaweedfs.nix
+              (
+                { ... }:
+                {
+                  services.seaweedfs = {
+                    enable = true;
+                    group = "media";
+                    mount = {
+                      enable = true;
+                      instances = [
+                        {
+                          name = "zfsmedia";
+                          mountPoint = "/zfsmedia";
+                          path = "/buckets/zfs-media";
+                          filerAddress = "10.0.0.4:8888";
+                        }
+                        {
+                          name = "lvmmedia";
+                          mountPoint = "/lvmmedia";
+                          path = "/buckets/lvm-media";
+                          filerAddress = "10.0.0.4:8888";
+                        }
+                      ];
+                    };
+                  };
+                  swapDevices = [
+                    {
+                      device = "/swapfile";
+                      # 4gb
+                      size = 4 * 1024;
+                      randomEncryption.enable = true;
+                    }
                   ];
-                };
-
-                environment.systemPackages = [
-                  pkgs.s3fs
-                ];
-              }
+                }
+              )
             ];
           };
 

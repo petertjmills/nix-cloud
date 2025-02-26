@@ -55,17 +55,22 @@ in
       onevpl-intel-gpu
     ];
   };
+  # add jellyfin user to media group
+  users.users.jellyfin.extraGroups = [ "media" ];
+
   services.jellyfin = {
     enable = true;
     openFirewall = true;
+    dataDir = "/lvmmedia/jellyfin";
+    configDir = "/lvmmedia/jellyfin/config";
     # group="render";
   };
   services.transmission = {
     enable = true;
     openFirewall = true;
     settings = {
-      download-dir = "/data/transmission";
-      incomplete-dir = "/data/transmission/incomplete";
+      download-dir = "/lvmmedia/transmission";
+      incomplete-dir = "/lvmmedia/transmission/incomplete";
       rpc-bind-address = "0.0.0.0";
       rpc-enabled = true;
       rpc-whitelist-enabled = false;

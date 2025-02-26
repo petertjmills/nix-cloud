@@ -37,6 +37,7 @@
           }
         ],
         "image": "nixos-lxc-base",
+        "limits": {},
         "name": "cumulonimbus",
         "type": "container"
       },
@@ -66,6 +67,10 @@
           }
         ],
         "image": "nixos-lxc-base",
+        "limits": {
+          "cpu": 2,
+          "memory": "4GiB"
+        },
         "name": "cumulus",
         "type": "container"
       },
@@ -80,6 +85,15 @@
             "type": "pci"
           },
           {
+            "name": "root",
+            "properties": {
+              "path": "/",
+              "pool": "lvm",
+              "size": "50GiB"
+            },
+            "type": "disk"
+          },
+          {
             "name": "enp1s0",
             "properties": {
               "ipv4.address": "10.0.0.5",
@@ -90,6 +104,10 @@
           }
         ],
         "image": "nixos-vm-base",
+        "limits": {
+          "cpu": 4,
+          "memory": "4GiB"
+        },
         "name": "nimbostratus",
         "type": "virtual-machine"
       },
@@ -109,6 +127,7 @@
           }
         ],
         "image": "nixos-lxc-base",
+        "limits": {},
         "name": "stratocumulus",
         "type": "container"
       }

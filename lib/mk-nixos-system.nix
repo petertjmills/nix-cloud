@@ -27,6 +27,7 @@ nixpkgs.lib.nixosSystem {
             image = terranix.image;
             type = if terranix.image == "nixos-lxc-base" then "container" else "virtual-machine";
             config = terranix.config;
+            limits = if terranix ? limits then terranix.limits else { };
             device = (if terranix ? device then terranix.device else [ ]) ++ [
               {
                 name = "enp1s0";
