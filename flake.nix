@@ -266,6 +266,12 @@
             ];
           };
 
+          cirrus = mkNixosSystem {
+            name = "cirrus";
+            ip = ipPool 5;
+            modules = [ ];
+          };
+
         };
 
       apps.x86_64-linux = {
