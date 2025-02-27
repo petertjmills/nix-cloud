@@ -132,6 +132,8 @@
                   pkgs.nixfmt-rfc-style
                   pkgs.incus
                 ];
+                boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+
               }
             ];
           };
@@ -149,6 +151,7 @@
             modules = [
               ./machine/incus-container.nix
               ./modules/dns.nix
+              ./modules/wireguard.nix
             ];
           };
 
@@ -269,7 +272,10 @@
           cirrus = mkNixosSystem {
             name = "cirrus";
             ip = ipPool 5;
-            modules = [ ];
+            modules = [
+              ./machine/hetzner.nix
+              ./modules/cirrus-wireguard.nix
+            ];
           };
 
         };

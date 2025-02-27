@@ -1,8 +1,17 @@
 keys:
   - &server_sky age1l6lupjuy7tuaw6nf3dk82074wd272x9lrxxkmah06savqf6u7etqfrqv8l
   - &server_cumulus age1fmk04uk2gknhjkchdlffqzfvjrt554s6tucncv6uyncjng9frc4qu5pz9r
+  - &server_stratocumulus age1yumjth80fa8hwdegsyvak3yrt26nqmyx4vsxvl0qd3hvt2a0mgwsggu6an
+  - &server_cirrus age169kmx96fpk4quhmst7yn9lqvasd7dd4uk7h2e3kv8lzvq0ykashqaz4wsw
 
 creation_rules:
+  - path_regex: secrets/wireguard.yaml$
+    key_groups:
+      - age:
+          - *server_sky
+          - *server_cumulus
+          - *server_stratocumulus
+          - *server_cirrus
   - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
     key_groups:
       - age:

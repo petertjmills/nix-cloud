@@ -9,6 +9,7 @@
   ip,
   terranix ? null,
   modules ? null,
+  type ? "incus_instance",
 }:
 nixpkgs.lib.nixosSystem {
   specialArgs = {
@@ -22,7 +23,7 @@ nixpkgs.lib.nixosSystem {
         null
       else
         {
-          resource."incus_instance"."${name}" = {
+          resource."${type}"."${name}" = {
             name = name;
             image = terranix.image;
             type = if terranix.image == "nixos-lxc-base" then "container" else "virtual-machine";

@@ -1,8 +1,20 @@
-{ pkgs, config, ... }:
+{
+  pkgs,
+  config,
+  hostname,
+  ...
+}:
 {
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
   };
+
+  sops.defaultSopsFile = ../secrets/wireguard.yaml;
+  sops.age.sshKeyPaths = [ "/root/.ssh/id_ed25519" ];
+  sops.age.generateKey = true;
+
+  sops.secrets."${hostname}/private_key" = { };
+  sops.secrets."${hostname}/public_key" = { };
 
   networking.nat.enable = true;
   networking.nat.externalInterface = "enp1s0";
@@ -12,6 +24,7 @@
     wg0 = {
       # Determines the IP address and subnet of the server's end of the tunnel interface.
       ips = [ "10.100.0.2/24" ];
+      privateKeyFile = config.sops.secrets."${hostname}/private_key".path;
 
       # The port that WireGuard listens to. Must be accessible by the client.
       listenPort = 9696;
@@ -28,12 +41,18 @@
 
       peers = [
         {
-          publicKey = "UgKxWdYS4MxE8uKW+7gJwHRtnwm7GhIVzY8N7SBYqnc=";
+          publicKey = "H+RLWriegaZZTb+bb1FiugcxAOwFsJ7pIrYnBPMKDS4=";
           allowedIPs = [ "10.100.0.0/24" ];
-          endpoint = "162.55.216.236:51820";
+          endpoint = "167.235.63.14:9696";
           persistentKeepalive = 25;
         }
       ];
     };
+  };
+
+  networking.firewall = {
+    allowedUDPPorts = [
+      9696
+    ];
   };
 }
