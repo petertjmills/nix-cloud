@@ -20,7 +20,7 @@
   ];
   boot.initrd.kernelModules = [ ];
   boot.kernelParams = [ ];
-  nixpkgs.hostPlatform = "aarch64-linux";
+  # nixpkgs.hostPlatform = "aarch64-linux";
   boot.loader.grub.enable = true;
   # Required for Hetzner UEFI boot.
   boot.loader.grub.efiSupport = true;

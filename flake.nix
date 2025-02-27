@@ -271,6 +271,7 @@
 
           cirrus = mkNixosSystem {
             name = "cirrus";
+            system = "aarch64-linux";
             ip = ipPool 5;
             modules = [
               ./machine/hetzner.nix

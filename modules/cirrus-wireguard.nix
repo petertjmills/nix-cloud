@@ -54,6 +54,18 @@
               "10.100.0.3/32"
             ];
           }
+          {
+            publicKey = "lXrFERVJigqYUm1TaDLAUqOW5AKayZL32qzLnzzEKy4=";
+            allowedIPs = [
+              "10.100.0.4/32"
+            ];
+          }
+          {
+            publicKey = "tiiXzAYDtaFHxCpfNJXjoQA6dDLIUeytaMTQZ0xN9Vo=";
+            allowedIPs = [
+              "10.100.0.5/32"
+            ];
+          }
         ];
       };
     };
