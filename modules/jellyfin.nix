@@ -64,10 +64,12 @@ in
     dataDir = "/lvmmedia/jellyfin";
     configDir = "/lvmmedia/jellyfin/config";
     # group="render";
+    group = "media";
   };
   services.transmission = {
     enable = true;
     openFirewall = true;
+    group = "media";
     settings = {
       download-dir = "/lvmmedia/transmission";
       incomplete-dir = "/lvmmedia/transmission/incomplete";
@@ -80,6 +82,7 @@ in
   services.radarr = {
     enable = true;
     openFirewall = true;
+    group = "media";
   };
   services.prowlarr = {
     enable = true;

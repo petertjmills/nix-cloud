@@ -28,7 +28,7 @@
         privateKeyFile = config.sops.secrets."${hostname}/private_key".path;
 
         # The port that WireGuard listens to. Must be accessible by the client.
-        listenPort = 9696;
+        listenPort = 51820;
 
         postSetup = ''
           ${pkgs.iptables}/bin/iptables --append FORWARD --in-interface wg0 --jump ACCEPT

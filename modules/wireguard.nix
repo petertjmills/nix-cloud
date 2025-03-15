@@ -29,6 +29,8 @@
       # The port that WireGuard listens to. Must be accessible by the client.
       listenPort = 9696;
 
+      mtu = 1420-8;
+
       postSetup = ''
         ${pkgs.iptables}/bin/iptables --append FORWARD --in-interface wg0 --jump ACCEPT
         ${pkgs.iptables}/bin/iptables --append FORWARD --out-interface wg0 --jump ACCEPT
@@ -43,8 +45,8 @@
         {
           publicKey = "H+RLWriegaZZTb+bb1FiugcxAOwFsJ7pIrYnBPMKDS4=";
           allowedIPs = [ "10.100.0.0/24" ];
-          endpoint = "167.235.63.14:9696";
-          persistentKeepalive = 25;
+          endpoint = "167.235.63.14:51820";
+          persistentKeepalive = 10;
         }
       ];
     };

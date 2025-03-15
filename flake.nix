@@ -278,7 +278,6 @@
               ./modules/cirrus-wireguard.nix
             ];
           };
-
         };
 
       apps.x86_64-linux = {
