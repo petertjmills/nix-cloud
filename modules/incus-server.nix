@@ -1,4 +1,10 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 with lib;
 
@@ -6,17 +12,25 @@ let
   cfg = config.services.incusServer;
 
   # Helper function to create images
-  mkImage = inputs: { name, module }: rec {
-    inherit name;
-    nixosConfig = inputs.nixpkgs.lib.nixosSystem {
-      modules = [
-        module
-      ];
-    };
-    build = nixosConfig.config.system.build;
-  };
+  mkImage =
+    {
+      name,
+      module,
+      ...
+    }:
+    rec {
+      inherit name;
+      nixosConfig = inputs.nixpkgs.lib.nixosSystem {
+        modules = [
+          module
+        ];
+      };
+      build = nixosConfig.config.system.build;
 
-in {
+    };
+
+in
+{
   options.services.incusServer = {
     enable = mkEnableOption "Incus container server";
 
@@ -83,29 +97,26 @@ in {
       default = true;
     };
 
-    inputs = mkOption {
-      type = types.attrs;
-      description = "Nix flake inputs";
-    };
-
     images = mkOption {
-      type = types.attrsOf (types.submodule {
-        options = {
-          name = mkOption {
-            type = types.str;
-            description = "Image name";
+      type = types.listOf (
+        types.submodule {
+          options = {
+            name = mkOption {
+              type = types.str;
+              description = "Image name";
+            };
+            module = mkOption {
+              type = types.path;
+              description = "Path to the image module";
+            };
+            script = mkOption {
+              type = types.anything;
+              description = "Script to run to import the image";
+            };
           };
-          module = mkOption {
-            type = types.path;
-            description = "Path to the image module";
-          };
-          script = mkOption {
-            type = types.str;
-            description = "Script to run to import the image";
-          };
-        };
-      });
-      default = {};
+        }
+      );
+      default = { };
       description = "Images to create";
     };
   };
@@ -169,7 +180,7 @@ in {
             type = "bridge";
           }
         ];
-        storage_pools = [];
+        storage_pools = [ ];
         profiles = [
           {
             config."agent.nic_config" = true;
@@ -184,21 +195,28 @@ in {
       };
     };
 
-    systemd.services = mapAttrs' (name: image: let
-        imageObj = mkImage cfg.inputs image;
-        serviceName = "incus-import-image-${name}";
-      in {
-        name = serviceName;
-        value = {
-          enable = true;
-          wantedBy = [ "multi-user.target" ];
-          after = [ "network.target" ];
-          serviceConfig = {
-            Type = "oneshot";
-            ExecStart = "${image.script} ${imageObj.build}";
+    systemd.services = builtins.listToAttrs (
+      map (
+        image:
+        let
+          imageObj = mkImage image;
+          serviceName = "incus-import-image-${image.name}";
+          importScript = image.script imageObj;
+        in
+        {
+          name = serviceName;
+          value = {
+            enable = true;
+            wantedBy = [ "multi-user.target" ];
+            after = [ "network.target" ];
+            serviceConfig = {
+              Type = "oneshot";
+              ExecStart = "${importScript}";
+            };
+            description = "Import Incus image ${image.name}";
           };
-          description = "Import Incus image ${image.name}";
-        };
-      }) cfg.images;
+        }
+      ) cfg.images
+    );
   };
 }

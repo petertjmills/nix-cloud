@@ -1,5 +1,9 @@
 # Function that takes a subnet and returns a new function
-subnet: internalSubnet:
+{
+  defaultGateway,
+  subnet,
+  internalSubnet ? "10.0.0.1/24",
+}:
 let
   calculateNetwork =
     subnet:
@@ -84,6 +88,7 @@ index:
 # resultIp = intToIp (network + index);
 # in
 {
+  inherit defaultGateway;
   # Return the IP address for this index
   address = intToIp (network + index);
 

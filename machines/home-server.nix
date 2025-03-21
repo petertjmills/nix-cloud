@@ -1,12 +1,10 @@
 {
-  inputs,
-  ip,
-  defaultGateway,
   pkgs,
+  lib,
   ...
 }:
 {
-  imports = [ inputs.disko.nixosModules.disko ];
+  imports = [ ];
 
   boot.loader.grub.enable = true;
   boot.loader.grub.efiSupport = true;
@@ -84,4 +82,6 @@
       };
     };
   };
+
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }

@@ -1,18 +1,26 @@
 {
   modulesPath,
   pkgs,
+  lib,
   inputs,
   config,
   ...
 }:
 {
+  options.ip = lib.mkOption {
+    type = lib.types.str;
+    default = "";
+    description = "The IP address of the container";
+  };
+
   imports = [
     "${modulesPath}/virtualisation/lxc-container.nix"
     ../modules/terranix.nix
   ];
-
-  terranix.resource."incus_instance"."${config.networking.hostname}" = {
-        name = "${config.networking.hostname}";
+  config = {
+    terranix.resource = {
+      "incus_instance"."${config.networking.hostName}" = {
+        name = "${config.networking.hostName}";
         image = "nixos-lxc-base";
         config = {
           "boot.autostart" = true;
@@ -30,10 +38,13 @@
             };
           }
         ];
+      };
     };
+
+    virtualisation.incus.agent.enable = true;
+    virtualisation.incus.package = pkgs.incus;
+    networking.interfaces.enp1s0.useDHCP = true;
+    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   };
 
-  virtualisation.incus.agent.enable = true;
-  virtualisation.incus.package = pkgs.incus;
-  networking.interfaces.enp1s0.useDHCP = true;
 }

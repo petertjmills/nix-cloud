@@ -28,9 +28,13 @@
     let
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
 
-      defaultGateway = "192.168.86.1";
-      internalSubnet = "10.0.0.1/24";
-      ipPool = import ./lib/ip-calculator.nix "192.168.86.192/26" internalSubnet;
+      # defaultGateway = "192.168.86.1";
+      # internalSubnet = "10.0.0.1/24";
+      ipPool = import ./lib/ip-calculator.nix {
+        defaultGateway = "192.168.86.1";
+        subnet = "192.168.86.192/32";
+        internalSubnet = "10.0.0.1/24";
+      };
 
       # Relative path, because secrets are mounted at /mnt/secrets
       # in the luks usb drive on the host
@@ -69,7 +73,14 @@
 
     in
     {
-      nixosConfigurations = import ./hosts { inherit nixpkgs; };
+      nixosConfigurations = import ./hosts {
+        inherit
+          nixpkgs
+          ipPool
+          inputs
+          self
+          ;
+      };
 
       apps.x86_64-linux = {
 
