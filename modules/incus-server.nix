@@ -211,7 +211,7 @@ in
             after = [ "network.target" ];
             serviceConfig = {
               Type = "oneshot";
-              ExecStart = "${importScript}";
+              ExecStart = pkgs.writers.writeBash "import-script" "${importScript}";
             };
             description = "Import Incus image ${image.name}";
           };

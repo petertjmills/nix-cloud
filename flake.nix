@@ -123,18 +123,15 @@
           let
             system = "x86_64-linux";
             tofu = import ./packages/opentofu.nix { inherit pkgs; };
-            allVMsTerraformConfiguration = terranix.lib.terranixConfiguration {
+            terraformConfiguration = terranix.lib.terranixConfiguration {
               inherit system;
               modules = [
-                (import ./lib/terranix-utils.nix {
-                  inherit nixpkgs terranix-storage self;
-                })
+                (nixpkgs.lib.attrsets.foldlAttrs (acc: name: value: {
+                  terranixM = (nixpkgs.lib.attrsets.recursiveUpdate acc.terranixM (value.config.terranix or { }));
+                }) { terranixM = { }; } self.nixosConfigurations).terranixM
               ];
             };
 
-            terranixVms = nixpkgs.lib.filterAttrs (
-              name: config: config._module.specialArgs.terranix != null
-            ) self.nixosConfigurations;
           in
           {
             apply = {
@@ -142,19 +139,7 @@
               program = toString (
                 pkgs.writers.writeBash "apply" ''
                   if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
-                  cp ${allVMsTerraformConfiguration} config.tf.json
-                  ${tofu}/bin/tofu init
-                  ${
-                    # Import all nixos configurations in case they already exist
-                    builtins.concatStringsSep "\n" (
-                      builtins.map (name: ''
-                        ${tofu}/bin/tofu import incus_instance.${name} ${name},image=${
-                          terranixVms.${name}._module.specialArgs.terranix.resource.incus_instance.${name}.image
-                        }
-                      '') (builtins.attrNames terranixVms)
-                    )
-                  }
-
+                  cp ${terraformConfiguration} config.tf.json
                   ${tofu}/bin/tofu apply
                   # rm -f config.tf.json
                 ''
@@ -166,7 +151,7 @@
               program = toString (
                 pkgs.writers.writeBash "plan" ''
                   if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
-                  cp ${allVMsTerraformConfiguration} config.tf.json
+                  cp ${terraformConfiguration} config.tf.json
                   ${tofu}/bin/tofu init
                   ${tofu}/bin/tofu plan
                   # rm -f config.tf.json
@@ -179,7 +164,7 @@
               program = toString (
                 pkgs.writers.writeBash "import" ''
                   if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
-                  cp ${allVMsTerraformConfiguration} config.tf.json
+                  cp ${terraformConfiguration} config.tf.json
                   ${tofu}/bin/tofu init
                   ${tofu}/bin/tofu import
                   # rm -f config.tf.json
@@ -192,7 +177,7 @@
               program = toString (
                 pkgs.writers.writeBash "destroy" ''
                   if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
-                  cp ${allVMsTerraformConfiguration} config.tf.json
+                  cp ${terraformConfiguration} config.tf.json
                   ${tofu}/bin/terraform destroy
                   rm -f config.tf.json
                 ''

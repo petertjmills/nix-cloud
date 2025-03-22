@@ -86,13 +86,13 @@ in
     };
 
     # Other common Terraform sections that might be needed
-    data = mergeAttrs [ "data" ];
-    provider = mergeAttrs [ "provider" ];
-    module = mergeAttrs [ "module" ];
-    output = mergeAttrs [ "output" ];
-    variable = mergeAttrs [ "variable" ];
-    locals = mergeAttrs [ "locals" ];
-    terraform = mergeAttrs [ "terraform" ];
+    # data = mergeAttrs [ "data" ];
+    # provider = mergeAttrs [ "provider" ];
+    # module = mergeAttrs [ "module" ];
+    # output = mergeAttrs [ "output" ];
+    # variable = mergeAttrs [ "variable" ];
+    # locals = mergeAttrs [ "locals" ];
+    # terraform = mergeAttrs [ "terraform" ];
   };
 
   config = {

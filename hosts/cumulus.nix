@@ -41,5 +41,4 @@
     pkgs.just
   ];
   boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
-
 }
