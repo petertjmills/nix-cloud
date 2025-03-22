@@ -44,6 +44,10 @@
     virtualisation.incus.agent.enable = true;
     virtualisation.incus.package = pkgs.incus;
     networking.interfaces.enp1s0.useDHCP = true;
+    networking.nameservers = [
+      "1.1.1.1"
+    ];
+
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   };
 
