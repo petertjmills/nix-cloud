@@ -82,6 +82,16 @@
           ;
       };
 
+      terraformConfiguration = terranix.lib.terranixConfiguration {
+        system = "x86_64-linux";
+        modules = [
+          (nixpkgs.lib.attrsets.foldlAttrs (acc: name: value: {
+            terranixM = (nixpkgs.lib.attrsets.recursiveUpdate acc.terranixM (value.config.terranix or { }));
+          }) { terranixM = { }; } self.nixosConfigurations).terranixM
+          terranix-storage
+        ];
+      };
+
       apps.x86_64-linux = {
 
         generate-ssh-keys = {
@@ -119,72 +129,17 @@
           );
         };
 
-        terranix-config =
-          let
-            system = "x86_64-linux";
-            tofu = import ./packages/opentofu.nix { inherit pkgs; };
-            terraformConfiguration = terranix.lib.terranixConfiguration {
-              inherit system;
-              modules = [
-                (nixpkgs.lib.attrsets.foldlAttrs (acc: name: value: {
-                  terranixM = (nixpkgs.lib.attrsets.recursiveUpdate acc.terranixM (value.config.terranix or { }));
-                }) { terranixM = { }; } self.nixosConfigurations).terranixM
-              ];
-            };
-
-          in
-          {
-            apply = {
-              type = "app";
-              program = toString (
-                pkgs.writers.writeBash "apply" ''
-                  if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
-                  cp ${terraformConfiguration} config.tf.json
-                  ${tofu}/bin/tofu apply
-                  # rm -f config.tf.json
-                ''
-              );
-            };
-
-            plan = {
-              type = "app";
-              program = toString (
-                pkgs.writers.writeBash "plan" ''
-                  if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
-                  cp ${terraformConfiguration} config.tf.json
-                  ${tofu}/bin/tofu init
-                  ${tofu}/bin/tofu plan
-                  # rm -f config.tf.json
-                ''
-              );
-            };
-
-            import = {
-              type = "app";
-              program = toString (
-                pkgs.writers.writeBash "import" ''
-                  if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
-                  cp ${terraformConfiguration} config.tf.json
-                  ${tofu}/bin/tofu init
-                  ${tofu}/bin/tofu import
-                  # rm -f config.tf.json
-                ''
-              );
-            };
-
-            destroy = {
-              type = "app";
-              program = toString (
-                pkgs.writers.writeBash "destroy" ''
-                  if [[ -e config.tf.json ]]; then rm -f config.tf.json; fi
-                  cp ${terraformConfiguration} config.tf.json
-                  ${tofu}/bin/terraform destroy
-                  rm -f config.tf.json
-                ''
-              );
-            };
-          };
-
+        terranix-config = (
+          import ./apps/terranix-config.nix {
+            inherit
+              terranix
+              pkgs
+              nixpkgs
+              terranix-storage
+              self
+              ;
+          }
+        );
       };
 
     };

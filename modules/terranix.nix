@@ -69,14 +69,14 @@ in
                   itself, and can be found in the module documentation.
                 '';
               };
-            options = {
-              device = mkOption {
-                type = deviceListType;
-                default = [ ];
-                description = "Device configurations";
-              };
-              # All other attributes will be merged automatically
-            };
+            # options = {
+            #   device = mkOption {
+            #     type = deviceListType;
+            #     default = [ ];
+            #     description = "Device configurations";
+            #   };
+            #   # All other attributes will be merged automatically
+            # };
           }
         )
 

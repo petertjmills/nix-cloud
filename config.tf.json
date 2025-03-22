@@ -1,0 +1,107 @@
+{
+  "provider": {
+    "incus": {}
+  },
+  "resource": {
+    "incus_instance": {
+      "cumulus": {
+        "config": {
+          "boot.autostart": true,
+          "security.nesting": true
+        },
+        "device": [
+          {
+            "name": "root",
+            "properties": {
+              "path": "/",
+              "pool": "lvm",
+              "size": "50GiB"
+            },
+            "type": "disk"
+          },
+          {
+            "name": "enp1s0",
+            "properties": {
+              "ipv4.address": "10.0.0.2",
+              "name": "enp1s0",
+              "network": "incusbr0"
+            },
+            "type": "nic"
+          }
+        ],
+        "image": "nixos-lxc-base",
+        "limits": {
+          "cpu": 2,
+          "memory": "4GiB"
+        },
+        "name": "cumulus"
+      },
+      "stratocumulus": {
+        "config": {
+          "boot.autostart": true
+        },
+        "device": [
+          {
+            "name": "enp1s0",
+            "properties": {
+              "ipv4.address": "10.0.0.3",
+              "name": "enp1s0",
+              "network": "incusbr0"
+            },
+            "type": "nic"
+          }
+        ],
+        "image": "nixos-lxc-base",
+        "name": "stratocumulus"
+      }
+    },
+    "incus_network_forward": {
+      "cumulus": {
+        "config": {
+          "target_address": "10.0.0.2"
+        },
+        "listen_address": "192.168.86.193",
+        "network": "incusbr0"
+      },
+      "stratocumulus": {
+        "config": {
+          "target_address": "10.0.0.3"
+        },
+        "listen_address": "192.168.86.194",
+        "network": "incusbr0"
+      }
+    },
+    "incus_storage_pool": {
+      "homeserver_lvm": {
+        "config": {
+          "size": "800GiB"
+        },
+        "driver": "lvm",
+        "name": "lvm"
+      }
+    },
+    "incus_storage_volume": {
+      "homeserver_lvm_500gb": {
+        "config": {
+          "size": "500GiB"
+        },
+        "name": "lvm_500gb",
+        "pool": "lvm"
+      },
+      "homeserver_zfs_tank_1tb": {
+        "config": {
+          "size": "1TiB"
+        },
+        "name": "zfs_tank_1tb",
+        "pool": "tank"
+      }
+    }
+  },
+  "terraform": {
+    "required_providers": {
+      "incus": {
+        "source": "registry.terraform.io/lxc/incus"
+      }
+    }
+  }
+}

@@ -22,14 +22,15 @@ let
   # Create a nixosSystem for each host
   mkHost = hostName: {
     name = hostName;
-    specialArgs = {
-      inherit ipPool self inputs;
-    };
+
     value = nixpkgs.lib.nixosSystem {
+      specialArgs = {
+        inherit ipPool self inputs;
+      };
       modules = [
         (./. + "/${hostName}.nix")
         inputs.disko.nixosModules.default
-        { _module.args = { inherit inputs; }; }
+        # { _module.args = { inherit inputs; }; }
         {
           nix.settings.experimental-features = [
             "nix-command"

@@ -12,6 +12,11 @@
     default = "";
     description = "The IP address of the container";
   };
+  options.lanIp = lib.mkOption {
+    type = lib.types.str;
+    default = "";
+    description = "The external LAN IP address of the container";
+  };
 
   imports = [
     "${modulesPath}/virtualisation/lxc-container.nix"
@@ -38,6 +43,13 @@
             };
           }
         ];
+      };
+      "incus_network_forward"."${config.networking.hostName}" = {
+        network = "incusbr0";
+        listen_address = config.lanIp;
+        config = {
+          target_address = config.ip;
+        };
       };
     };
 

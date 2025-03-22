@@ -39,6 +39,7 @@
   boot.supportedFilesystems = [ "zfs" ];
   boot.zfs.extraPools = [ "tank" ];
   networking.hostId = "d0a95792";
+  networking.nameservers = [ "1.1.1.1" ];
   environment.systemPackages = [
     pkgs.zfs
   ];

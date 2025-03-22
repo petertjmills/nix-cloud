@@ -2,8 +2,12 @@
   config,
   pkgs,
   lib,
+  ipPool,
   ...
 }:
+let
+  ip = ipPool 1;
+in
 {
   imports = [
     ../machines/incus-container.nix
@@ -12,7 +16,8 @@
   ];
 
   networking.hostName = "cumulus";
-  ip = "10.0.0.2";
+  ip = ip.internalIp;
+  lanIp = ip.address;
 
   terranix.resource."incus_instance"."${config.networking.hostName}" = {
     config."security.nesting" = true;
