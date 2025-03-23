@@ -40,7 +40,7 @@
       # in the luks usb drive on the host
       secrets-dir = "/mnt/secrets";
 
-      terranix-storage = rec {
+      terranix-storage =  {
         terraform."required_providers"."incus" = {
           source = "registry.terraform.io/lxc/incus";
         };
@@ -80,16 +80,6 @@
           inputs
           self
           ;
-      };
-
-      terraformConfiguration = terranix.lib.terranixConfiguration {
-        system = "x86_64-linux";
-        modules = [
-          (nixpkgs.lib.attrsets.foldlAttrs (acc: name: value: {
-            terranixM = (nixpkgs.lib.attrsets.recursiveUpdate acc.terranixM (value.config.terranix or { }));
-          }) { terranixM = { }; } self.nixosConfigurations).terranixM
-          terranix-storage
-        ];
       };
 
       apps.x86_64-linux = {

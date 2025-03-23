@@ -21,6 +21,8 @@
   imports = [
     "${modulesPath}/virtualisation/lxc-container.nix"
     ../modules/terranix.nix
+    ../modules/dns.nix
+    ../modules/monitoring.nix
   ];
   config = {
     terranix.resource = {
@@ -57,6 +59,7 @@
     virtualisation.incus.package = pkgs.incus;
     networking.interfaces.enp1s0.useDHCP = true;
     networking.nameservers = [
+      inputs.self.nixosConfigurations.stratocumulus.config.ip
       "1.1.1.1"
     ];
 

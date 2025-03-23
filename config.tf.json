@@ -53,6 +53,24 @@
         ],
         "image": "nixos-lxc-base",
         "name": "stratocumulus"
+      },
+      "stratus": {
+        "config": {
+          "boot.autostart": true
+        },
+        "device": [
+          {
+            "name": "enp1s0",
+            "properties": {
+              "ipv4.address": "10.0.0.4",
+              "name": "enp1s0",
+              "network": "incusbr0"
+            },
+            "type": "nic"
+          }
+        ],
+        "image": "nixos-lxc-base",
+        "name": "stratus"
       }
     },
     "incus_network_forward": {
@@ -68,6 +86,13 @@
           "target_address": "10.0.0.3"
         },
         "listen_address": "192.168.86.194",
+        "network": "incusbr0"
+      },
+      "stratus": {
+        "config": {
+          "target_address": "10.0.0.4"
+        },
+        "listen_address": "192.168.86.195",
         "network": "incusbr0"
       }
     },

@@ -145,6 +145,7 @@ in
       enable = true;
       allowedTCPPorts = [
         cfg.httpPort
+        8444
         53
         67
       ];
@@ -185,6 +186,7 @@ in
       ui.enable = true;
       preseed = {
         config."core.https_address" = "[::]:${toString cfg.httpPort}";
+        config."core.metrics_authentication" = false;
         config."images.auto_update_interval" = "0";
         networks = [
           {

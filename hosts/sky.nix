@@ -13,6 +13,7 @@ in
     ../modules/zsh.nix
     ../modules/incus-server.nix
     ../modules/dns.nix
+    ../modules/monitoring.nix
   ];
 
   networking.hostName = "sky";
@@ -24,6 +25,24 @@ in
     {
       name = "${config.networking.hostName}.lan";
       ip = ip.address;
+    }
+  ];
+
+  monitoring.prometheusScrapeConfigs = [
+    {
+      job_name = "incus";
+      metrics_path = "/1.0/metrics";
+      static_configs = [
+        {
+          targets = [
+            "${config.networking.hostName}.internal:8443"
+          ];
+        }
+      ];
+      scheme = "https";
+      tls_config = {
+        insecure_skip_verify = true;
+      };
     }
   ];
 
