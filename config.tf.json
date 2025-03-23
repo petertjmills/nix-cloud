@@ -4,6 +4,46 @@
   },
   "resource": {
     "incus_instance": {
+      "cumulonimbus": {
+        "config": {
+          "boot.autostart": true
+        },
+        "device": [
+          {
+            "name": "zfs_storage",
+            "properties": {
+              "path": "/zfs_data",
+              "pool": "tank",
+              "source": "zfs_tank_1tb"
+            },
+            "type": "disk"
+          },
+          {
+            "name": "lvm_storage",
+            "properties": {
+              "path": "/lvm_data",
+              "pool": "lvm",
+              "source": "lvm_500gb"
+            },
+            "type": "disk"
+          },
+          {
+            "name": "enp1s0",
+            "properties": {
+              "ipv4.address": "10.0.0.5",
+              "name": "enp1s0",
+              "network": "incusbr0"
+            },
+            "type": "nic"
+          }
+        ],
+        "image": "nixos-lxc-base",
+        "limits": {
+          "cpu": 1,
+          "memory": "1GiB"
+        },
+        "name": "cumulonimbus"
+      },
       "cumulus": {
         "config": {
           "boot.autostart": true,
@@ -52,6 +92,10 @@
           }
         ],
         "image": "nixos-lxc-base",
+        "limits": {
+          "cpu": 1,
+          "memory": "1GiB"
+        },
         "name": "stratocumulus"
       },
       "stratus": {
@@ -70,10 +114,21 @@
           }
         ],
         "image": "nixos-lxc-base",
+        "limits": {
+          "cpu": 1,
+          "memory": "1GiB"
+        },
         "name": "stratus"
       }
     },
     "incus_network_forward": {
+      "cumulonimbus": {
+        "config": {
+          "target_address": "10.0.0.5"
+        },
+        "listen_address": "192.168.86.196",
+        "network": "incusbr0"
+      },
       "cumulus": {
         "config": {
           "target_address": "10.0.0.2"

@@ -40,7 +40,7 @@
       # in the luks usb drive on the host
       secrets-dir = "/mnt/secrets";
 
-      terranix-storage =  {
+      terranix-storage = {
         terraform."required_providers"."incus" = {
           source = "registry.terraform.io/lxc/incus";
         };
@@ -83,6 +83,24 @@
       };
 
       apps.x86_64-linux = {
+        deploy =
+          {
+            type = "app";
+            program = toString (
+              pkgs.writers.writeBash "test" ''
+                echo deploy $1
+              ''
+            );
+          }
+          // (builtins.mapAttrs (name: value: {
+            type = "app";
+            program = toString (
+              pkgs.writers.writeBash "deploy" ''
+                echo deploy ${name} ${value.config.ip}
+                ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake .#${name} --target-host ${value.config.ip}
+              ''
+            );
+          }) self.nixosConfigurations);
 
         generate-ssh-keys = {
           type = "app";

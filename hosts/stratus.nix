@@ -44,12 +44,29 @@ in
     scrapeConfigs = scrapeConfigs;
   };
 
+  environment.etc."grafana/dashboards/incus-dashboard.json".source =
+    ../configs/grafana/incus-dashboard.json;
+
   services.grafana = {
     enable = true;
     settings = {
       server = {
         http_port = 3000;
         http_addr = "0.0.0.0";
+      };
+    };
+    provision = {
+      enable = true;
+
+      dashboards.settings = {
+        apiVersion = 1;
+
+        providers = [
+          {
+            name = "default";
+            options.path = "/etc/grafana/dashboards";
+          }
+        ];
       };
     };
   };

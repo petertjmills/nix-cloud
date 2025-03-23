@@ -32,6 +32,10 @@
         config = {
           "boot.autostart" = true;
         };
+        limits = lib.mkDefault {
+          cpu = 1;
+          memory = "1GiB";
+        };
 
         device = [
           {
