@@ -60,6 +60,17 @@
       "1.1.1.1"
     ];
 
+    dns.domains = [
+      {
+        name = "${config.networking.hostName}.internal";
+        ip = config.ip;
+      }
+      {
+        name = "${config.networking.hostName}.lan";
+        ip = config.lanIp;
+      }
+    ];
+
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   };
 

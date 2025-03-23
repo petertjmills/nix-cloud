@@ -13,6 +13,7 @@ in
     ../machines/incus-container.nix
     ../modules/zsh.nix
     ../modules/opentofu.nix
+    ../modules/dns.nix
   ];
 
   networking.hostName = "cumulus";

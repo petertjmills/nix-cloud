@@ -1,18 +1,37 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  ipPool,
+  config,
+  ...
+}:
+let
+  ip = ipPool 0;
+in
 {
   imports = [
     ../machines/home-server.nix
     ../modules/zsh.nix
     ../modules/incus-server.nix
+    ../modules/dns.nix
   ];
 
   networking.hostName = "sky";
+  dns.domains = [
+    {
+      name = "${config.networking.hostName}.internal";
+      ip = ip.internalIp;
+    }
+    {
+      name = "${config.networking.hostName}.lan";
+      ip = ip.address;
+    }
+  ];
 
   services.incusServer = {
     enable = true;
-    ip.address = "192.168.86.192";
-    ip.internalSubnet = "10.0.0.1/24";
-    defaultGateway = "192.168.86.1";
+    ip.address = ip.address;
+    ip.internalSubnet = ip.internalSubnet;
+    defaultGateway = ip.defaultGateway;
     images = [
       {
         name = "nixos-vm-base";

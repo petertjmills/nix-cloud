@@ -11,4 +11,6 @@ in
   lanIp = ip.address;
   networking.hostName = "stratocumulus";
 
+  dns.server = true;
+
 }

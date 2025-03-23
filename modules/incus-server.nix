@@ -29,6 +29,23 @@ let
 
     };
 
+  ips = (
+    lib.attrsets.foldlAttrs (
+      acc: name: value:
+      acc
+      ++ (
+        if value.config ? lanIp then
+          [
+            {
+              address = value.config.lanIp;
+              prefixLength = 24;
+            }
+          ]
+        else
+          [ ]
+      )
+    ) [ ] inputs.self.nixosConfigurations
+  );
 in
 {
   options.services.incusServer = {
@@ -150,7 +167,7 @@ in
           address = cfg.ip.address;
           prefixLength = 24;
         }
-      ];
+      ] ++ ips;
     };
 
     networking.defaultGateway = {
