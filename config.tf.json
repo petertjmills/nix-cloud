@@ -39,8 +39,8 @@
         ],
         "image": "nixos-lxc-base",
         "limits": {
-          "cpu": 1,
-          "memory": "1GiB"
+          "cpu": "1",
+          "memory": "4GiB"
         },
         "name": "cumulonimbus"
       },

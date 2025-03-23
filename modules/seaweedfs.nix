@@ -216,127 +216,123 @@ in
     };
   };
 
-  config =
-    mkIf cfg.enable (
-      mkIf cfg.enableServer ({
+  config = mkMerge [
+    (mkIf cfg.enableServer ({
 
-        environment.systemPackages = [ pkgs.seaweedfs ];
+      environment.systemPackages = [ pkgs.seaweedfs ];
 
-        networking.firewall = mkIf cfg.openFirewall {
-          allowedTCPPorts =
-            (lib.optional cfg.master.enable cfg.master.port)
-            ++ (lib.concatMap (vol: [ vol.port ]) cfg.volume.instances)
-            ++ (lib.optional cfg.filer.enable cfg.filer.port)
-            ++ (lib.optional cfg.s3.enable cfg.s3.port);
-          allowedUDPPorts =
-            (lib.optional cfg.master.enable cfg.master.port)
-            ++ (lib.concatMap (vol: [ vol.port ]) cfg.volume.instances)
-            ++ (lib.optional cfg.filer.enable cfg.filer.port)
-            ++ (lib.optional cfg.s3.enable cfg.s3.port);
-        };
+      networking.firewall = mkIf cfg.openFirewall {
+        allowedTCPPorts =
+          (lib.optional cfg.master.enable cfg.master.port)
+          ++ (lib.concatMap (vol: [ vol.port ]) cfg.volume.instances)
+          ++ (lib.optional cfg.filer.enable cfg.filer.port)
+          ++ (lib.optional cfg.s3.enable cfg.s3.port);
+        allowedUDPPorts =
+          (lib.optional cfg.master.enable cfg.master.port)
+          ++ (lib.concatMap (vol: [ vol.port ]) cfg.volume.instances)
+          ++ (lib.optional cfg.filer.enable cfg.filer.port)
+          ++ (lib.optional cfg.s3.enable cfg.s3.port);
+      };
 
-        users.users.${cfg.user} = {
-          isSystemUser = true;
-          group = cfg.group;
-          description = "SeaweedFS User";
-          createHome = true;
-          home = "/var/lib/seaweedfs";
-        };
+      users.users.${cfg.user} = {
+        isSystemUser = true;
+        group = cfg.group;
+        description = "SeaweedFS User";
+        createHome = true;
+        home = "/var/lib/seaweedfs";
+      };
 
-        users.groups.${cfg.group} = {
-          name = cfg.group;
-        };
+      users.groups.${cfg.group} = {
+        name = cfg.group;
+      };
 
-        systemd.tmpfiles.rules = (
-          map (dir: "d ${dir} 0770 ${cfg.user} ${cfg.group} - -") cfg.dataDirectories
-        );
+      systemd.tmpfiles.rules = (
+        map (dir: "d ${dir} 0770 ${cfg.user} ${cfg.group} - -") cfg.dataDirectories
+      );
 
-        environment.etc."seaweedfs/filer.toml".text = cfg.filerConfig;
+      environment.etc."seaweedfs/filer.toml".text = cfg.filerConfig;
 
-        systemd.services =
-          # Master service
-          (mkIf cfg.master.enable {
-            "seaweedfs-master" = {
-              description = "SeaweedFS Master Server";
-              after = [ "network.target" ];
-              wantedBy = [ "multi-user.target" ];
-              serviceConfig = {
-                Type = "simple";
-                User = cfg.user;
-                Group = cfg.group;
-                ExecStart = "${pkgs.seaweedfs}/bin/weed master -volumeSizeLimitMB ${toString cfg.master.volumeSizeLimitMB} -mdir=${cfg.master.dirPath} -port=${toString cfg.master.port} ${concatStringsSep " " cfg.master.extraArgs}";
-                Restart = "on-failure";
-                StateDirectory = "seaweedfs-master";
-              };
+      systemd.services = mkMerge [
+        # Master service
+        (mkIf cfg.master.enable {
+          "seaweedfs-master" = {
+            description = "SeaweedFS Master Server";
+            after = [ "network.target" ];
+            wantedBy = [ "multi-user.target" ];
+            serviceConfig = {
+              Type = "simple";
+              User = cfg.user;
+              Group = cfg.group;
+              ExecStart = "${pkgs.seaweedfs}/bin/weed master -volumeSizeLimitMB ${toString cfg.master.volumeSizeLimitMB} -mdir=${cfg.master.dirPath} -port=${toString cfg.master.port} ${concatStringsSep " " cfg.master.extraArgs}";
+              Restart = "on-failure";
+              StateDirectory = "seaweedfs-master";
             };
-          })
-          //
+          };
+        })
 
-            # Volume services - create a service for each volume instance
-            (mkIf cfg.volume.enable (
-              listToAttrs (
-                map (
-                  volume:
-                  let
-                    diskTypeArg = if volume.diskType != null then "-disk=${volume.diskType}" else "";
-                  in
-                  nameValuePair "seaweedfs-volume-${volume.name}" {
-                    description = "SeaweedFS Volume Server (${volume.name})";
-                    after = [ "seaweedfs-master.service" ];
-                    wantedBy = [ "multi-user.target" ];
-                    serviceConfig = {
-                      Type = "simple";
-                      User = cfg.user;
-                      Group = cfg.group;
-                      ExecStart = "${pkgs.seaweedfs}/bin/weed volume -max=${toString volume.max} ${diskTypeArg} -dir=${volume.dirPath} -port=${toString volume.port} ${concatStringsSep " " volume.extraArgs}";
-                      Restart = "on-failure";
-                      StateDirectory = "seaweedfs-volume-${volume.name}";
-                    };
-                  }
-                ) cfg.volume.instances
-              )
-            ))
-          //
-
-            # Filer service
-            (mkIf cfg.filer.enable {
-              "seaweedfs-filer" = {
-                description = "SeaweedFS Filer Server";
-                after = [
-                  "seaweedfs-master.service"
-                ] ++ (map (vol: "seaweedfs-volume-${vol.name}.service") cfg.volume.instances);
+        # Volume services - create a service for each volume instance
+        (mkIf cfg.volume.enable (
+          listToAttrs (
+            map (
+              volume:
+              let
+                diskTypeArg = if volume.diskType != null then "-disk=${volume.diskType}" else "";
+              in
+              nameValuePair "seaweedfs-volume-${volume.name}" {
+                description = "SeaweedFS Volume Server (${volume.name})";
+                after = [ "seaweedfs-master.service" ];
                 wantedBy = [ "multi-user.target" ];
                 serviceConfig = {
                   Type = "simple";
                   User = cfg.user;
                   Group = cfg.group;
-                  ExecStart = "${pkgs.seaweedfs}/bin/weed filer -port=${toString cfg.filer.port} ${concatStringsSep " " cfg.filer.extraArgs}";
+                  ExecStart = "${pkgs.seaweedfs}/bin/weed volume -max=${toString volume.max} ${diskTypeArg} -dir=${volume.dirPath} -port=${toString volume.port} ${concatStringsSep " " volume.extraArgs}";
                   Restart = "on-failure";
-                  StateDirectory = "seaweedfs-filer";
+                  StateDirectory = "seaweedfs-volume-${volume.name}";
                 };
-              };
-            })
-          //
+              }
+            ) cfg.volume.instances
+          )
+        ))
 
-            # S3 gateway service
-            (mkIf cfg.s3.enable {
-              "seaweedfs-s3" = {
-                description = "SeaweedFS S3 Gateway";
-                after = [ "seaweedfs-filer.service" ];
-                wantedBy = [ "multi-user.target" ];
-                serviceConfig = {
-                  Type = "simple";
-                  User = cfg.user;
-                  Group = cfg.group;
-                  ExecStart = "${pkgs.seaweedfs}/bin/weed s3 -ip.bind=0.0.0.0 -port=${toString cfg.s3.port} ${concatStringsSep " " cfg.s3.extraArgs}";
-                  Restart = "on-failure";
-                  StateDirectory = "seaweedfs-s3";
-                };
-              };
-            });
-      })
-    )
-    // (mkIf cfg.mount.enable {
+        # Filer service
+        (mkIf cfg.filer.enable {
+          "seaweedfs-filer" = {
+            description = "SeaweedFS Filer Server";
+            after = [
+              "seaweedfs-master.service"
+            ] ++ (map (vol: "seaweedfs-volume-${vol.name}.service") cfg.volume.instances);
+            wantedBy = [ "multi-user.target" ];
+            serviceConfig = {
+              Type = "simple";
+              User = cfg.user;
+              Group = cfg.group;
+              ExecStart = "${pkgs.seaweedfs}/bin/weed filer -port=${toString cfg.filer.port} ${concatStringsSep " " cfg.filer.extraArgs}";
+              Restart = "on-failure";
+              StateDirectory = "seaweedfs-filer";
+            };
+          };
+        })
+
+        # S3 gateway service
+        (mkIf cfg.s3.enable {
+          "seaweedfs-s3" = {
+            description = "SeaweedFS S3 Gateway";
+            after = [ "seaweedfs-filer.service" ];
+            wantedBy = [ "multi-user.target" ];
+            serviceConfig = {
+              Type = "simple";
+              User = cfg.user;
+              Group = cfg.group;
+              ExecStart = "${pkgs.seaweedfs}/bin/weed s3 -ip.bind=0.0.0.0 -port=${toString cfg.s3.port} ${concatStringsSep " " cfg.s3.extraArgs}";
+              Restart = "on-failure";
+              StateDirectory = "seaweedfs-s3";
+            };
+          };
+        })
+      ];
+    }))
+    (mkIf cfg.mount.enable {
       # FUSE mount services - create a service for each mount point
       # create each mount point folder
       # TODO: below won't work if server is enabled (arrays won't merge)
@@ -378,6 +374,7 @@ in
           }
         ) cfg.mount.instances
       );
-    });
+    })
+  ];
 
 }

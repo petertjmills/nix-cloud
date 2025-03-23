@@ -18,6 +18,11 @@ in
   lanIp = ip.address;
 
   terranix.resource."incus_instance"."${config.networking.hostName}" = {
+    limits = {
+      cpu = "1";
+      memory = "4GiB";
+    };
+
     device = [
       {
         name = "zfs_storage";
@@ -44,5 +49,12 @@ in
     enable = true;
     enableServer = true;
   };
+
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 4096;
+    }
+  ];
 
 }
