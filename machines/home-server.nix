@@ -9,12 +9,7 @@
   options.ip = lib.mkOption {
     type = lib.types.str;
     default = "";
-    description = "The IP address of the container";
-  };
-  options.lanIp = lib.mkOption {
-    type = lib.types.str;
-    default = "";
-    description = "The external LAN IP address of the container";
+    description = "The internal IP address of the system";
   };
 
   config = {

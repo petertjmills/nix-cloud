@@ -43,7 +43,6 @@ in
   services.seaweedfs = {
     enable = true;
     enableServer = true;
-
   };
 
 }
