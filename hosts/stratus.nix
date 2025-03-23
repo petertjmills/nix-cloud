@@ -33,6 +33,8 @@ in
   networking.firewall = {
     allowedTCPPorts = [
       config.services.prometheus.port
+      config.services.loki.configuration.server.http_listen_port
+      config.services.grafana.settings.server.http_port
     ];
   };
 
@@ -40,5 +42,49 @@ in
     enable = true;
     globalConfig.scrape_interval = "10s"; # "1m"
     scrapeConfigs = scrapeConfigs;
+  };
+
+  services.grafana = {
+    enable = true;
+    settings = {
+      server = {
+        http_port = 3000;
+        http_addr = "0.0.0.0";
+      };
+    };
+  };
+
+  services.loki = {
+    enable = true;
+    configuration = {
+      auth_enabled = false;
+      server = {
+        http_listen_address = "0.0.0.0";
+        http_listen_port = 3100;
+      };
+
+      common = {
+        ring.instance_addr = "127.0.0.1";
+        ring.kvstore.store = "inmemory";
+        replication_factor = 1;
+        path_prefix = "/tmp/loki";
+      };
+
+      schema_config.configs = [
+        {
+          from = "2020-05-15";
+          store = "tsdb";
+          object_store = "filesystem";
+          schema = "v13";
+          index = {
+            prefix = "index_";
+            period = "24h";
+          };
+        }
+      ];
+
+      storage_config.filesystem.directory = "/tmp/loki/chunks";
+
+    };
   };
 }

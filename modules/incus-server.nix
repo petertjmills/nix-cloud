@@ -188,6 +188,8 @@ in
         config."core.https_address" = "[::]:${toString cfg.httpPort}";
         config."core.metrics_authentication" = false;
         config."images.auto_update_interval" = "0";
+        config."loki.instance" = "incus";
+        config."loki.api.url" = "http://${inputs.self.nixosConfigurations.stratus.config.ip}:3100";
         networks = [
           {
             config = {

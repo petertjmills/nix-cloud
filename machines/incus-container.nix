@@ -55,7 +55,7 @@
       };
     };
 
-    virtualisation.incus.agent.enable = true;
+    # virtualisation.incus.agent.enable = true;
     virtualisation.incus.package = pkgs.incus;
     networking.interfaces.enp1s0.useDHCP = true;
     networking.nameservers = [
