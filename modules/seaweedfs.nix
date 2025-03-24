@@ -29,6 +29,12 @@ in
     enable = mkEnableOption "SeaweedFS distributed file system";
     enableServer = mkEnableOption "Enable SeaweedFS server components";
 
+    package = mkOption {
+      type = types.package;
+      default = pkgs.seaweedfs;
+      description = "Package to install SeaweedFS from";
+    };
+
     user = mkOption {
       type = types.str;
       default = "seaweedfs";
@@ -44,6 +50,8 @@ in
     master = {
       enable = mkEnableOption' "master" true "Enable SeaweedFS master server";
       port = mkPortOption 9333 "Port for master server";
+      grpcPort = mkPortOption 19333 "Port for master server gRPC";
+      metricsPort = mkPortOption 29333 "Port for master server metrics";
       volumeSizeLimitMB = mkOption {
         type = types.int;
         default = 1000;
@@ -75,6 +83,14 @@ in
                 type = types.port;
                 description = "Port for this volume server instance";
               };
+              grpcPort = mkOption {
+                type = types.port;
+                description = "Port for this volume server gRPC";
+              };
+              metricsPort = mkOption {
+                type = types.port;
+                description = "Port for this volume server metrics";
+              };
               dirPath = mkOption {
                 type = types.str;
                 description = "Directory path for volume storage";
@@ -101,6 +117,8 @@ in
           {
             name = "zfs-lvm";
             port = 8080;
+            grpcPort = 18080;
+            metricsPort = 28080;
             dirPath = "/zfs_data/seaweedfs/volumes,/lvm_data/seaweedfs/volumes";
             diskType = "zfs,lvm";
             max = 0;
@@ -108,6 +126,8 @@ in
           {
             name = "root";
             port = 8081;
+            grpcPort = 18081;
+            metricsPort = 28081;
             dirPath = "/data";
             max = 0;
           }
@@ -119,6 +139,8 @@ in
     filer = {
       enable = mkEnableOption' "filer" true "Enable SeaweedFS filer server";
       port = mkPortOption 8888 "Port for filer server";
+      grpcPort = mkPortOption 18888 "Port for filer server gRPC";
+      metricsPort = mkPortOption 28888 "Port for master server metrics";
       configPath = mkOption {
         type = types.path;
         default = "/etc/seaweedfs/filer.toml";
@@ -134,6 +156,7 @@ in
     s3 = {
       enable = mkEnableOption' "s3" true "Enable SeaweedFS S3 gateway";
       port = mkPortOption 8333 "Port for S3 gateway";
+      metricsPort = mkPortOption 28333 "Port for master server metrics";
       extraArgs = mkOption {
         type = types.listOf types.str;
         default = [ ];
@@ -219,19 +242,37 @@ in
   config = mkMerge [
     (mkIf cfg.enableServer ({
 
-      environment.systemPackages = [ pkgs.seaweedfs ];
+      environment.systemPackages = [ cfg.package ];
 
       networking.firewall = mkIf cfg.openFirewall {
         allowedTCPPorts =
           (lib.optional cfg.master.enable cfg.master.port)
-          ++ (lib.concatMap (vol: [ vol.port ]) cfg.volume.instances)
+          ++ (lib.optional cfg.master.enable cfg.master.metricsPort)
+          ++ (lib.optional cfg.master.enable cfg.master.grpcPort)
+          ++ (lib.concatMap (vol: [
+            vol.port
+            vol.metricsPort
+            vol.grpcPort
+          ]) cfg.volume.instances)
           ++ (lib.optional cfg.filer.enable cfg.filer.port)
-          ++ (lib.optional cfg.s3.enable cfg.s3.port);
+          ++ (lib.optional cfg.filer.enable cfg.filer.grpcPort)
+          ++ (lib.optional cfg.filer.enable cfg.filer.metricsPort)
+          ++ (lib.optional cfg.s3.enable cfg.s3.port)
+          ++ (lib.optional cfg.s3.enable cfg.s3.metricsPort);
         allowedUDPPorts =
           (lib.optional cfg.master.enable cfg.master.port)
-          ++ (lib.concatMap (vol: [ vol.port ]) cfg.volume.instances)
+          ++ (lib.optional cfg.master.enable cfg.master.metricsPort)
+          ++ (lib.optional cfg.master.enable cfg.master.grpcPort)
+          ++ (lib.concatMap (vol: [
+            vol.port
+            vol.metricsPort
+            vol.grpcPort
+          ]) cfg.volume.instances)
           ++ (lib.optional cfg.filer.enable cfg.filer.port)
-          ++ (lib.optional cfg.s3.enable cfg.s3.port);
+          ++ (lib.optional cfg.filer.enable cfg.filer.grpcPort)
+          ++ (lib.optional cfg.filer.enable cfg.filer.metricsPort)
+          ++ (lib.optional cfg.s3.enable cfg.s3.port)
+          ++ (lib.optional cfg.s3.enable cfg.s3.metricsPort);
       };
 
       users.users.${cfg.user} = {
@@ -263,7 +304,7 @@ in
               Type = "simple";
               User = cfg.user;
               Group = cfg.group;
-              ExecStart = "${pkgs.seaweedfs}/bin/weed master -volumeSizeLimitMB ${toString cfg.master.volumeSizeLimitMB} -mdir=${cfg.master.dirPath} -port=${toString cfg.master.port} ${concatStringsSep " " cfg.master.extraArgs}";
+              ExecStart = "${cfg.package}/bin/weed master -volumeSizeLimitMB ${toString cfg.master.volumeSizeLimitMB} -mdir=${cfg.master.dirPath} -port=${toString cfg.master.port} -metricsPort=${toString cfg.master.metricsPort} ${concatStringsSep " " cfg.master.extraArgs}";
               Restart = "on-failure";
               StateDirectory = "seaweedfs-master";
             };
@@ -284,11 +325,13 @@ in
                 wantedBy = [ "multi-user.target" ];
                 serviceConfig = {
                   Type = "simple";
-                  User = cfg.user;
-                  Group = cfg.group;
-                  ExecStart = "${pkgs.seaweedfs}/bin/weed volume -max=${toString volume.max} ${diskTypeArg} -dir=${volume.dirPath} -port=${toString volume.port} ${concatStringsSep " " volume.extraArgs}";
+                  # User = cfg.user;
+                  # Group = cfg.group;
+                  User = "root"; # Volume operations typically need root privileges
+                  Group = "root";
+                  ExecStart = "${cfg.package}/bin/weed volume -max=${toString volume.max} ${diskTypeArg} -dir=${volume.dirPath} -port=${toString volume.port} -metricsPort=${toString volume.metricsPort} ${concatStringsSep " " volume.extraArgs}";
                   Restart = "on-failure";
-                  StateDirectory = "seaweedfs-volume-${volume.name}";
+                  # StateDirectory = "seaweedfs-volume-${volume.name}";
                 };
               }
             ) cfg.volume.instances
@@ -307,7 +350,7 @@ in
               Type = "simple";
               User = cfg.user;
               Group = cfg.group;
-              ExecStart = "${pkgs.seaweedfs}/bin/weed filer -port=${toString cfg.filer.port} ${concatStringsSep " " cfg.filer.extraArgs}";
+              ExecStart = "${cfg.package}/bin/weed filer -port=${toString cfg.filer.port} -metricsPort=${toString cfg.filer.metricsPort} ${concatStringsSep " " cfg.filer.extraArgs}";
               Restart = "on-failure";
               StateDirectory = "seaweedfs-filer";
             };
@@ -324,7 +367,7 @@ in
               Type = "simple";
               User = cfg.user;
               Group = cfg.group;
-              ExecStart = "${pkgs.seaweedfs}/bin/weed s3 -ip.bind=0.0.0.0 -port=${toString cfg.s3.port} ${concatStringsSep " " cfg.s3.extraArgs}";
+              ExecStart = "${cfg.package}/bin/weed s3 -ip.bind=0.0.0.0 -port=${toString cfg.s3.port} -metricsPort=${toString cfg.s3.metricsPort} ${concatStringsSep " " cfg.s3.extraArgs}";
               Restart = "on-failure";
               StateDirectory = "seaweedfs-s3";
             };
@@ -367,7 +410,7 @@ in
               User = "root"; # Mount operations typically need root privileges
               Group = "root";
               ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${mount.mountPoint}";
-              ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.seaweedfs}/bin/weed mount -filer=${mount.filerAddress} ${collectionArg} ${pathArg} -dir=${mount.mountPoint} ${concatStringsSep " " mount.extraArgs} &'";
+              ExecStart = "${pkgs.bash}/bin/bash -c '${cfg.package}/bin/weed mount -filer=${mount.filerAddress} ${collectionArg} ${pathArg} -dir=${mount.mountPoint} ${concatStringsSep " " mount.extraArgs} &'";
               ExecStop = "${pkgs.utillinux}/bin/umount ${mount.mountPoint}";
               Restart = "on-failure";
             };

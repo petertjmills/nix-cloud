@@ -46,6 +46,8 @@ in
 
   environment.etc."grafana/dashboards/incus-dashboard.json".source =
     ../configs/grafana/incus-dashboard.json;
+  environment.etc."grafana/dashboards/seaweedfs-dashboard.json".source =
+    ../configs/grafana/seaweedfs-dashboard.json;
 
   services.grafana = {
     enable = true;

@@ -91,6 +91,20 @@
                 echo deploy $1
               ''
             );
+            all = {
+              type = "app";
+              program = toString (
+                pkgs.writers.writeBash "deploy" ''
+                  ${builtins.concatStringsSep "\n" (
+                    builtins.attrValues (
+                      builtins.mapAttrs (name: value: ''
+                        ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake .#${name} --target-host ${value.config.ip}
+                      '') self.nixosConfigurations
+                    )
+                  )}
+                ''
+              );
+            };
           }
           // (builtins.mapAttrs (name: value: {
             type = "app";
