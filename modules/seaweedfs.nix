@@ -304,7 +304,7 @@ in
               Type = "simple";
               User = cfg.user;
               Group = cfg.group;
-              ExecStart = "${cfg.package}/bin/weed master -volumeSizeLimitMB ${toString cfg.master.volumeSizeLimitMB} -mdir=${cfg.master.dirPath} -port=${toString cfg.master.port} -metricsPort=${toString cfg.master.metricsPort} ${concatStringsSep " " cfg.master.extraArgs}";
+              ExecStart = "${cfg.package}/bin/weed master -ip.bind=0.0.0.0 -volumeSizeLimitMB ${toString cfg.master.volumeSizeLimitMB} -mdir=${cfg.master.dirPath} -port=${toString cfg.master.port} -metricsPort=${toString cfg.master.metricsPort} ${concatStringsSep " " cfg.master.extraArgs}";
               Restart = "on-failure";
               StateDirectory = "seaweedfs-master";
             };
@@ -329,7 +329,7 @@ in
                   # Group = cfg.group;
                   User = "root"; # Volume operations typically need root privileges
                   Group = "root";
-                  ExecStart = "${cfg.package}/bin/weed volume -max=${toString volume.max} ${diskTypeArg} -dir=${volume.dirPath} -port=${toString volume.port} -metricsPort=${toString volume.metricsPort} ${concatStringsSep " " volume.extraArgs}";
+                  ExecStart = "${cfg.package}/bin/weed volume -ip.bind=0.0.0.0 -max=${toString volume.max} ${diskTypeArg} -dir=${volume.dirPath} -port=${toString volume.port} -metricsPort=${toString volume.metricsPort} ${concatStringsSep " " volume.extraArgs}";
                   Restart = "on-failure";
                   # StateDirectory = "seaweedfs-volume-${volume.name}";
                 };
@@ -350,7 +350,7 @@ in
               Type = "simple";
               User = cfg.user;
               Group = cfg.group;
-              ExecStart = "${cfg.package}/bin/weed filer -port=${toString cfg.filer.port} -metricsPort=${toString cfg.filer.metricsPort} ${concatStringsSep " " cfg.filer.extraArgs}";
+              ExecStart = "${cfg.package}/bin/weed filer -ip.bind=0.0.0.0 -port=${toString cfg.filer.port} -metricsPort=${toString cfg.filer.metricsPort} ${concatStringsSep " " cfg.filer.extraArgs}";
               Restart = "on-failure";
               StateDirectory = "seaweedfs-filer";
             };
