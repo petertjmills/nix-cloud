@@ -12,6 +12,10 @@ let
     }) { domains = [ ]; } inputs.self.nixosConfigurations).domains;
 in
 {
+  imports = [
+    ./monitoring.nix
+  ];
+
   options.dns = {
     server = lib.mkOption {
       type = lib.types.bool;
@@ -49,7 +53,7 @@ in
 
           access-control = [
             "192.168.86.0/24 allow"
-            "10.0.0.0/24 allow"
+            "10.0.0.0/8 allow"
           ];
           # private-address = [
           #   ''"10.0.0.0/8"''
@@ -79,6 +83,25 @@ in
       allowedTCPPorts = [ 53 ];
       allowedUDPPorts = [ 53 ];
     };
+
+    services.prometheus.exporters.unbound = {
+      enable = true;
+      port = 9101;
+      openFirewall = true;
+    };
+
+    monitoring.prometheusScrapeConfigs = [
+      {
+        job_name = "unbound";
+        static_configs = [
+          {
+            targets = [
+              "${config.networking.hostName}.internal:9101"
+            ];
+          }
+        ];
+      }
+    ];
 
   };
 }

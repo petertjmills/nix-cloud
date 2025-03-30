@@ -111,6 +111,7 @@
             type = "app";
             program = toString (
               pkgs.writers.writeBash "deploy" ''
+                  #!/bin/bash
                 echo deploy ${name} ${value.config.ip}
                 ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake .#${name} --target-host ${value.config.ip}
               ''

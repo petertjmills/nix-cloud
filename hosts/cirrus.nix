@@ -1,25 +1,17 @@
 {
-  config,
-  ipPool,
   pkgs,
+  config,
   inputs,
   ...
 }:
-let
-  ip = ipPool 2;
-in
 {
   imports = [
-    ../machines/incus-container.nix
-    ../modules/dns.nix
+    ../machines/hetzner.nix
     inputs.sops-nix.nixosModules.sops
   ];
 
-  ip = ip.internalIp;
-  lanIp = ip.address;
-  networking.hostName = "stratocumulus";
+  ip = "167.235.63.14";
 
-  dns.server = true;
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
   };
@@ -31,6 +23,7 @@ in
   sops.secrets."${config.networking.hostName}/private_key" = { };
   sops.secrets."${config.networking.hostName}/public_key" = { };
 
+  networking.hostName = "cirrus";
   networking.nat.enable = true;
   networking.nat.externalInterface = "enp1s0";
   networking.nat.internalInterfaces = [ "wg0" ];
@@ -38,7 +31,7 @@ in
   networking.wireguard.interfaces = {
     wg0 = {
       # Determines the IP address and subnet of the server's end of the tunnel interface.
-      ips = [ "10.100.0.2/24" ];
+      ips = [ "10.100.0.1/24" ];
       privateKeyFile = config.sops.secrets."${config.networking.hostName}/private_key".path;
 
       # The port that WireGuard listens to. Must be accessible by the client.
@@ -56,30 +49,31 @@ in
 
       peers = [
         {
-          publicKey = "H+RLWriegaZZTb+bb1FiugcxAOwFsJ7pIrYnBPMKDS4=";
-          allowedIPs = [ "10.100.0.0/24" ];
-          endpoint = "167.235.63.14:9696";
-          persistentKeepalive = 25;
+          publicKey = "Cb9V8hbU3aN5aWeI0KfdDDMH1HcdSkQ3YAeFX4y41zc=";
+          allowedIPs = [
+            "10.100.0.2/32"
+            "10.0.0.0/8"
+          ];
         }
         {
           # peters iphone
           publicKey = "ySrXo34ZWoLkUygaFCdYhA4YNRJsQ+/503s6x+QaBSE=";
           allowedIPs = [
-            "10.100.0.6/32"
+            "10.100.0.3/32"
           ];
         }
         {
           # peters laptop
           publicKey = "izKoBqDZ/zihuiGZYQ0hqnYWi+xOr0SPuD/sVPf4BiE=";
           allowedIPs = [
-            "10.100.0.7/32"
+            "10.100.0.4/32"
           ];
         }
         {
           # macmini
           publicKey = "YJokfOz2sw+4h6kSrBrWBTuReQOm2SlTOqDSgordfDU=";
           allowedIPs = [
-            "10.100.0.8/32"
+            "10.100.0.5/32"
           ];
         }
       ];
@@ -91,5 +85,4 @@ in
       9696
     ];
   };
-
 }

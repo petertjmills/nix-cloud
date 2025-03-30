@@ -48,6 +48,8 @@ in
     ../configs/grafana/incus-dashboard.json;
   environment.etc."grafana/dashboards/seaweedfs-dashboard.json".source =
     ../configs/grafana/seaweedfs-dashboard.json;
+  environment.etc."grafana/dashboards/loki-dashboard.json".source =
+    ../configs/grafana/loki-dashboard.json;
 
   services.grafana = {
     enable = true;
