@@ -27,7 +27,8 @@ let
       specialArgs = {
         inherit ipPool self inputs;
       };
-      system = if hostName == "cirrus" then "aarch64-linux" else "x86_64-linux";
+      # system = if hostName == "cirrus" then "aarch64-linux" else "x86_64-linux";
+      # system = "x86_64-linux";
 
       modules = [
         (./. + "/${hostName}.nix")

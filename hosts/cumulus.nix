@@ -46,7 +46,9 @@ in
     pkgs.just
     pkgs.sops
   ];
-  boot.binfmt.emulatedSystems = [ "aarch64-linux" ];
+  boot.binfmt.emulatedSystems = [
+    "aarch64-linux"
+  ];
   nix.settings.extra-platforms = [
     "x86_64-linux"
     "aarch64-linux"

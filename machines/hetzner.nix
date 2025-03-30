@@ -37,6 +37,7 @@
     #
     networking.firewall.enable = true;
     nixpkgs.hostPlatform = lib.mkForce "aarch64-linux";
+    # nixpkgs.system = "aarch64-linux";
 
     disko.devices = {
       disk = {
