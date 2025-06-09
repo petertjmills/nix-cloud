@@ -14,6 +14,23 @@
 
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+
+    home-manager.url = "github:nix-community/home-manager/release-24.11";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-24.11";
+    darwin.inputs.nixpkgs.follows = "nixpkgs";
+
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+    homebrew-core = {
+      url = "github:homebrew/homebrew-core";
+      flake = false;
+    };
+    homebrew-cask = {
+      url = "github:homebrew/homebrew-cask";
+      flake = false;
+    };
+
   };
 
   outputs =
@@ -23,6 +40,11 @@
       terranix,
       disko,
       sops-nix,
+      home-manager,
+      darwin,
+      nix-homebrew,
+      homebrew-core,
+      homebrew-cask,
       ...
     }@inputs:
     let
@@ -71,6 +93,10 @@
         };
       };
 
+      darwinSystems = [
+          "aarch64-darwin"
+          "x86_64-darwin"
+      ];
     in
     {
       nixosConfigurations = import ./hosts {
@@ -81,6 +107,16 @@
           self
           ;
       };
+
+      darwinConfigurations = nixpkgs.lib.genAttrs darwinSystems (system:
+            {"mac-mini-m4" = darwin.lib.darwinSystem {
+            inherit system;
+            specialArgs = { inherit inputs; };
+            modules = [
+                ./darwin-hosts/mac-mini-m4.nix
+            ];
+            };}
+        );
 
       apps.x86_64-linux = {
         deploy =

@@ -72,7 +72,7 @@
         ],
         "image": "nixos-lxc-base",
         "limits": {
-          "cpu": 2,
+          "cpu": 4,
           "memory": "4GiB"
         },
         "name": "cumulus"

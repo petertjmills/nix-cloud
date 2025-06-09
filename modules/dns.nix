@@ -64,8 +64,18 @@ in
           #   ''"fe80::/10"''
           #   ''"::ffff:0:0/96"''
           # ];
-          local-zone = ''"e-clare.com." static'';
-          local-data = builtins.map (host: ''"${host.name}. IN A ${host.ip}"'') hosts;
+          local-zone = "'youtube.com.' redirect";
+          local-data = builtins.map (host: ''"${host.name}. IN A ${host.ip}"'') hosts ++ [
+            ''"test.metachroma.co. IN A 10.0.0.2"''
+            ''"test.metachroma.co. IN MX 10 test.metachroma.co."''
+            "'_dmarc.metachroma.co. IN TXT \"v=DMARC1;p=reject;rua=mailto:dmarc@metachroma.co\"'"
+            "'test.metachroma.co. IN TXT \"v=spf1 ip4:193.237.206.90 ~all\"'"
+            # Youtube blackhole
+
+            "'youtube.com. IN A 127.0.0.1'"
+
+            # '''metachroma._domainkey.test IN TXT "p=MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAiwepiBaOQBPupaITjupdpZMzczkkRHdb9WVNxXIZSuAuvXhZl++QQrQDllmj2YquyyLly8/J/NW+vPO7G4PFlLgn5vmgREDnM6sUfTCcA0ALgDD3DUnusOKOYlUvJ36nJlM43dsSFD/bkULQvTXNVMVIa/s9Er+LaDf2DRjrxVIrottbU6/KQHHeeKrgYxHxBIdr6Yi8pCaIdjuIOuPH2ZhmYw33xDY/i/lFUygH2NgZH5l0Yv4CM/3GjW9LKNRlygAqHTyUXo1f3LNA5yCt7CBoZo8ctnrBj+dOVJWaTQWj2fj/sQrVBA7cGmVZDrNNzEbDUnLh3V1zgdRFQ2QzLZt4IYGzLRu99PyeKQJYmifTPfgrcQK13/T+VcqfCxhF0q7AdiUwo8rB4kDoTyITxqNM7aje6ox85VFpsDsR2SKXinFgwXTuViPOfwxCRNpBiiv/8qPH3VteZiq7LP0tQFObEIihKGzpj+NGVXfIOfWNpSycH94XsPtUFW+BNtUNeDx4tlTOlScl7VlXeS8g9hy9bxDtmNwy3h3p2BKpUH7myCuSyWalunnUzh9LThrYyNvjfQFxyQbsCoRqHCSH+gDkpFgi8viNIlmlTTkYQ4D3hMhsPlQtCsB8rVgKRDBDE/0ET0YktAN//BWvBwghXm6P3eYbzLdpPRLQyQP/8TcCAwEAAQ=="' ''
+          ];
         };
 
         forward-zone = {

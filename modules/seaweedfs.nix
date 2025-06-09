@@ -403,7 +403,6 @@ in
           in
           nameValuePair "seaweedfs-mount-${mount.name}" {
             description = "SeaweedFS FUSE Mount (${mount.name})";
-            after = [ "seaweedfs-filer.service" ];
             wantedBy = [ "multi-user.target" ];
             serviceConfig = {
               Type = "forking";
