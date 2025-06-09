@@ -36,9 +36,9 @@ in
   #   '';
   # };
 
-  system = {
-    # Turn off NIX_PATH warnings now that we're using flakes
-    checks.verifyNixPath = false;
-    stateVersion = 5;
-  };
+  # system = {
+  #   # Turn off NIX_PATH warnings now that we're using flakes
+  #   checks.verifyNixPath = false;
+  #   stateVersion = 5;
+  # };
 }
