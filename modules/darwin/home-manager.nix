@@ -26,6 +26,7 @@ in
       "google-chrome"
       "discord"
       "daisydisk"
+      "ghostty"
     ];
     masApps = {
       "WhatsApp Messenger" = 310633997;
@@ -157,6 +158,7 @@ in
       };
       ghostty = {
         enable = true;
+        package = null;
         enableZshIntegration = true;
         settings = {
           background-opacity = 0.7;
