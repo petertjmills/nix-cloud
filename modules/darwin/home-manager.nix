@@ -43,8 +43,8 @@ in
       pkgs.raycast
       pkgs.blender
       pkgs.wireshark
-      pkgs.nixfmt-rfc-style
-      pkgs.nixd
+      # pkgs.nixfmt-rfc-style
+      # pkgs.nixd
     ];
 
     programs = {
@@ -82,11 +82,11 @@ in
           "vscode-dark-modern"
         ];
         # Not available til 25.05
-        # extraPackages = [
-        #   pkgs.nixfmt-rfc-style
-        #   pkgs.nixd
-        # ];
-        # installRemoteServer = false;
+        extraPackages = [
+          pkgs.nixfmt-rfc-style
+          pkgs.nixd
+        ];
+        installRemoteServer = false;
         userSettings = {
           edit_predictions = {
             mode = "subtle";
