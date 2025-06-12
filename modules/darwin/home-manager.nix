@@ -1,4 +1,9 @@
-{ inputs, pkgs, lib, ... }:
+{
+  inputs,
+  pkgs,
+  lib,
+  ...
+}:
 let
   user = "petermills";
 in
@@ -8,10 +13,10 @@ in
   ];
 
   users.users.${user} = {
-    name     = "${user}";
-    home     = "/Users/${user}";
+    name = "${user}";
+    home = "/Users/${user}";
     isHidden = false;
-    shell    = pkgs.zsh;
+    shell = pkgs.zsh;
   };
 
   homebrew = {
@@ -19,7 +24,7 @@ in
     casks = [
       "displaylink"
       "zen"
-      "little-snitch"
+      "little-snitch@5"
       "yaak"
       "obsidian"
       "beekeeper-studio"
@@ -28,6 +33,7 @@ in
       "daisydisk"
       "ghostty"
     ];
+
     masApps = {
       "WhatsApp Messenger" = 310633997;
       "Logic Pro" = 634148309;
@@ -38,7 +44,12 @@ in
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
 
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) ["spotify" "raycast"];
+  nixpkgs.config.allowUnfreePredicate =
+    pkg:
+    builtins.elem (lib.getName pkg) [
+      "spotify"
+      "raycast"
+    ];
 
   home-manager.users.${user} = {
     home.packages = [

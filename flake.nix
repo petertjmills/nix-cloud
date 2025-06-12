@@ -22,7 +22,6 @@
     darwin.inputs.nixpkgs.follows = "nixpkgs";
 
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
-    nix-homebrew.inputs.nixpkgs.follows = "nixpkgs";
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
       flake = false;
@@ -32,6 +31,10 @@
       flake = false;
     };
 
+    secrets = {
+      url = "git+ssh://git@github.com/petertjmills/secrets.git";
+      flake = false;
+    };
   };
 
   outputs =
@@ -95,8 +98,8 @@
       };
 
       darwinSystems = [
-          "aarch64-darwin"
-          "x86_64-darwin"
+        "aarch64-darwin"
+        "x86_64-darwin"
       ];
     in
     {
@@ -109,15 +112,15 @@
           ;
       };
 
-      darwinConfigurations = nixpkgs.lib.genAttrs darwinSystems (system:
-            {"mac-mini-m4" = darwin.lib.darwinSystem {
-            inherit system;
-            specialArgs = { inherit inputs; };
-            modules = [
-                ./darwin-hosts/mac-mini-m4.nix
-            ];
-            };}
-        );
+      darwinConfigurations = nixpkgs.lib.genAttrs darwinSystems (system: {
+        "mac-mini-m4" = darwin.lib.darwinSystem {
+          inherit system;
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./darwin-hosts/mac-mini-m4.nix
+          ];
+        };
+      });
 
       apps.x86_64-linux = {
         deploy =

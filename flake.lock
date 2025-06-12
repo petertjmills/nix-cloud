@@ -584,8 +584,25 @@
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs",
         "nixvim": "nixvim",
+        "secrets": "secrets",
         "sops-nix": "sops-nix",
         "terranix": "terranix"
+      }
+    },
+    "secrets": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1749762718,
+        "narHash": "sha256-m8V2Vli/LpBIPHhYApX7LjlndyWQhAYp1ImhS7Szng0=",
+        "ref": "refs/heads/main",
+        "rev": "156b0184b1bce741c42d1935ec6b7b9755c8051a",
+        "revCount": 2,
+        "type": "git",
+        "url": "ssh://git@github.com/petertjmills/secrets.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/petertjmills/secrets.git"
       }
     },
     "sops-nix": {
