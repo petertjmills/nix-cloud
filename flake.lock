@@ -592,11 +592,11 @@
     "secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1749762718,
-        "narHash": "sha256-m8V2Vli/LpBIPHhYApX7LjlndyWQhAYp1ImhS7Szng0=",
+        "lastModified": 1749827077,
+        "narHash": "sha256-2KB+qMJrvuKNDyqsFxvCKWFepRTNkY2P3c3g6brVfOU=",
         "ref": "refs/heads/main",
-        "rev": "156b0184b1bce741c42d1935ec6b7b9755c8051a",
-        "revCount": 2,
+        "rev": "4d5e14207ece32df2abf5dce2db8df84d2035b35",
+        "revCount": 3,
         "type": "git",
         "url": "ssh://git@github.com/petertjmills/secrets.git"
       },

@@ -5,7 +5,8 @@
   ...
 }:
 let
-  user = "petermills";
+  users = import "${inputs.secrets}/user.nix";
+  user = users.darwin.username;
 in
 {
   imports = [
