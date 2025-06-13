@@ -245,7 +245,7 @@ Networks: (10.LEVEL.0.0/24)
 - `nix run 'github:nix-community/disko/latest#disko-install' -- --flake <flake-url>#<flake-attr> --disk <disk-name> <disk-device>`
 - Note: For some reason I have to clone first: it doesn't let me do `flake https://github.com.....` may be worth investigating
 - sometimes works try:
-   
+
    ```sh
    nix run 'github:nix-community/disko/latest#disko-install' -- --flake github:petertjmills/nix-cloud/refactor2#sky --disk main /dev/nvme0n1
    ```
@@ -255,6 +255,10 @@ Networks: (10.LEVEL.0.0/24)
   ```
 5. Reboot!
 
+## Darwin
+```sh
+GIT_SSH_COMMAND='ssh -i /Volumes/NO\ NAME/id_ed25519_github' sudo nix run nix-darwin/nix-darwin-24.11#darwin-rebuild -- switch --flake github:petertjmills/nix-cloud/refactor5#aarch64-darwin.mac-mini-m4
+```
 # Learning Nix
 
 With nix module imports, the function parameter has access to all of the attributes of the module importing it.
