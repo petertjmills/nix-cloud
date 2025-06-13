@@ -22,7 +22,6 @@ in
   homebrew = {
     enable = true;
     casks = [
-      "displaylink"
       "zen"
       "little-snitch@5"
       "yaak"
@@ -32,6 +31,7 @@ in
       "discord"
       "daisydisk"
       "ghostty"
+      "spotify"
     ];
 
     masApps = {
@@ -47,18 +47,16 @@ in
   nixpkgs.config.allowUnfreePredicate =
     pkg:
     builtins.elem (lib.getName pkg) [
-      "spotify"
       "raycast"
     ];
 
   home-manager.users.${user} = {
     home.packages = [
-      pkgs.spotify
       pkgs.raycast
       pkgs.blender
       pkgs.wireshark
-      # pkgs.nixfmt-rfc-style
-      # pkgs.nixd
+      pkgs.nixfmt-rfc-style
+      pkgs.nixd
     ];
 
     programs = {
@@ -164,11 +162,13 @@ in
           };
         };
       };
+
       git = {
         enable = true;
         userEmail = "ptjm8422@gmail.com";
         userName = "petertjmills";
       };
+
       ghostty = {
         enable = true;
         package = null;
