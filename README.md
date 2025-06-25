@@ -130,74 +130,54 @@ Personal cloud
 
 Services
 
-- Backup location
-  - Borg
+- Backup
+  - restic
+- NAS
+  - SeaweedFS
 - Notes
-  - Nextcloud
+  - Radicale
 - Reminders
-  - Nextcloud
+  - Radicale
 - Calendar
-  - Nextcloud
+  - Radicale
 - Media server
   - Jellyfin
   - Radarr
   - Sonarr
   - Prowlarr
   - Transmission
-- VPN
-  - Headscale
-  - Tailscale
 - Password manager
   - Vaultwarden
   - Bitwarden
-- CDN - Strapi
-  Infrastructure
 - Logging/Monitoring
   - Grafana
   - Loki
   - Prometheus
-- Notifications
-  - ntfy.sh
-- Auth
-  - Authelia
-- Mail
-  - [TBC]
 - Proxy
-  - Nginx
-- Other
-  - Endlessh
+  - caddy/traefik
 - DNS
-  - dnsmasq
+  - unbound
 - VPN
   - Wireguard
-- Dev
-  - VSCode server
-  - Opentofu
-  - Nix-anywhere
-  - Github Action Runners
+
 
 Devices
 
 - Homelab
-  - VMs
-    - Cumulus
-      - Dev
-    - Stratocumulus
-      - Internal Proxy
-      - DNS
-    - Cumulonimbus
-      - Backups
-    - Stratus
-      - Logging/Monitoring
-      - Notifications
-    - Nimbostratus
-      - Media Server
-    - Altocumulus
-      - Notes
-      - Reminders
-      - Calendar
-      - Password Manager
-      - Auth
+  - Sky
+    - DNS
+    - Internal Proxy
+    - NAS
+    - Backups
+    - Logging/Monitoring
+    - Notifications
+    - Media Server
+    - Notes
+    - Reminders
+    - Calendar
+    - Password Manager
+    - Auth
+    - Dev Containers
 - VPS
   - Cirrus
     - VPN
@@ -283,3 +263,29 @@ in
     attr = a + b;
 }
 ```
+
+## VPN/Overlay
+
+headscale + tailscale client:
+- MagicDNS doesn't allow me to set a dns server that is internal to the network
+- Declarative config:
+    - No ability for declarative users without modifying the database
+    - No way to give nodes specific ip addresses
+    -
+- If tailscale configs are changed they don't update on nix clients without manually deleting /var/lib/tailscale and restarting the tailscaled and tailscaled-autoconnect services
+
+Netmaker:
+- Can't create an exit node on the CE of netmaker
+- Complex to set up (lots of moving parts)
+
+Vanilla Wireguard:
+- No NAT Traversal so it's slow, and I have to change config when I'm at home
+
+Netbird:
+- No management CLI and no declarative host configuration
+
+Nebula:
+??
+
+innernet:
+- No NAT Traversal

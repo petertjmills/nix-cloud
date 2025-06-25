@@ -1,96 +1,140 @@
 {
   pkgs,
   lib,
+  inputs,
+  config,
   ...
 }:
 {
-  imports = [ ];
+  imports = [
+    inputs.disko.nixosModules.default
+  ];
 
-  options.ip = lib.mkOption {
-    type = lib.types.str;
-    default = "";
-    description = "The internal IP address of the system";
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+  nix.channel.enable = false;
+  services.openssh.enable = true;
+  users.users.root.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
+  ];
+
+  system.stateVersion = "24.05";
+  boot.loader.grub.enable = true;
+  boot.loader.grub.efiSupport = true;
+  boot.loader.grub.efiInstallAsRemovable = true;
+  boot.initrd.availableKernelModules = [
+    "ata_piix"
+    "uhci_hcd"
+    "sd_mod"
+    "sr_mod"
+  ];
+  boot.kernelParams = [
+    "i915.force_probe=46d1"
+    "i915.enable_guc=2"
+    "intel_iommu=on"
+    "iommu=pt"
+    ''vfio-pci.ids="8086:46d1"''
+  ];
+  # Or incus will crash the Network interface when vm/container is stopped
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+
+  # networking.interfaces.enp1s0.ipv4.addresses = [
+  #   {
+  #     address = ip.address;
+  #     prefixLength = 32;
+  #   }
+  # ];
+  # networking.defaultGateway = {
+  #   address = defaultGateway;
+  #   interface = "enp1s0";
+  # };
+
+  time.timeZone = "Europe/London";
+  boot.supportedFilesystems = [ "zfs" ];
+  boot.zfs.extraPools = [ "tank" ];
+  networking.hostId = "d0a95792";
+
+  fileSystems."/mnt/zfs" = {
+    device = "tank";
+    fsType = "zfs";
+  };
+  systemd.enableEmergencyMode = false;
+
+  networking.nameservers = [
+    "1.1.1.1"
+    "9.9.9.9"
+  ];
+
+  networking.firewall = {
+    enable = true;
   };
 
-  config = {
-    boot.loader.grub.enable = true;
-    boot.loader.grub.efiSupport = true;
-    boot.loader.grub.efiInstallAsRemovable = true;
-    boot.initrd.availableKernelModules = [
-      "ata_piix"
-      "uhci_hcd"
-      "sd_mod"
-      "sr_mod"
-    ];
-    boot.kernelParams = [
-      "i915.force_probe=46d1"
-      "i915.enable_guc=2"
-      "intel_iommu=on"
-      "iommu=pt"
-      ''vfio-pci.ids="8086:46d1"''
-    ];
-    # Or incus will crash the Network interface when vm/container is stopped
-    boot.kernelPackages = pkgs.linuxPackages_latest;
+  networking.bridges = {
+    "br0" = {
+      interfaces = [ "enp1s0" ];
+    };
+  };
 
-    # networking.interfaces.enp1s0.ipv4.addresses = [
-    #   {
-    #     address = ip.address;
-    #     prefixLength = 32;
-    #   }
-    # ];
-    # networking.defaultGateway = {
-    #   address = defaultGateway;
-    #   interface = "enp1s0";
-    # };
-
-    boot.supportedFilesystems = [ "zfs" ];
-    boot.zfs.extraPools = [ "tank" ];
-    networking.hostId = "d0a95792";
-    networking.nameservers = [ "1.1.1.1" ];
-    environment.systemPackages = [
-      pkgs.zfs
+  networking.interfaces."br0".ipv4 = {
+    addresses = [
+      {
+        address = "192.168.86.192";
+        prefixLength = 24;
+      }
     ];
+  };
 
-    disko.devices.disk.main = {
-      device = "/dev/nvme0n1";
-      type = "disk";
-      content = {
-        type = "gpt";
-        partitions = {
-          boot = {
-            size = "1M";
-            type = "EF02"; # for grub MBR
+  networking.defaultGateway = {
+    address = "192.168.86.1";
+    interface = "br0";
+  };
+
+  environment.systemPackages = [
+    pkgs.zfs
+  ];
+
+  disko.devices.disk.main = {
+    device = "/dev/nvme0n1";
+    type = "disk";
+    content = {
+      type = "gpt";
+      partitions = {
+        boot = {
+          size = "1M";
+          type = "EF02"; # for grub MBR
+        };
+        ESP = {
+          size = "512M";
+          type = "EF00";
+          content = {
+            type = "filesystem";
+            format = "vfat";
+            mountpoint = "/boot";
+            mountOptions = [ "umask=0077" ];
           };
-          ESP = {
-            size = "512M";
-            type = "EF00";
-            content = {
-              type = "filesystem";
-              format = "vfat";
-              mountpoint = "/boot";
-              mountOptions = [ "umask=0077" ];
-            };
+        };
+        swap = {
+          size = "4G";
+          content = {
+            type = "swap";
+            discardPolicy = "both";
+            resumeDevice = false;
           };
-          swap = {
-            size = "4G";
-            content = {
-              type = "swap";
-              discardPolicy = "both";
-              resumeDevice = false;
-            };
-          };
-          root = {
-            size = "100%";
-            content = {
-              type = "filesystem";
-              format = "ext4";
-              mountpoint = "/";
-            };
+        };
+        root = {
+          size = "100%";
+          content = {
+            type = "filesystem";
+            format = "ext4";
+            mountpoint = "/";
           };
         };
       };
     };
-
-    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   };
+
+  nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }

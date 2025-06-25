@@ -52,7 +52,7 @@
       ...
     }@inputs:
     let
-      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      darwinPkgs = nixpkgs.legacyPackages.aarch64-darwin;
 
       # defaultGateway = "192.168.86.1";
       # internalSubnet = "10.0.0.1/24";
@@ -62,40 +62,9 @@
         internalSubnet = "10.0.0.1/24";
       };
 
-      # Relative path, because secrets are mounted at /mnt/secrets
-      # in the luks usb drive on the host
-      secrets-dir = "/mnt/secrets";
-
-      terranix-storage = {
-        terraform."required_providers"."incus" = {
-          source = "registry.terraform.io/lxc/incus";
-        };
-        provider."incus" = { };
-
-        resource."incus_storage_pool"."homeserver_lvm" = {
-          name = "lvm";
-          driver = "lvm";
-          config = {
-            size = "800GiB";
-          };
-        };
-
-        resource."incus_storage_volume"."homeserver_zfs_tank_1tb" = {
-          name = "zfs_tank_1tb";
-          pool = "tank";
-          config = {
-            size = "1TiB";
-          };
-        };
-
-        resource."incus_storage_volume"."homeserver_lvm_500gb" = {
-          name = "lvm_500gb";
-          pool = "lvm";
-          config = {
-            size = "500GiB";
-          };
-        };
-      };
+      linuxSystems = [
+        "x86_64-linux"
+      ];
 
       darwinSystems = [
         "aarch64-darwin"
@@ -103,13 +72,24 @@
       ];
     in
     {
-      nixosConfigurations = import ./hosts {
-        inherit
-          nixpkgs
-          ipPool
-          inputs
-          self
-          ;
+      nixosConfigurations = {
+        "sky" = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./machines/home-server.nix
+            ./hosts/sky.nix
+          ];
+        };
+
+        "cirrus" = nixpkgs.lib.nixosSystem {
+          system = "aarch64-linux";
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./machines/hetzner.nix
+            ./hosts/cirrus.nix
+          ];
+        };
       };
 
       darwinConfigurations = nixpkgs.lib.genAttrs darwinSystems (system: {
@@ -122,89 +102,21 @@
         };
       });
 
-      apps.x86_64-linux = {
-        deploy =
-          {
-            type = "app";
-            program = toString (
-              pkgs.writers.writeBash "test" ''
-                echo deploy $1
-              ''
-            );
-            all = {
-              type = "app";
-              program = toString (
-                pkgs.writers.writeBash "deploy" ''
-                  ${builtins.concatStringsSep "\n" (
-                    builtins.attrValues (
-                      builtins.mapAttrs (name: value: ''
-                        ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake .#${name} --target-host ${value.config.ip}
-                      '') self.nixosConfigurations
-                    )
-                  )}
-                ''
-              );
-
-            };
-          }
-          // (builtins.mapAttrs (name: value: {
-            type = "app";
-            program = toString (
-              pkgs.writers.writeBash "deploy" ''
-                  #!/bin/bash
-                echo deploy ${name} ${value.config.ip}
-                ${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake .#${name} --target-host ${value.config.ip}
-              ''
-            );
-          }) self.nixosConfigurations);
-
-        generate-ssh-keys = {
+      apps = {
+        nixos-switch = {
           type = "app";
           program = toString (
-            pkgs.writers.writeBash "push-secrets" ''
-              ${pkgs.python3}/bin/python3 ${./scripts/generate_ssh_keys.py} --output-dir ${secrets-dir} ${builtins.concatStringsSep " " (builtins.attrNames self.nixosConfigurations)}
+            darwinPkgs.writers.writeBash "nixos-switch" ''
+              ${darwinPkgs.nixos-rebuild}/bin/nixos-rebuild switch $1
             ''
           );
         };
-
-        push-ssh-keys = {
-          type = "app";
-          program = toString (
-            pkgs.writers.writeBash "push-secrets" ''
-              ${builtins.concatStringsSep "\n" (
-                builtins.map (name: ''
-                  # copy public keys to ./secrets/public-keys
-                  incus file push ${secrets-dir}/${name}_id_ed25519 ${name}/root/.ssh/id_ed25519 -p
-                  incus file push ${secrets-dir}/${name}_id_ed25519.pub ${name}/root/.ssh/id_ed25519.pub -p
-                '') (builtins.attrNames self.nixosConfigurations)
-              )}
-            ''
-          );
-        };
-
-        import-incus-images = {
-          type = "app";
-          program = toString (
-            pkgs.writers.writeBash "import-incus-images" ''
-              incus image import --alias nixos-lxc-base \
-              ${self.images.incus-lxc-base.metadata}/tarball/nixos-system-x86_64-linux.tar.xz \
-              ${self.images.incus-lxc-base.img}/nixos-lxc-image-x86_64-linux.squashfs
-            ''
-          );
-        };
-
-        terranix-config = (
-          import ./apps/terranix-config.nix {
-            inherit
-              terranix
-              pkgs
-              nixpkgs
-              terranix-storage
-              self
-              ;
-          }
-        );
       };
 
+      packages = nixpkgs.lib.genAttrs darwinSystems (system: {
+        tldx = import ./packages/tldx.nix { pkgs = darwinPkgs; };
+      });
+
     };
+
 }

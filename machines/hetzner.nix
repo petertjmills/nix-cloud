@@ -18,6 +18,10 @@
   };
 
   config = {
+    nix.settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
     boot.initrd.availableKernelModules = [
       "ahci"
       "xhci_pci"
@@ -36,8 +40,21 @@
     # boot.loader.grub.device = "/dev/sda";
     #
     networking.firewall.enable = true;
+    networking.nameservers = [
+      "9.9.9.9"
+      "1.1.1.1"
+    ];
     nixpkgs.hostPlatform = lib.mkForce "aarch64-linux";
     # nixpkgs.system = "aarch64-linux";
+    #
+
+    services.openssh.enable = true;
+    users.users.root.openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8tQOhDkrQO4q3W7JdernvtL1v+aiNsjozN41qrfs2n Silversurfer"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHyxwQIShLIk/qHVnEkRWC+7/V82brDH3s0tBwpnttVi macmini"
+    ];
+
+    system.stateVersion = "24.05";
 
     disko.devices = {
       disk = {
