@@ -63,38 +63,38 @@
   };
   systemd.enableEmergencyMode = false;
 
-  networking.nameservers = [
-    "1.1.1.1"
-    "9.9.9.9"
-  ];
+  networking = {
+    bridges."br0".interfaces = [ "enp1s0" ];
 
-  networking.firewall = {
-    enable = true;
-  };
+    useDHCP = false;
 
-  networking.bridges = {
-    "br0" = {
-      interfaces = [ "enp1s0" ];
-    };
-  };
-
-  networking.interfaces."br0".ipv4 = {
-    addresses = [
+    interfaces."br0".ipv4.addresses = [
       {
         address = "192.168.86.192";
         prefixLength = 24;
       }
     ];
-  };
 
-  networking.defaultGateway = {
-    address = "192.168.86.1";
-    interface = "br0";
-  };
+    firewall = {
+      enable = true;
+    };
 
-  environment.systemPackages = [
-    pkgs.zfs
-  ];
+    defaultGateway = {
+      address = "192.168.86.1";
+      interface = "br0";
+    };
+
+    nameservers = [
+      "1.1.1.1"
+      "9.9.9.9"
+    ];
+
+    nat = {
+      enable = true;
+      internalInterfaces = [ "vb-+" ];
+      externalInterface = "br0";
+    };
+  };
 
   disko.devices.disk.main = {
     device = "/dev/nvme0n1";

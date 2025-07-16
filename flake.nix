@@ -35,6 +35,8 @@
       url = "git+ssh://git@github.com/petertjmills/secrets.git";
       flake = false;
     };
+
+    unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
   outputs =
@@ -53,6 +55,7 @@
     }@inputs:
     let
       darwinPkgs = nixpkgs.legacyPackages.aarch64-darwin;
+      unstableDarwin = inputs.unstable.legacyPackages.aarch64-darwin;
 
       # defaultGateway = "192.168.86.1";
       # internalSubnet = "10.0.0.1/24";
@@ -95,7 +98,7 @@
       darwinConfigurations = nixpkgs.lib.genAttrs darwinSystems (system: {
         "mac-mini-m4" = darwin.lib.darwinSystem {
           inherit system;
-          specialArgs = { inherit inputs; };
+          specialArgs = { inherit inputs unstableDarwin; };
           modules = [
             ./darwin-hosts/mac-mini-m4.nix
           ];

@@ -2,6 +2,7 @@
   inputs,
   pkgs,
   lib,
+  unstableDarwin,
   ...
 }:
 let
@@ -68,6 +69,7 @@ in
     programs = {
       zed-editor = {
         enable = true;
+        package = unstableDarwin.zed-editor;
         extensions = [
           "dockerfile"
           "sql"
@@ -76,7 +78,6 @@ in
           "log"
           "vscode-dark-modern"
         ];
-        # Not available til 25.05
         extraPackages = [
           pkgs.nixfmt-rfc-style
           pkgs.nixd
@@ -102,7 +103,7 @@ in
             default_profile = "ask";
             default_model = {
               provider = "zed.dev";
-              model = "claude-sonnet-4-thinking-latest";
+              model = "claude-sonnet-4";
             };
             version = "2";
           };
@@ -166,7 +167,7 @@ in
     username = user;
     entries = [
       { path = "/Applications/Zen.app/"; }
-      { path = "${pkgs.zed-editor}/Applications/Zed.app"; }
+      { path = "${unstableDarwin.zed-editor}/Applications/Zed.app"; }
       { path = "/Applications/Spotify.app/"; }
       { path = "/Applications/Ghostty.app/"; }
       { path = "/System/Applications/Messages.app/"; }

@@ -26,6 +26,7 @@ in
 
       # unbound
       53
+      5432
     ];
     allowedUDPPorts = [ 53 ];
   };
@@ -228,5 +229,30 @@ in
     "d '${config.services.transmission.settings.download-dir}' 0770 transmission media - -"
     "d '${config.services.transmission.settings.incomplete-dir}' 0770 transmission media - -"
   ];
+
+  services.postgresql = {
+    enable = true;
+    enableTCPIP = true;
+    settings.port = 5432;
+    authentication = pkgs.lib.mkOverride 10 ''
+      #...
+      #type database DBuser origin-address auth-method
+      # ipv4
+      local all all              trust
+      host  all      all     127.0.0.1/32   trust
+      host all       all     ::1/128        trust
+      host  all      all     100.64.0.5/32   trust
+      # ipv6
+    '';
+    ensureUsers = [
+      {
+        name = "metachroma_dev";
+        ensureDBOwnership = true;
+      }
+    ];
+    ensureDatabases = [
+      "metachroma_dev"
+    ];
+  };
 
 }
