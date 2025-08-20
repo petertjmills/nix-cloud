@@ -124,6 +124,14 @@
         tldx = import ./packages/tldx.nix { pkgs = darwinPkgs; };
       });
 
+      templates.dev = {
+        path = ./templates/dev;
+        description = "My standard dev template";
+        welcomeText = ''
+          Run `direnv allow` to get started
+        '';
+      };
+
     };
 
 }
