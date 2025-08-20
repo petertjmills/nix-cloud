@@ -3,6 +3,7 @@
   pkgs,
   lib,
   unstableDarwin,
+  unfreeDarwinPkgs,
   ...
 }:
 let
@@ -25,6 +26,11 @@ in
 
   homebrew = {
     enable = true;
+    onActivation = {
+      autoUpdate = true;
+      cleanup = "uninstall";
+      upgrade = true;
+    };
     casks = [
       "zen"
       "little-snitch@5"
@@ -40,7 +46,10 @@ in
       "displaylink"
       "launchcontrol"
       "tailscale"
+      "ollama"
+      "thunderbird"
     ];
+    brews = [ "ollama" ];
 
     masApps = {
       "WhatsApp Messenger" = 310633997;
@@ -64,6 +73,7 @@ in
       pkgs.nixd
       pkgs.nixos-rebuild
       # pkgs.tailscale
+      unfreeDarwinPkgs.vscode
     ];
 
     programs = {
@@ -84,6 +94,7 @@ in
         ];
         installRemoteServer = false;
         userSettings = {
+          terminal.scrollbar.show = false;
           edit_predictions = {
             mode = "subtle";
             copilot = {

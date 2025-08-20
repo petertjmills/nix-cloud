@@ -58,7 +58,6 @@ in
             "100.64.0.0/10 allow"
           ];
 
-          local-zone = [ "'youtube.com.' redirect" ];
           local-data = builtins.map (r: ''"${r.name} IN ${r.type} ${r.data}"'') cfg.records;
         };
 

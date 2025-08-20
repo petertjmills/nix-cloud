@@ -250,9 +250,14 @@ in
         name = "metachroma_dev";
         ensureDBOwnership = true;
       }
+      {
+        name = "metachroma_test";
+        ensureDBOwnership = true;
+      }
     ];
     ensureDatabases = [
       "metachroma_dev"
+      "metachroma_test"
     ];
   };
 

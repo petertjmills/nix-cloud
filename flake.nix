@@ -55,6 +55,10 @@
     }@inputs:
     let
       darwinPkgs = nixpkgs.legacyPackages.aarch64-darwin;
+      unfreeDarwinPkgs = import nixpkgs {
+        system = "aarch64-darwin";
+        config.allowUnfree = true;
+      };
       unstableDarwin = inputs.unstable.legacyPackages.aarch64-darwin;
 
       # defaultGateway = "192.168.86.1";
@@ -98,7 +102,7 @@
       darwinConfigurations = nixpkgs.lib.genAttrs darwinSystems (system: {
         "mac-mini-m4" = darwin.lib.darwinSystem {
           inherit system;
-          specialArgs = { inherit inputs unstableDarwin; };
+          specialArgs = { inherit inputs unstableDarwin unfreeDarwinPkgs; };
           modules = [
             ./darwin-hosts/mac-mini-m4.nix
           ];

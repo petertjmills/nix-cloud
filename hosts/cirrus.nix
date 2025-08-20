@@ -181,11 +181,6 @@ in
       type = "TXT";
       data = "v=spf1 ip4:193.237.206.90 ~all";
     }
-    {
-      name = "youtube.com.";
-      type = "A";
-      data = "127.0.0.1";
-    }
   ];
 
   networking.firewall = {
