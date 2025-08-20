@@ -18,8 +18,8 @@ init HOST SSH *args:
 
 # nixos-rebuild --target-host root@192.168.86.212 switch --flake .#nimbus
 
-deploy HOST SSH:
-	nixos-rebuild switch --flake .#{{HOST}} --target-host {{SSH}}
+deploy HOST SSH *args:
+	nixos-rebuild switch --flake .#{{HOST}} --target-host {{SSH}} {{args}}
 
 # nixos-generators can cross compile and use different image formats!
 # Maybe move away from iso in the future?

@@ -76,6 +76,18 @@ All proxmox vms require this too:
 boot.initrd.availableKernelModules = [ "virtio_scsi" ];
 ```
 
+Change boot order in uefi with
+
+```sh
+nix-shell -p efibootmgr
+# list boot devices
+efibootmgr
+# change order
+efibootmgr -o 0001,0002
+# set next boot
+efibootmgr -n 0001
+```
+
 # Backups
 
 Cirrustratus is the backup server. It hosts a borg backup repositories that can be accessed via ssh (Therefore requires the ssh keys to be configured).
@@ -118,75 +130,56 @@ Personal cloud
 
 Services
 
-- Backup location
-  - Borg
+- Backup
+  - restic
+- NAS
+  - SeaweedFS
 - Notes
-  - Nextcloud
+  - Radicale
 - Reminders
-  - Nextcloud
+  - Radicale
 - Calendar
-  - Nextcloud
+  - Radicale
 - Media server
   - Jellyfin
   - Radarr
   - Sonarr
   - Prowlarr
   - Transmission
-- VPN
-  - Headscale
-  - Tailscale
 - Password manager
   - Vaultwarden
   - Bitwarden
-- CDN - Strapi
-  Infrastructure
 - Logging/Monitoring
   - Grafana
   - Loki
   - Prometheus
-- Notifications
-  - ntfy.sh
-- Auth
-  - Authelia
-- Mail
-  - [TBC]
 - Proxy
-  - Nginx
-- Other
-  - Endlessh
+  - caddy/traefik
 - DNS
-  - dnsmasq
+  - unbound
 - VPN
   - Wireguard
-- Dev
-  - VSCode server
-  - Opentofu
-  - Nix-anywhere
+
 
 Devices
 
 - Homelab
-  - VMs
-    - Cumulus
-      - Dev
-    - Nimbus
-      - Media Server
-    - Cirrus
-      - Internal Proxy
-      - DNS
-    - Altostratus
-      - Notes
-      - Reminders
-      - Calendar
-      - Password Manager
-      - Auth
-    - Altocumulus
-      - Logging/Monitoring
-      - Notifications
-    - Cirrostratus
-      - Backups
+  - Sky
+    - DNS
+    - Internal Proxy
+    - NAS
+    - Backups
+    - Logging/Monitoring
+    - Notifications
+    - Media Server
+    - Notes
+    - Reminders
+    - Calendar
+    - Password Manager
+    - Auth
+    - Dev Containers
 - VPS
-  - Stratus
+  - Cirrus
     - VPN
     - External Proxy
     - Endlessh
@@ -231,6 +224,68 @@ Networks: (10.LEVEL.0.0/24)
 
 - `nix run 'github:nix-community/disko/latest#disko-install' -- --flake <flake-url>#<flake-attr> --disk <disk-name> <disk-device>`
 - Note: For some reason I have to clone first: it doesn't let me do `flake https://github.com.....` may be worth investigating
+- sometimes works try:
 
+   ```sh
+   nix run 'github:nix-community/disko/latest#disko-install' -- --flake github:petertjmills/nix-cloud/refactor2#sky --disk main /dev/nvme0n1
+   ```
+- If this runs out of device storage try
+  ```sh
+  mount -o remount,size=10G,noatime /nix/.rw-store
+  ```
 5. Reboot!
 
+## Darwin
+```sh
+GIT_SSH_COMMAND='ssh -i /Volumes/NO\ NAME/id_ed25519_github' sudo nix run nix-darwin/nix-darwin-24.11#darwin-rebuild -- switch --flake github:petertjmills/nix-cloud/refactor5#aarch64-darwin.mac-mini-m4
+```
+# Learning Nix
+
+With nix module imports, the function parameter has access to all of the attributes of the module importing it.
+
+so if you have a module like this:
+
+```nix
+{ config, pkgs, ... }:
+let
+    a = 1;
+    b = 2;
+in
+{
+  imports = [ ./myfile];
+}
+```
+
+```nix
+{ config, pkgs, a, b, ... }:
+{
+    # do stuff
+    attr = a + b;
+}
+```
+
+## VPN/Overlay
+
+headscale + tailscale client:
+- MagicDNS doesn't allow me to set a dns server that is internal to the network
+- Declarative config:
+    - No ability for declarative users without modifying the database
+    - No way to give nodes specific ip addresses
+    -
+- If tailscale configs are changed they don't update on nix clients without manually deleting /var/lib/tailscale and restarting the tailscaled and tailscaled-autoconnect services
+
+Netmaker:
+- Can't create an exit node on the CE of netmaker
+- Complex to set up (lots of moving parts)
+
+Vanilla Wireguard:
+- No NAT Traversal so it's slow, and I have to change config when I'm at home
+
+Netbird:
+- No management CLI and no declarative host configuration
+
+Nebula:
+??
+
+innernet:
+- No NAT Traversal

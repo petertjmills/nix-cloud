@@ -1,60 +1,233 @@
 {
   "provider": {
-    "proxmox": {
-      "pm_api_url": "http://proxmox.server:8006/api2/json",
-      "pm_tls_insecure": true
-    }
+    "incus": {}
   },
   "resource": {
-    "proxmox_vm_qemu": {
-      "nimbus": {
-        "cores": "2",
-        "disks": {
-          "ide": {
-            "ide0": {
-              "cdrom": {
-                "iso": "local:iso/nixos-24.05.20240630.7dca152-x86_64-linux.iso"
-              }
-            }
+    "incus_instance": {
+      "cumulonimbus": {
+        "config": {
+          "boot.autostart": true,
+          "security.nesting": true
+        },
+        "device": [
+          {
+            "name": "zfs_storage",
+            "properties": {
+              "path": "/zfs_data",
+              "pool": "tank",
+              "source": "zfs_tank_1tb"
+            },
+            "type": "disk"
           },
-          "scsi": {
-            "scsi0": {
-              "disk": {
-                "iothread": true,
-                "serial": "disk0nimbus-os",
-                "size": "128G",
-                "storage": "local-lvm"
-              }
-            }
+          {
+            "name": "lvm_storage",
+            "properties": {
+              "path": "/lvm_data",
+              "pool": "lvm",
+              "source": "lvm_500gb"
+            },
+            "type": "disk"
+          },
+          {
+            "name": "enp1s0",
+            "properties": {
+              "ipv4.address": "10.0.0.5",
+              "name": "enp1s0",
+              "network": "incusbr0"
+            },
+            "type": "nic"
           }
+        ],
+        "image": "nixos-lxc-base",
+        "limits": {
+          "cpu": "1",
+          "memory": "4GiB"
         },
-        "machine": "q35",
-        "memory": "4096",
-        "name": "nimbus",
-        "network": {
-          "bridge": "vmbr0",
-          "firewall": true,
-          "id": 0,
-          "link_down": false,
-          "model": "virtio"
+        "name": "cumulonimbus"
+      },
+      "cumulus": {
+        "config": {
+          "boot.autostart": true,
+          "security.nesting": true
         },
-        "pcis": {
-          "pci0": {
-            "mapping": {
-              "mapping_id": "intelgpu"
-            }
+        "device": [
+          {
+            "name": "root",
+            "properties": {
+              "path": "/",
+              "pool": "lvm",
+              "size": "50GiB"
+            },
+            "type": "disk"
+          },
+          {
+            "name": "enp1s0",
+            "properties": {
+              "ipv4.address": "10.0.0.2",
+              "name": "enp1s0",
+              "network": "incusbr0"
+            },
+            "type": "nic"
           }
+        ],
+        "image": "nixos-lxc-base",
+        "limits": {
+          "cpu": 4,
+          "memory": "4GiB"
         },
-        "scsihw": "virtio-scsi-single",
-        "target_node": "yellowsubmarine"
+        "name": "cumulus"
+      },
+      "nimbostratus": {
+        "config": {
+          "boot.autostart": true
+        },
+        "device": [
+          {
+            "name": "gpu",
+            "properties": {
+              "address": "0000:00:02.0"
+            },
+            "type": "pci"
+          },
+          {
+            "name": "root",
+            "properties": {
+              "path": "/",
+              "pool": "lvm",
+              "size": "50GiB"
+            },
+            "type": "disk"
+          },
+          {
+            "name": "enp1s0",
+            "properties": {
+              "ipv4.address": "10.0.0.6",
+              "name": "enp1s0",
+              "network": "incusbr0"
+            },
+            "type": "nic"
+          }
+        ],
+        "image": "nixos-vm-base",
+        "limits": {
+          "cpu": 4,
+          "memory": "4GiB"
+        },
+        "name": "nimbostratus",
+        "type": "virtual-machine"
+      },
+      "stratocumulus": {
+        "config": {
+          "boot.autostart": true
+        },
+        "device": [
+          {
+            "name": "enp1s0",
+            "properties": {
+              "ipv4.address": "10.0.0.3",
+              "name": "enp1s0",
+              "network": "incusbr0"
+            },
+            "type": "nic"
+          }
+        ],
+        "image": "nixos-lxc-base",
+        "limits": {
+          "cpu": 1,
+          "memory": "1GiB"
+        },
+        "name": "stratocumulus"
+      },
+      "stratus": {
+        "config": {
+          "boot.autostart": true
+        },
+        "device": [
+          {
+            "name": "enp1s0",
+            "properties": {
+              "ipv4.address": "10.0.0.4",
+              "name": "enp1s0",
+              "network": "incusbr0"
+            },
+            "type": "nic"
+          }
+        ],
+        "image": "nixos-lxc-base",
+        "limits": {
+          "cpu": 1,
+          "memory": "1GiB"
+        },
+        "name": "stratus"
+      }
+    },
+    "incus_network_forward": {
+      "cumulonimbus": {
+        "config": {
+          "target_address": "10.0.0.5"
+        },
+        "listen_address": "192.168.86.196",
+        "network": "incusbr0"
+      },
+      "cumulus": {
+        "config": {
+          "target_address": "10.0.0.2"
+        },
+        "listen_address": "192.168.86.193",
+        "network": "incusbr0"
+      },
+      "nimbostratus": {
+        "config": {
+          "target_address": "10.0.0.6"
+        },
+        "listen_address": "192.168.86.197",
+        "network": "incusbr0"
+      },
+      "stratocumulus": {
+        "config": {
+          "target_address": "10.0.0.3"
+        },
+        "listen_address": "192.168.86.194",
+        "network": "incusbr0"
+      },
+      "stratus": {
+        "config": {
+          "target_address": "10.0.0.4"
+        },
+        "listen_address": "192.168.86.195",
+        "network": "incusbr0"
+      }
+    },
+    "incus_storage_pool": {
+      "homeserver_lvm": {
+        "config": {
+          "size": "800GiB"
+        },
+        "driver": "lvm",
+        "name": "lvm"
+      }
+    },
+    "incus_storage_volume": {
+      "homeserver_lvm_500gb": {
+        "config": {
+          "size": "500GiB"
+        },
+        "name": "lvm_500gb",
+        "pool": "lvm"
+      },
+      "homeserver_zfs_tank_1tb": {
+        "config": {
+          "size": "1TiB"
+        },
+        "name": "zfs_tank_1tb",
+        "pool": "tank"
       }
     }
   },
   "terraform": {
     "required_providers": {
-      "proxmox": {
-        "source": "registry.terraform.io/telmate/proxmox",
-        "version": "3.0.1-rc6"
+      "incus": {
+        "source": "registry.terraform.io/lxc/incus"
       }
     }
   }
