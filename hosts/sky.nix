@@ -27,6 +27,9 @@ in
       # unbound
       53
       5432
+
+      #Jellyfin
+      8096
     ];
     allowedUDPPorts = [ 53 ];
   };
@@ -253,6 +256,7 @@ in
       {
         name = "metachroma_test";
         ensureDBOwnership = true;
+        ensureClauses.createdb = true;
       }
     ];
     ensureDatabases = [
