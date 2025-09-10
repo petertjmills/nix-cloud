@@ -48,6 +48,7 @@ in
       "tailscale"
       "ollama"
       "thunderbird"
+      "calibre"
     ];
     brews = [ "ollama" ];
 
