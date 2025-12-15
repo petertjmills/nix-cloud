@@ -37,14 +37,23 @@ in
           plugins = [
             "git"
             "direnv"
+            "jj"
           ];
-          theme = "dieter";
+          custom = "${./zsh-custom}";
+          theme = "dieter-custom";
         };
       };
       git = {
         enable = true;
         userEmail = "ptjm8422@gmail.com";
         userName = "petertjmills";
+      };
+      jujutsu = {
+        enable = true;
+        settings.user = {
+          email = "ptjm8422@gmail.com";
+          name = "petertjmills";
+        };
       };
     };
     home.stateVersion = "24.11";

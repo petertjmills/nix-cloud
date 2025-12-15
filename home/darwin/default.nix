@@ -75,6 +75,7 @@ in
       pkgs.nixos-rebuild
       # pkgs.tailscale
       unfreeDarwinPkgs.vscode
+      unstableDarwin.librespot
     ];
 
     programs = {
@@ -95,7 +96,7 @@ in
         ];
         installRemoteServer = false;
         userSettings = {
-          terminal.scrollbar.show = false;
+          # terminal.scrollbar.show = false;
           edit_predictions = {
             mode = "subtle";
             copilot = {
@@ -115,7 +116,17 @@ in
             default_profile = "ask";
             default_model = {
               provider = "zed.dev";
-              model = "claude-sonnet-4";
+              model = "gpt-5";
+            };
+            profiles.ask = {
+              name = "Ask";
+              tools.web_search = false;
+              tools.fetch = false;
+            };
+            profiles.write = {
+              name = "Write";
+              tools.web_search = false;
+              tools.fetch = false;
             };
             version = "2";
           };

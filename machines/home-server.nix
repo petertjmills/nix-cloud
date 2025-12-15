@@ -65,24 +65,24 @@
 
   networking = {
     bridges."br0".interfaces = [ "enp1s0" ];
-
+    interfaces."br0".useDHCP = true;
     useDHCP = false;
-
-    interfaces."br0".ipv4.addresses = [
-      {
-        address = "192.168.86.192";
-        prefixLength = 24;
-      }
-    ];
 
     firewall = {
       enable = true;
     };
 
-    defaultGateway = {
-      address = "192.168.86.1";
-      interface = "br0";
-    };
+    # interfaces."br0".ipv4.addresses = [
+    #   {
+    #     address = "192.168.86.192";
+    #     prefixLength = 24;
+    #   }
+    # ];
+
+    # defaultGateway = {
+    #   address = "192.168.86.1";
+    #   interface = "br0";
+    # };
 
     nameservers = [
       "1.1.1.1"

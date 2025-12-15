@@ -45,6 +45,7 @@ in
   security.acme = {
     acceptTerms = true;
     defaults.email = "cirrus_pm4_cert@pm4.uk";
+    defaults.dnsResolver = "1.1.1.1";
     certs."wildcard.pm4.uk" = {
       credentialFiles."CF_DNS_API_TOKEN_FILE" = config.sops.secrets.cloudflare_api_key.path;
       dnsProvider = "cloudflare";
@@ -180,6 +181,11 @@ in
       name = "test.metachroma.co.";
       type = "TXT";
       data = "v=spf1 ip4:193.237.206.90 ~all";
+    }
+    {
+      name = "frigate.pm4.uk";
+      type = "CNAME";
+      data = "sky.ts.pm4.uk";
     }
   ];
 

@@ -59,6 +59,11 @@
         system = "aarch64-darwin";
         config.allowUnfree = true;
       };
+
+      unstable = import inputs.unstable {
+        system = "x86_64-linux";
+        config.allowUnfree = true;
+      };
       unstableDarwin = inputs.unstable.legacyPackages.aarch64-darwin;
 
       # defaultGateway = "192.168.86.1";
@@ -82,7 +87,7 @@
       nixosConfigurations = {
         "sky" = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
+          specialArgs = { inherit inputs unstable; };
           modules = [
             ./machines/home-server.nix
             ./hosts/sky.nix
