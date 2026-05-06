@@ -11,16 +11,16 @@ let
   cfg = config.local.media;
 
   # https://wiki.nixos.org/w/index.php?title=Jellyfin&mobileaction=toggle_view_desktop#VAAPI_and_Intel_QSV_on_Arc_GPU
-  jellyfin-ffmpeg-overlay = (
-    final: prev: {
-      jellyfin-ffmpeg = prev.jellyfin-ffmpeg.override {
-        ffmpeg_7-full = prev.ffmpeg_7-full.override {
-          withMfx = false;
-          withVpl = true;
-        };
-      };
-    }
-  );
+  # jellyfin-ffmpeg-overlay = (
+  #   final: prev: {
+  #     jellyfin-ffmpeg = prev.jellyfin-ffmpeg.override {
+  #       ffmpeg_7-full = prev.ffmpeg_7-full.override {
+  #         withMfx = false;
+  #         withVpl = true;
+  #       };
+  #     };
+  #   }
+  # );
 in
 {
   options.local.media = {
@@ -117,9 +117,9 @@ in
 
   config = mkIf cfg.enable {
     # Overlays for jellyfin-ffmpeg with hardware acceleration
-    nixpkgs.overlays = mkIf cfg.hardwareAcceleration.enable [
-      jellyfin-ffmpeg-overlay
-    ];
+    # nixpkgs.overlays = mkIf cfg.hardwareAcceleration.enable [
+    #   jellyfin-ffmpeg-overlay
+    # ];
 
     # Kernel modules and parameters for hardware acceleration
     boot = mkIf cfg.hardwareAcceleration.enable {
@@ -156,7 +156,7 @@ in
 
     # Package overrides for hardware acceleration
     nixpkgs.config.packageOverrides = mkIf cfg.hardwareAcceleration.enable (pkgs: {
-      vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
+      intel-vaapi-driver = pkgs.intel-vaapi-driver.override { enableHybridCodec = true; };
     });
 
     # Hardware acceleration
@@ -167,7 +167,7 @@ in
         extraPackages = with pkgs; [
           intel-media-driver
           intel-vaapi-driver
-          vaapiVdpau
+          libva-vdpau-driver # error: 'vaapiVdpau' has been renamed to/replaced by 'libva-vdpau-driver'
           intel-compute-runtime
           vpl-gpu-rt
         ];
@@ -194,6 +194,7 @@ in
 
       transmission = mkIf cfg.transmission.enable {
         enable = true;
+        package = pkgs.transmission_4;
         # Don't open firewall here. Do it on the host
         # openFirewall = cfg.openFirewall;
         openFirewall = false;

@@ -13,6 +13,18 @@ in
   home-manager.useUserPackages = true;
 
   home-manager.users.${user} = {
+    home.packages = [
+      pkgs.pirate-get
+      pkgs.transmission_4
+    ];
+    xdg.configFile."pirate-get" = {
+      enable = true;
+      source = (pkgs.formats.toml { }).generate "pirate-get" {
+        "Search"."total-results" = 5;
+        "Misc".transmission = true;
+        "Misc"."transmission-endpoint" = "sky:9091";
+      };
+    };
     programs = {
       direnv = {
         enable = true;
@@ -45,8 +57,8 @@ in
       };
       git = {
         enable = true;
-        userEmail = "ptjm8422@gmail.com";
-        userName = "petertjmills";
+        settings.user.email = "ptjm8422@gmail.com";
+        settings.user.name = "petertjmills";
       };
       jujutsu = {
         enable = true;

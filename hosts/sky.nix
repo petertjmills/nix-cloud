@@ -24,7 +24,63 @@ in
     ../modules/media.nix
     ../modules/frigate.16.nix
   ];
+  ####################################
+  # System
+  ####################################
+  environment.defaultPackages = [
+    pkgs.neofetch
+    pkgs.htop
+    inputs.escpos-server.packages.x86_64-linux.escpos-print
+  ];
+  environment.systemPackages = [
+    pkgs.seaweedfs
+  ];
+  systemd.tmpfiles.rules = [
+    "d '${config.services.radicale.settings.storage.filesystem_folder}' 0700 radicale radicale - -"
+    "d '${config.services.transmission.settings.download-dir}' 0770 transmission media - -"
+    "d '${config.services.transmission.settings.incomplete-dir}' 0770 transmission media - -"
+  ];
+  ####################################
+  # Secrets
+  ####################################
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  sops.age.generateKey = true;
+  sops.secrets.headscale_sky = {
+    sopsFile = "${inputs.secrets}/headscale/sky";
+    format = "binary";
+  };
 
+  ####################################
+  # Backups
+  ####################################
+
+  services.restic.backups = {
+    # "postgres" = { };
+    # "jellyfin-settings" = { };
+    # "media" = { };
+    # "radicale" = { };
+    # "frigate" = { };
+    # "home-assistant" = { };
+  };
+
+  services.restic.server = {
+    enable = true;
+    appendOnly = true;
+    dataDir = "/mnt/zfs/backups/restic";
+    extraFlags = [
+      # "--no-auth"
+      "--proxy-auth-username=X-Webauth-User"
+    ];
+    listenAddress = "127.0.0.1:8480";
+    privateRepos = true;
+    prometheus = true;
+  };
+
+  services.usbmuxd.enable = true;
+
+  ####################################
+  # Ports + Networking
+  ####################################
   networking.hostName = "sky";
   networking.firewall = {
     allowedTCPPorts = [
@@ -53,11 +109,9 @@ in
     ];
   };
 
-  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-  sops.age.generateKey = true;
-  sops.secrets.headscale_sky = {
-    sopsFile = "${inputs.secrets}/headscale/sky";
-    format = "binary";
+  services.resolved = {
+    enable = true;
+    dnssec = "false";
   };
 
   services.tailscale = {
@@ -74,101 +128,109 @@ in
 
   networking.firewall.checkReversePath = "loose";
 
-  environment.defaultPackages = [
-    pkgs.neofetch
-    pkgs.htop
-
-    # neolink
-  ];
-
-  # services.traefik = {
-  #   enable = true;
-  #   staticConfigOptions = {
-  #     entryPoints.web = {
-  #       address = ":80";
-  #       http.redirections.entryPoint.to = "websecure";
-  #       http.redirections.entryPoint.scheme = "https";
-  #     };
-  #     entryPoints.websecure = {
-  #       address = ":443";
-  #     };
-  #     # Replace this with cert from security.acme (to centralise)
-  #     # certificateResolvers.main.acme = {
-  #     #   email = "";
-  #     #   storage = "";
-  #     #   dnsChallenge.provider = "cloudflare";
-  #     #   dnsChallenge.delayBeforeCheck = 30;
-  #     # };
-
-  #   };
-  #   dynamicConfigOptions = {
-  #     # http.routers.
-  #   };
-  # };
-  # sops.secrets.cloudflare_api_key = {
-  #   sopsFile = "${inputs.secrets}/cloudflare_api/pm4.uk.enc";
-  #   format = "binary";
-  # };
-  # security.acme = {
-  #   acceptTerms = true;
-  #   defaults.email = "cirrus_pm4_cert@pm4.uk";
-  #   defaults.dnsResolver = "1.1.1.1";
-  #   certs."wildcard.pm4.uk" = {
-  #     credentialFiles."CF_DNS_API_TOKEN_FILE" = config.sops.secrets.cloudflare_api_key.path;
-  #     dnsProvider = "cloudflare";
-  #     domain = "*.pm4.uk";
-  #   };
-  # };
-  # services.caddy = {
-  #   enable = true;
-  #   virtualHosts."frigate.pm4.uk".extraConfig = ''
-  #     reverse_proxy http://localhost:8971
-  #     tls ${config.security.acme.certs."wildcard.pm4.uk".directory}/cert.pem ${
-  #       config.security.acme.certs."wildcard.pm4.uk".directory
-  #     }/key.pem {
-  #       protocols tls1.3
-  #     }
-  #     import logging frigate.pm4.uk
-  #   '';
-  # };
-
-  services.prometheus = {
+  sops.secrets.cloudflare_api_key = {
+    sopsFile = "${inputs.secrets}/cloudflare_api/pm4.uk.enc";
+    format = "binary";
+  };
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = "sky_pm4_cert@pm4.uk";
+    defaults.dnsResolver = "1.1.1.1";
+    certs."wildcard.pm4.uk" = {
+      credentialFiles."CF_DNS_API_TOKEN_FILE" = config.sops.secrets.cloudflare_api_key.path;
+      dnsProvider = "cloudflare";
+      domain = "*.pm4.uk";
+    };
+    certs."wildcard.coredev.pm4.uk" = {
+      credentialFiles."CF_DNS_API_TOKEN_FILE" = config.sops.secrets.cloudflare_api_key.path;
+      dnsProvider = "cloudflare";
+      domain = "*.coredev.pm4.uk";
+    };
+  };
+  users.groups.acme = {
+    # This is for the nspawn container
+    gid = 977;
+  };
+  services.caddy = {
     enable = true;
-    globalConfig.scrape_interval = "10s"; # "1m"
-    # scrapeConfigs = scrapeConfigs;
+    extraConfig = ''
+      (tailscale_auth) {
+        forward_auth unix/${config.services.tailscaleAuth.socketPath} {
+            uri /
+
+            header_up Remote-Addr {http.request.remote.host}
+            header_up Remote-Port {http.request.remote.port}
+            header_up Expected-Tailnet ts.pm4.uk.
+
+           	copy_headers {
+            		Tailscale-User>X-Webauth-User
+            		Tailscale-Name>X-Webauth-Name
+            		Tailscale-Login>X-Webauth-Login
+            		Tailscale-Tailnet>X-Webauth-Tailnet
+            		Tailscale-Profile-Picture>X-Webauth-Profile-Picture
+           	}
+        }
+
+        request_header X-Webauth-Email "{http.request.header.X-Webauth-User}@pm4.uk"
+      }
+    '';
+    virtualHosts = {
+      "frigate.pm4.uk" = {
+        useACMEHost = "wildcard.pm4.uk";
+        extraConfig = ''
+          reverse_proxy localhost:8392
+        '';
+      };
+      "radicale.pm4.uk" = {
+        useACMEHost = "wildcard.pm4.uk";
+        extraConfig = ''
+          import tailscale_auth
+          @get-root {
+              method GET
+              path /.web
+          }
+
+          redir @get-root /.web/
+          reverse_proxy localhost:5232 {
+              # replace "HOST" with configured hostname of URL (FQDN) in client
+              header_up Host HOST
+              # replace "PORT" with configured port of URL in client
+              header_up X-Forwarded-Port PORT
+              # Set http_x_remote_user to = X-Webauth-User
+              header_up X-Remote-User "{http.request.header.X-Webauth-User}"
+          }
+        '';
+      };
+      "restic.pm4.uk" = {
+        useACMEHost = "wildcard.pm4.uk";
+        extraConfig = ''
+          import tailscale_auth
+          reverse_proxy localhost:8480
+        '';
+      };
+      "openwebui.pm4.uk" = {
+        useACMEHost = "wildcard.pm4.uk";
+        extraConfig = ''
+          import tailscale_auth
+          reverse_proxy localhost:8358
+        '';
+      };
+    };
   };
 
-  # environment.etc."grafana/dashboards/incus-dashboard.json".source =
-  #   ../configs/grafana/incus-dashboard.json;
-  # environment.etc."grafana/dashboards/seaweedfs-dashboard.json".source =
-  #   ../configs/grafana/seaweedfs-dashboard.json;
-  # environment.etc."grafana/dashboards/loki-dashboard.json".source =
-  #   ../configs/grafana/loki-dashboard.json;
+  services.tailscaleAuth = {
+    enable = true;
+    user = "caddy";
+    group = "caddy";
+  };
 
-  # services.grafana = {
-  #   enable = true;
-  #   settings = {
-  #     server = {
-  #       http_port = 3000;
-  #       http_addr = "0.0.0.0";
-  #     };
-  #
-  # };
-  #   provision = {
-  #     enable = true;
-
-  #     dashboards.settings = {
-  #       apiVersion = 1;
-
-  #       providers = [
-  #         {
-  #           name = "default";
-  #           options.path = "/etc/grafana/dashboards";
-  #         }
-  #       ];
-  #     };
-  #   };
-  # };
+  ####################################
+  # Observability
+  ####################################
+  services.prometheus = {
+    enable = true;
+    globalConfig.scrape_interval = "1m"; # "1m"
+  };
 
   services.loki = {
     enable = true;
@@ -204,6 +266,9 @@ in
     };
   };
 
+  ####################################
+  # Storage
+  ####################################
   local.seaweedfs-server = {
     enable = true;
     # package = pkgs.callPackage ../packages/seaweedfs.nix { };
@@ -240,9 +305,7 @@ in
       "/mnt/zfs/seaweedfs"
     ];
   };
-  environment.systemPackages = [
-    pkgs.seaweedfs
-  ];
+
   fileSystems."/mnt/seaweed" = {
     device = "fuse";
     fsType = "fuse./run/current-system/sw/bin/weed";
@@ -252,36 +315,6 @@ in
       "filer.path=/"
     ];
   };
-
-  local.media = {
-    enable = true;
-    dataPath = "/data/media"; # Custom base path
-
-    jellyfin = { };
-
-    transmission = {
-      rpcPort = 9091;
-    };
-
-    hardwareAcceleration.enable = true;
-  };
-
-  services.radicale = {
-    enable = true;
-    settings = {
-      server.hosts = [ "0.0.0.0:5232" ];
-      auth.type = "htpasswd";
-      auth.htpasswd_filename = "${inputs.secrets}/htpasswd";
-      auth.htpasswd_encryption = "bcrypt";
-      storage.filesystem_folder = "/data/radicale";
-    };
-  };
-
-  systemd.tmpfiles.rules = [
-    "d '${config.services.radicale.settings.storage.filesystem_folder}' 0700 radicale radicale - -"
-    "d '${config.services.transmission.settings.download-dir}' 0770 transmission media - -"
-    "d '${config.services.transmission.settings.incomplete-dir}' 0770 transmission media - -"
-  ];
 
   services.postgresql = {
     enable = true;
@@ -315,8 +348,40 @@ in
     ];
   };
 
-  # neolink
+  ####################################
+  # Media
+  ####################################
+  local.media = {
+    enable = true;
+    dataPath = "/data/media"; # Custom base path
 
+    jellyfin = { };
+
+    transmission = {
+      rpcPort = 9091;
+    };
+
+    hardwareAcceleration.enable = true;
+  };
+
+  ####################################
+  # Organisation
+  ####################################
+  services.radicale = {
+    enable = true;
+    settings = {
+      server.hosts = [ "0.0.0.0:5232" ];
+      # auth.type = "htpasswd";
+      # auth.htpasswd_filename = "${inputs.secrets}/htpasswd";
+      # auth.htpasswd_encryption = "bcrypt";
+      auth.type = "http_x_remote_user";
+      storage.filesystem_folder = "/data/radicale";
+    };
+  };
+
+  ####################################
+  # Home Automation
+  ####################################
   sops.secrets.neolink = {
     sopsFile = "${inputs.secrets}/neolink/config.toml";
     format = "binary";
@@ -333,6 +398,18 @@ in
         settings.allow_anonymous = true;
       }
     ];
+  };
+
+  services.zigbee2mqtt = {
+    enable = true;
+    settings = {
+      serial.port = "/dev/serial/by-id/usb-Itead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_V2_b2c13e0a2789f0118a5609697aa08750-if00-port0";
+      serial.adapter = "ember";
+      mqtt.server = "mqtt://localhost:1883";
+      frontend.enabled = true;
+      frontend.port = 11883;
+      homeassistant.enabled = true;
+    };
   };
 
   sops.secrets.frigate-env = {
@@ -361,14 +438,23 @@ in
     };
   };
   systemd.services.go2rtc.serviceConfig.EnvironmentFile = "${config.sops.secrets.frigate-env.path}";
-  hardware.opengl.extraPackages = with pkgs; [
-    vaapiIntel
+  hardware.graphics.extraPackages = with pkgs; [
+    intel-vaapi-driver
     libvdpau-va-gl
     intel-media-driver
   ];
+
+  services.nginx.virtualHosts."${config.local.services.frigate.hostname}" = {
+    listen = [
+      {
+        addr = "0.0.0.0";
+        port = 8392;
+      }
+    ];
+  };
   local.services.frigate = {
     enable = true;
-    package = unstable.frigate;
+    package = pkgs.frigate;
     hostname = "frigate.pm4.uk";
     vaapiDriver = "iHD";
     settings = {
@@ -436,7 +522,7 @@ in
         motion.contour_area = 10;
         motion.improve_contrast = true;
 
-        zones.frontgarden.coordinates = "0.001,0.561,0.063,0.57,0.663,0.669,0.682,0.087,0.999,0.078,1,1,0,1";
+        zones.frontgarden.coordinates = "0,0.655,0.113,0.635,0.672,0.685,0.682,0.087,0.999,0.078,1,1,0,1";
         review.alerts.required_zones = [ "frontgarden" ];
 
         detect.fps = 5;
@@ -460,7 +546,6 @@ in
   };
   systemd.services.frigate.serviceConfig.EnvironmentFile = "${config.sops.secrets.frigate-env.path}";
 
-  # Home Assistant
   virtualisation.podman = {
     enable = true;
   };
@@ -506,4 +591,196 @@ in
     };
   };
 
+  ####################################
+  # Dev
+  ####################################
+
+  containers."coredev" = {
+    autoStart = true;
+    privateNetwork = true;
+    hostBridge = "br0"; # Specify the bridge name
+    # localAddress = "192.168.5.40/24";
+    bindMounts = {
+      ts-secret = {
+        hostPath = config.sops.secrets.headscale_sky.path;
+        isReadOnly = true;
+        mountPoint = config.sops.secrets.headscale_sky.path;
+      };
+      wildcard-ts-pm4 = {
+        hostPath = config.security.acme.certs."wildcard.coredev.pm4.uk".directory;
+        mountPoint = "${config.security.acme.certs."wildcard.coredev.pm4.uk".directory}:";
+        isReadOnly = true;
+      };
+      # cf-secret = {
+      #   hostPath = config.sops.secrets.cloudflare_api_key.path;
+      #   isReadOnly = true;
+      #   mountPoint = config.sops.secrets.cloudflare_api_key.path;
+      # };
+    };
+    config =
+      let
+        sslCertDir = config.security.acme.certs."wildcard.coredev.pm4.uk".directory;
+      in
+      {
+        # coredev #####################################################################
+        imports = [
+          inputs.ory-nix-auth.nixosModules."x86_64-linux".default
+        ];
+        networking.useHostResolvConf = lib.mkForce false;
+        services.resolved.enable = true;
+        services.resolved.fallbackDns = [
+          "1.1.1.1"
+          "1.0.0.1"
+        ];
+
+        networking.hosts = {
+          "127.0.0.1" = [ "coredev.ts.pm4.uk" ];
+        };
+        networking.useDHCP = lib.mkForce true;
+
+        environment.defaultPackages = [
+          pkgs.tailscale
+        ];
+
+        services.tailscale = {
+          enable = true;
+          useRoutingFeatures = "both";
+          authKeyFile = config.sops.secrets.headscale_sky.path;
+          interfaceName = "userspace-networking";
+          extraUpFlags = [
+            "--login-server=https://hs.pm4.uk"
+          ];
+          port = 49999;
+          openFirewall = true;
+        };
+
+        services.postgresql = {
+          enable = true;
+          enableTCPIP = true;
+          settings.port = 5432;
+          authentication = pkgs.lib.mkOverride 10 ''
+            #...
+            #type database DBuser origin-address auth-method
+            # ipv4
+            local all all              trust
+            host  all      all     127.0.0.1/32   trust
+            host all       all     ::1/128        trust
+            host  all      all     100.64.0.5/32   trust
+            host all all 100.64.0.10/32 trust
+            # ipv6
+          '';
+          ensureUsers = [
+            {
+              name = "metachroma_dev";
+              ensureDBOwnership = true;
+            }
+            {
+              name = "metachroma_test";
+              ensureDBOwnership = true;
+              ensureClauses.createdb = true;
+            }
+            {
+              name = "kratos-main";
+              ensureDBOwnership = true;
+              ensureClauses.createdb = true;
+              ensureClauses.createrole = true;
+            }
+          ];
+          ensureDatabases = [
+            "metachroma_dev"
+            "metachroma_test"
+            "kratos-main"
+          ];
+        };
+
+        # Mirror the pinned GID inside the container
+        users.groups.acme = {
+          gid = 977;
+        };
+
+        # Add caddy to the acme group
+        users.users.caddy.extraGroups = [ "acme" ];
+
+        # Caddy reverse proxy configuration
+        services.caddy = {
+          enable = true;
+
+          virtualHosts."auth.coredev.pm4.uk" = {
+            extraConfig = ''
+              tls ${sslCertDir}/cert.pem ${sslCertDir}/key.pem
+              reverse_proxy * localhost:4433
+            '';
+          };
+        };
+
+        services.kratos.core = {
+          enable = true;
+          # package = unstable.kratos;
+
+          # Bootstrap identities (for development/testing)
+          ensureIdentitiesFile = ../config/coredev/users.json;
+
+          settings = {
+            dsn = "postgres://kratos-main:secret@localhost:5432/kratos-main?host=/var/run/postgresql&sslmode=disable&max_conns=20&max_idle_conns=4";
+            serve = {
+              public = {
+                base_url = "https://auth.coredev.pm4.uk";
+                port = 4433;
+                cors.enabled = true;
+              };
+              admin = {
+                base_url = "http://localhost:4434";
+              };
+            };
+
+            identity = {
+              default_schema_id = "default";
+              schemas = [
+                {
+                  id = "default";
+                  url = "file://${../config/coredev/user-schema.json}";
+                }
+              ];
+            };
+
+            selfservice.methods = {
+              password.enabled = true;
+              code.enabled = true;
+            };
+
+            selfservice.flows.registration.enabled = false;
+
+            selfservice.default_browser_return_url = "https://auth.coredev.pm4.uk";
+          };
+        };
+
+        systemd.services.kratos-core.wantedBy = lib.mkForce [ ];
+
+        # /coredev #####################################################################
+      };
+  };
+
+  ####################################
+  # AI
+  ####################################
+  nixpkgs.config.allowUnfreePredicate =
+    pkg:
+    builtins.elem (lib.getName pkg) [
+      "open-webui"
+    ];
+  services.open-webui = {
+    enable = true;
+    host = "127.0.0.1";
+    port = 8358;
+    environment = {
+      WEBUI_URL = "https://openwebui.pm4.uk";
+      # ENABLE_SIGNUP = "false";
+      WEBUI_ADMIN_EMAIL = "admin@example.com";
+      WEBUI_ADMIN_PASSWORD = "adminpassword";
+      WEBUI_AUTH_TRUSTED_EMAIL_HEADER = "X-Webauth-Email";
+      WEBUI_AUTH_TRUSTED_NAME_HEADER = "X-Webauth-Name";
+      CHAT_STREAM_RESPONSE_CHUNK_MAX_BUFFER_SIZE = "34359738368";
+      ENABLE_CHAT_RESPONSE_BASE64_IMAGE_URL_CONVERSION = "True";
+    };
+  };
 }

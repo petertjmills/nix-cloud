@@ -1,0 +1,77 @@
+{
+  "$id": "metachroma-identity-schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Person",
+  "type": "object",
+  "properties": {
+    "traits": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "title": "E-Mail",
+          "group": "password",
+          "minLength": 3,
+          "ory.sh/kratos": {
+            "credentials": {
+              "password": {
+                "identifier": true
+              },
+              "passkey": {
+                "display_name": true
+              }
+            },
+            "verification": {
+              "via": "email"
+            },
+            "recovery": {
+              "via": "email"
+            }
+          }
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "group": "profile"
+        },
+        "username": {
+          "title": "Username",
+          "type": "string",
+          "group": "profile"
+        },
+        "website": {
+          "title": "Website",
+          "type": "string",
+          "group": "profile"
+        },
+        "picture": {
+          "title": "Picture",
+          "type": "string",
+          "group": "profile"
+        },
+        "githubId": {
+          "title": "GithubId",
+          "type": "string",
+          "group": "profile"
+        }
+      },
+      "required": ["email"],
+      "additionalProperties": false
+    },
+    "metadata_public": {
+      "type": "object",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Groups",
+          "group": "profile"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

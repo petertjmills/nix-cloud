@@ -9,6 +9,7 @@
 let
   users = import "${inputs.secrets}/user.nix";
   user = users.darwin.username;
+
 in
 {
   imports = [
@@ -45,12 +46,11 @@ in
       "focusrite-control"
       "displaylink"
       "launchcontrol"
-      "tailscale"
-      "ollama"
+      # "tailscale"
       "thunderbird"
       "calibre"
+      "blender"
     ];
-    brews = [ "ollama" ];
 
     masApps = {
       "WhatsApp Messenger" = 310633997;
@@ -68,7 +68,7 @@ in
   home-manager.users.${user} = {
     home.packages = [
       pkgs.raycast
-      pkgs.blender
+      # pkgs.blender
       pkgs.wireshark
       pkgs.nixfmt-rfc-style
       pkgs.nixd
@@ -76,9 +76,47 @@ in
       # pkgs.tailscale
       unfreeDarwinPkgs.vscode
       unstableDarwin.librespot
+      pkgs.nodejs
     ];
 
+    # xdg.configFile =
+    #   (lib.mapAttrs'
+    #     (
+    #       name: content:
+    #       lib.nameValuePair "opencode/skills/${name}/SKILL.md" (
+    #         if lib.isPath content then { source = content; } else { text = content; }
+    #       )
+    #     )
+    #     {
+    #       "frontend-design" = ../../ai/skills/frontend-design.md;
+    #     }
+    #   )
+    #   // (lib.mapAttrs'
+    #     (
+    #       name: content:
+    #       lib.nameValuePair "opencode/agents/${name}.md" (
+    #         if lib.isPath content then { source = content; } else { text = content; }
+    #       )
+    #     )
+    #     {
+    #       "architect" = ../../ai/agents/architect.md;
+    #       "code-reviewer" = ../../ai/agents/code-reviewer.md;
+    #       "code-reviewerer" = ../../ai/agents/code-reviewerer.md;
+    #       "developer" = ../../ai/agents/developer.md;
+    #       "repo-scout" = ../../ai/agents/repo-scout.md;
+    #     }
+    #   );
+
     programs = {
+      opencode = {
+        enable = true;
+        package = inputs.opencode.packages."aarch64-darwin".default;
+        rules = ../../ai/rules.md;
+        skills = ../../ai/skills;
+        agents = ../../ai/agents;
+        settings.agent.explore.disable = true;
+      };
+
       zed-editor = {
         enable = true;
         package = unstableDarwin.zed-editor;
@@ -96,6 +134,14 @@ in
         ];
         installRemoteServer = false;
         userSettings = {
+          "context_servers".shadcn-local = {
+            command = "npx";
+            args = [
+              "shadcn@latest"
+              "mcp"
+            ];
+          };
+
           # terminal.scrollbar.show = false;
           edit_predictions = {
             mode = "subtle";
@@ -113,10 +159,11 @@ in
           };
           agent = {
             always_allow_tool_actions = true;
+            play_sound_when_agent_done = true;
             default_profile = "ask";
             default_model = {
               provider = "zed.dev";
-              model = "gpt-5";
+              model = "claude-opus-4.5";
             };
             profiles.ask = {
               name = "Ask";
@@ -128,7 +175,36 @@ in
               tools.web_search = false;
               tools.fetch = false;
             };
-            version = "2";
+            profiles.shadcn = {
+              name = "Shadcn";
+              tools.web_search = false;
+              tools.fetch = true;
+              tools.diagnostics = true;
+              tools.find_path = true;
+              tools.grep = true;
+              tools.list_directory = true;
+              tools.open = true;
+              tools.read_file = true;
+              tools.thinking = true;
+            };
+            profiles.shadcn-write = {
+              name = "Shadcn write";
+              tools.web_search = false;
+              tools.fetch = true;
+              tools.diagnostics = true;
+              tools.find_path = true;
+              tools.grep = true;
+              tools.list_directory = true;
+              tools.open = true;
+              tools.read_file = true;
+              tools.thinking = true;
+              tools.copy_path = true;
+              tools.create_directory = true;
+              tools.delete_path = true;
+              tools.edit_file = true;
+              tools.move_path = true;
+              tools.terminal = true;
+            };
           };
           vim_mode = true;
           ui_font_size = 16;

@@ -2,11 +2,14 @@
   inputs,
   lib,
   config,
+  pkgs,
   ...
 }:
 let
   cfg = config.local.dns;
-
+  unboundWithDoH = pkgs.unbound-with-systemd.override {
+    withDoH = true;
+  };
 in
 {
   imports = [
@@ -45,13 +48,17 @@ in
   config = lib.mkIf cfg.server {
     services.unbound = {
       enable = true;
+      package = unboundWithDoH;
       resolveLocalQueries = true;
       settings = {
         server = {
           interface = [
             "0.0.0.0"
+            "0.0.0.0@8443"
           ];
-
+          https-port = 8443;
+          tls-service-key = "${config.security.acme.certs."wildcard.ts.pm4.uk".directory}/key.pem";
+          tls-service-pem = "${config.security.acme.certs."wildcard.ts.pm4.uk".directory}/cert.pem";
           access-control = [
             "192.168.86.0/24 allow"
             "10.0.0.0/8 allow"
@@ -73,12 +80,13 @@ in
         remote-control.control-enable = true;
       };
     };
+    users.users.unbound.extraGroups = [ "acme" ];
 
-    services.prometheus.exporters.unbound = {
-      enable = true;
-      port = 9101;
-      openFirewall = true;
-    };
+    # services.prometheus.exporters.unbound = {
+    #   enable = true;
+    #   port = 9101;
+    #   openFirewall = true;
+    # };
 
     # monitoring.prometheusScrapeConfigs = [
     #   {

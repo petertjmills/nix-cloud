@@ -41,6 +41,16 @@ in
     format = "binary";
     owner = config.services.headscale.user;
   };
+  sops.secrets.headscale_metachroma_backend = {
+    sopsFile = "${inputs.secrets}/headscale/metachroma-backend";
+    format = "binary";
+    owner = config.services.headscale.user;
+  };
+  sops.secrets.headscale_metachroma_web = {
+    sopsFile = "${inputs.secrets}/headscale/metachroma-web";
+    format = "binary";
+    owner = config.services.headscale.user;
+  };
 
   security.acme = {
     acceptTerms = true;
@@ -50,6 +60,11 @@ in
       credentialFiles."CF_DNS_API_TOKEN_FILE" = config.sops.secrets.cloudflare_api_key.path;
       dnsProvider = "cloudflare";
       domain = "*.${url}";
+    };
+    certs."wildcard.ts.pm4.uk" = {
+      credentialFiles."CF_DNS_API_TOKEN_FILE" = config.sops.secrets.cloudflare_api_key.path;
+      dnsProvider = "cloudflare";
+      domain = "*.ts.${url}";
     };
   };
 
@@ -112,6 +127,28 @@ in
           }
         ];
       }
+      {
+        id = 4;
+        name = "sophie";
+      }
+      {
+        id = 5;
+        name = "firestick";
+      }
+      {
+        id = 6;
+        name = "metachroma";
+        keys = [
+          {
+            ephemeral = false;
+            path = config.sops.secrets.headscale_metachroma_backend.path;
+          }
+          {
+            ephemeral = false;
+            path = config.sops.secrets.headscale_metachroma_web.path;
+          }
+        ];
+      }
     ];
 
     settings = {
@@ -148,10 +185,18 @@ in
       dns = {
         magic_dns = true;
         base_domain = "ts.pm4.uk";
-        override_local_dns = false;
+        override_local_dns = true;
         nameservers.global = [
-          "127.0.0.1" # Redirect all DNS queries to unbound, set below
-          "100.64.0.3" # This should be set to the cirrus ip. I don't know how to automate this. This is why headscale sucks
+          #"127.0.0.1" # Redirect all DNS queries to unbound, set below. UPDATE commented out as it broke things
+          # "https://cirrus.ts.pm4.uk/dns-query"
+          # "100.64.0.6" # This should be set to the cirrus ip (this machine). I don't know how to automate this. This is why headscale sucks
+          "1.1.1.1"
+        ];
+        nameservers.split."pm4.uk" = [
+          "100.64.0.6"
+        ];
+        nameservers.split."metachroma.co" = [
+          "100.64.0.6"
         ];
       };
 
@@ -186,6 +231,31 @@ in
       name = "frigate.pm4.uk";
       type = "CNAME";
       data = "sky.ts.pm4.uk";
+    }
+    {
+      name = "radicale.pm4.uk";
+      type = "CNAME";
+      data = "sky.ts.pm4.uk";
+    }
+    {
+      name = "restic.pm4.uk";
+      type = "CNAME";
+      data = "sky.ts.pm4.uk";
+    }
+    {
+      name = "openwebui.pm4.uk";
+      type = "CNAME";
+      data = "sky.ts.pm4.uk";
+    }
+    {
+      name = "epg.pm4.uk";
+      type = "CNAME";
+      data = "web1.ts.pm4.uk";
+    }
+    {
+      name = "auth.coredev.pm4.uk";
+      type = "CNAME";
+      data = "coredev.ts.pm4.uk";
     }
   ];
 

@@ -1,0 +1,48 @@
+{
+  "$id": "metachroma-identity-schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Machine",
+  "type": "object",
+  "properties": {
+    "traits": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "title": "id",
+          "group": "password",
+          "minLength": 3,
+          "ory.sh/kratos": {
+            "credentials": {
+              "password": {
+                "identifier": true
+              }
+            }
+          }
+        },
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "group": "profile"
+        }
+      },
+      "required": ["id", "name"],
+      "additionalProperties": false
+    },
+    "metadata_public": {
+      "type": "object",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "title": "Groups",
+          "group": "profile"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

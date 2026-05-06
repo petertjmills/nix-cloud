@@ -13,9 +13,13 @@
       in
       {
         packages.default = { };
+        packages.website = pkgs.callPackage ./nix/packages/website.nix { };
 
         devShell = pkgs.mkShell {
-          buildInputs = [ ];
+          buildInputs = [
+            pkgs.pnpm_10
+            pkgs.nodejs
+          ];
 
           shellHook = '''';
         };
