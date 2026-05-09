@@ -51,6 +51,11 @@ in
     format = "binary";
     owner = config.services.headscale.user;
   };
+  sops.secrets.headscale_alto = {
+    sopsFile = "${inputs.secrets}/headscale/alto";
+    format = "binary";
+    owner = config.services.headscale.user;
+  };
 
   security.acme = {
     acceptTerms = true;
@@ -99,21 +104,19 @@ in
     users = [
       {
         id = 1;
-        name = "cirrus";
+        name = "system";
         keys = [
           {
             ephemeral = false;
             path = config.sops.secrets.headscale_cirrus.path;
           }
-        ];
-      }
-      {
-        id = 2;
-        name = "sky";
-        keys = [
           {
             ephemeral = false;
             path = config.sops.secrets.headscale_sky.path;
+          }
+          {
+            ephemeral = false;
+            path = config.sops.secrets.headscale_alto.path;
           }
         ];
       }
@@ -228,9 +231,19 @@ in
       data = "v=spf1 ip4:193.237.206.90 ~all";
     }
     {
+      name = "mail.metachroma.co.";
+      type = "CNAME";
+      data = "backend.ts.pm4.uk.";
+    }
+    {
       name = "frigate.pm4.uk";
       type = "CNAME";
-      data = "sky.ts.pm4.uk";
+      data = "alto.ts.pm4.uk";
+    }
+    {
+      name = "home-assistant.pm4.uk";
+      type = "CNAME";
+      data = "alto.ts.pm4.uk";
     }
     {
       name = "radicale.pm4.uk";

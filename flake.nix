@@ -180,6 +180,23 @@
             ];
           };
 
+          "alto" = nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            specialArgs = { inherit inputs unstable; };
+            modules = [
+              ./machines/home-server-2.nix
+              ./hosts/alto.nix
+            ];
+          };
+
+          "x86_64-linux-iso" = nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            specialArgs = { inherit inputs unstable; };
+            modules = [
+              ./isos/x86_64-linux-minimal-cd.nix
+            ];
+          };
+
           "oci-test" = nixpkgs.lib.nixosSystem {
             system = "aarch64-linux";
             specialArgs = { inherit inputs; };
